@@ -106,6 +106,16 @@ properties:
       Transmitt FIFO depth- see dt-bindings/net/ti-dp83867.h for applicable
       values.
 
+  ti,led-0-active-low:
+    type: boolean
+    description: |
+      Invert then polarity of LED_0 on the PHY so that it is active low
+
+  ti,led-2-active-low:
+    type: boolean
+    description: |
+      Invert then polarity of LED_2 on the PHY so that it is active low
+
 required:
   - reg
 
