@@ -80,6 +80,11 @@
 
 #define RV3028_BACKUP_TCE		BIT(5)
 #define RV3028_BACKUP_TCR_MASK		GENMASK(1,0)
+#define RV3028_BACKUP_BSM_DISABLE_DFLT	0x0
+#define RV3028_BACKUP_BSM_DISABLE	BIT(3)
+#define RV3028_BACKUP_BSM_DSM_ENABLE	BIT(2)
+#define RV3028_BACKUP_BSM_LSM_ENABLE	(BIT(2) | BIT(3))
+#define RV3028_BACKUP_BSM_MASK		GENMASK(3, 2)
 
 #define OFFSET_STEP_PPT			953674
 
@@ -784,7 +789,8 @@ static const struct regmap_config regmap_config = {
 static int rv3028_probe(struct i2c_client *client)
 {
 	struct rv3028_data *rv3028;
-	int ret, status;
+	int ret, status, delay = 0;
+	unsigned int mode, mode_old;
 	u32 ohms;
 	struct nvmem_config nvmem_cfg = {
 		.name = "rv3028_nvram",
@@ -871,6 +877,32 @@ static int rv3028_probe(struct i2c_client *client)
 		} else {
 			dev_warn(&client->dev, "invalid trickle resistor value\n");
 		}
+	}
+
+	/* setup switching mode - write to EEPROM only if changed */
+	ret = regmap_read(rv3028->regmap, RV3028_BACKUP, &mode_old);
+	if (ret)
+		return ret;
+	mode_old &= RV3028_BACKUP_BSM_MASK;
+
+	if (device_property_present(&client->dev,
+				    "enable-direct-switching-mode")) {
+		mode = RV3028_BACKUP_BSM_DSM_ENABLE;
+		delay = 2;
+	} else if (device_property_present(&client->dev,
+					   "enable-level-switching-mode")) {
+		mode = RV3028_BACKUP_BSM_LSM_ENABLE;
+		delay = 16;
+	} else
+		mode = RV3028_BACKUP_BSM_DISABLE_DFLT;
+
+	if (mode != mode_old) {
+		ret = regmap_update_bits(rv3028->regmap, RV3028_BACKUP,
+					 RV3028_BACKUP_BSM_MASK, mode);
+		if (ret)
+			return ret;
+		if (delay)
+			mdelay(delay); /* wait for switchover */
 	}
 
 	ret = rtc_add_group(rv3028->rtc, &rv3028_attr_group);
