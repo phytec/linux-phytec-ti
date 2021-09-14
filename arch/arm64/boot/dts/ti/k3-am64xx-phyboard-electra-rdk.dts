@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2021 PHYTEC America, LLC - https://www.phytec.com
+ * Author: Matt McKee <mmckee@phytec.com>
+ */
+
+/dts-v1/;
+
+#include "k3-am64xx-phycore-som.dtsi"
+#include "k3-am64xx-phyboard-electra.dtsi"
+
+/ {
+	model = "PHYTEC phyBOARD-Electra-AM64xx";
+	compatible = "phytec,am64xx-phyboard-electra",
+		     "phytec,am64xx-phycore-som", "ti,am642";
+};
+
