@@ -1,0 +1,289 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/media/i2c/onsemi,ar0144.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: OnSemi 1/4-inch 1Mp CMOS Digital Image Sensor
+
+maintainers:
+  - Stefan Riedmueller <s.riedmueller@phytec.de>
+
+description: |
+  The OnSemiconductor AR0144 is a 1/4-inch 1.0 Mp CMOS digital image sensor
+  with an active-pixel array of 1280H x 800V. It features a 1 or 2 lane
+  MIPI-CSI2 interface or a parallel interface. It is programmable through a
+  simple two-wire serial interface.
+
+properties:
+  compatible:
+    enum:
+      - onsemi,ar0144
+      - onsemi,ar0144c
+      - onsemi,ar0144m
+
+  reg:
+    description: I2C device address
+    maxItems: 1
+
+  clocks:
+    maxItems: 1
+
+  clock-names:
+    const: ext
+
+  reset-gpios:
+    maxItems: 1
+    description: Chip reset GPIO
+
+  port:
+    $ref: /schemas/graph.yaml#/$defs/port-base
+    additionalProperties: false
+
+    properties:
+      endpoint:
+        $ref: /schemas/media/video-interfaces.yaml#
+        unevaluatedProperties: false
+
+        properties:
+          bus-type:
+            oneOf:
+              - const: 4 # MIPI CSI-2 D-PHY
+              - const: 5 # Parallel
+
+          onsemi,slew-rate-dat:
+            description: Data lines slew rate
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 7
+            default: 0
+
+          onsemi,slew-rate-clk:
+            description: Clock line slew rate
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 7
+            default: 0
+
+          onsemi,t-hs-prep:
+            description: MIPI Ths_prep value
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 15
+            default: 2
+
+          onsemi,t-hs-zero:
+            description: MIPI Ths_zero value
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 15
+            default: 6
+
+          onsemi,t-hs-trail:
+            description: MIPI Ths_trail value
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 15
+            default: 6
+
+          onsemi,t-clk-trail:
+            description: MIPI Tclk_trail value
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 15
+            default: 5
+
+          onsemi,t-clk-prep:
+            description: MIPI Tclk_prep value
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 15
+            default: 1
+
+          onsemi,t-hs-exit:
+            description: MIPI Ths_exit value
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 63
+            default: 4
+
+          onsemi,t-clk-zero:
+            description: MIPI Tclk_zero value
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 63
+            default: 14
+
+          onsemi,t-bgap:
+            description: MIPI Tbgap value
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 15
+            default: 2
+
+          onsemi,t-clk-pre:
+            description: MIPI Tclk_pre value
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 63
+            default: 1
+
+          onsemi,t-clk-post:
+            description: MIPI Tclk_post value
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 63
+            default: 7
+
+          onsemi,t-lpx:
+            description: MIPI Tlpx value
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 63
+            default: 2
+
+          onsemi,t-wakeup:
+            description: MIPI Twakeup value
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 127
+            default: 5
+
+          onsemi,t-init:
+            description: MIPI Tinit value
+            $ref: /schemas/types.yaml#/definitions/uint32
+            minimum: 0
+            maximum: 127
+            default: 4
+
+          onsemi,cont-tx-clk:
+            description: MIPI continuous TX clock
+            type: boolean
+
+          onsemi,heavy-lp-load:
+            description: MIPI set heavy LP load
+            type: boolean
+
+          link-frequencies:
+            description: |
+              Maximum link frequencies of the interface.
+            maxItems: 1
+
+          data-lanes:
+            oneOf:
+              - items:
+                - const: 1
+                - const: 2
+              - items:
+                - const: 1
+
+          clock-lanes: true
+          clock-noncontinuous: true
+
+        allOf:
+          - if:
+              properties:
+                bus-type:
+                  const: 4 # MIPI CSI-2 D-PHY
+
+            then:
+              properties:
+                onsemi,slew-rate-dat: false
+                onsemi,slew-rate-clk: false
+                link-frequencies:
+                  maximum: 384000000
+
+              required:
+                - data-lanes
+                - clock-lanes
+
+          - if:
+              properties:
+                bus-type:
+                  const: 5 # Parallel
+
+            then:
+              properties:
+                data-lanes: false
+                clock-lanes: false
+                clock-noncontinuous: false
+                onsemi,t-hs-prep: false
+                onsemi,t-hs-zero: false
+                onsemi,t-hs-trail: false
+                onsemi,t-clk-trail: false
+                onsemi,t-clk-prep: false
+                onsemi,t-hs-exit: false
+                onsemi,t-clk-zero: false
+                onsemi,t-bgap: false
+                onsemi,t-clk-pre: false
+                onsemi,t-clk-post: false
+                onsemi,t-lpx: false
+                onsemi,t-wakeup: false
+                onsemi,t-init: false
+                onsemi,cont-tx-clk: false
+                onsemi,heavy-lp-load: false
+                link-frequencies:
+                  maximum: 74250000
+
+
+        required:
+          - bus-type
+          - link-frequencies
+
+required:
+  - compatible
+  - reg
+  - clocks
+  - clock-names
+  - port
+
+additionalProperties: false
+
+examples:
+  - |
+    i2c0 {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        camera@10 {
+            compatible = "onsemi,ar0144";
+            reg = <0x10>;
+            reset-gpios = <&gpio_sensor 0 0>;
+
+            clocks = <&sensor_clk>;
+            clock-names = "ext";
+
+            port {
+                camera_1: endpoint {
+                    bus-type = <4>; /* MIPI CSI-2 D-PHY */
+                    link-frequencies = /bits/ 64 <384000000>;
+                    data-lanes = <1 2>;
+                    clock-lanes = <0>;
+                    clock-noncontinuous = <1>;
+                };
+            };
+        };
+    };
+
+    i2c1 {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        camera@10 {
+            compatible = "onsemi,ar0144";
+            reg = <0x10>;
+            reset-gpios = <&gpio_sensor 0 0>;
+
+            clocks = <&sensor_clk>;
+            clock-names = "ext";
+
+            port {
+                camera_1: endpoint {
+                    bus-type = <5>; /* Parallel */
+                    link-frequencies = /bits/ 64 <74250000>;
+                };
+            };
+        };
+    };
+
+...
