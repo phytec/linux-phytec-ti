@@ -129,6 +129,7 @@ dtb-$(CONFIG_ARCH_K3) += k3-j721e-sk-csi2-dual-imx219.dtbo
 
 # Boards with J721s2 SoC
 dtb-$(CONFIG_ARCH_K3) += k3-am68-phyboard-izar-rdk.dtb
+dtb-$(CONFIG_ARCH_K3) += k3-am68-phyboard-izar-pwm-fan.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am68-sk-base-board.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am68-sk-rpi-hdr-ehrpwm.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-j721s2-common-proc-board.dtb
@@ -234,6 +235,8 @@ k3-am654-base-board-toshiba-tc358867-evm-dtbs := k3-am654-base-board.dtb \
 	k3-am654-base-board-toshiba-tc358867-evm.dtbo
 k3-am68-sk-base-board-csi2-dual-imx219-dtbs := k3-am68-sk-base-board.dtb \
 	k3-j721e-sk-csi2-dual-imx219.dtbo
+k3-am68-phyboard-izar-pwm-fan-dtbs := k3-am68-phyboard-izar-rdk.dtb \
+	k3-am68-phyboard-izar-pwm-fan.dtbo
 k3-am69-sk-csi2-dual-imx219-dtbs := k3-am69-sk.dtb \
 	k3-j721e-sk-csi2-dual-imx219.dtbo
 k3-j7200-evm-mcspi-loopback-dtbs := k3-j7200-common-proc-board.dtb \
