@@ -1,0 +1,120 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2023 PHYTEC America LLC
+ * Author: Garrett Giordano <ggiordano@phytec.com>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include "k3-pinctrl.h"
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+
+&{/} {
+	aliases {
+		serial4 = "/bus@f0000/serial@2820000";
+	};
+
+	reg_wifi_en: fixed-regulator-wifi-en {
+		compatible = "regulator-fixed";
+		regulator-name = "wifi_en";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&wifi_en_pins_default>;
+		regulator-always-on;
+		enable-active-high;
+		gpio = <&main_gpio0 72 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&main_pmx0 {
+	bt_uart2_pins_default: bt-uart2-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x060, PIN_OUTPUT, 2) /* (R25) GPMC0_AD9.UART2_TXD */
+			AM62X_IOPAD(0x05c, PIN_INPUT, 2) /* (R24) GPMC0_AD8.UART2_RXD */
+			AM62X_IOPAD(0x074, PIN_INPUT, 8) /* (U25) GPMC0_AD14.UART2_CTSn */
+			AM62X_IOPAD(0x078, PIN_OUTPUT, 8) /* (U24) GPMC0_AD15.UART2_RTSn */
+		>;
+	};
+
+	bt_en_pins_default: bt-en-pins-default{
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x09c, PIN_INPUT, 7) /* (V25) GPMC0_WAIT1.GPIO0_38 */
+			AM62X_IOPAD(0x1f0, PIN_INPUT, 7) /* (A18) EXT_REFCLK.GPIO1_30 */
+			AM62X_IOPAD(0x124, PIN_INPUT, 7) /* (A23) MMC2_SDCD.GPIO0_71 */
+		>;
+	};
+
+	main_mmc2_wifi_pins_default: main-mmc2-wifi-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x108, PIN_INPUT, 0) /* (D24) MMC2_DAT3 */
+			AM62X_IOPAD(0x10c, PIN_INPUT, 0) /* (E23) MMC2_DAT2 */
+			AM62X_IOPAD(0x110, PIN_INPUT, 0) /* (C25) MMC2_DAT1 */
+			AM62X_IOPAD(0x114, PIN_INPUT, 0) /* (B24) MMC2_DAT0 */
+			AM62X_IOPAD(0x118, PIN_INPUT, 0) /* (D25) MMC2_CLK */
+			AM62X_IOPAD(0x120, PIN_INPUT, 0) /* (C24) MMC2_CMD */
+			AM62X_IOPAD(0x11c, PIN_INPUT, 0) /* (#N/A) MMC2_CLKB */
+		>;
+	};
+
+	wifi_en_pins_default: wifi-en-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x128, PIN_OUTPUT, 7) /* (B23) MMC2_SDWP.GPIO0_72 */
+		>;
+	};
+
+	wifi_wlirq_pins_default: wifi-wlirq-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x044, PIN_INPUT, 7) /* (N24) GPMC0_AD2.GPIO0_17 */
+		>;
+	};
+};
+
+&main_uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&bt_uart2_pins_default>;
+	status = "okay";
+	uart-has-rtscts;
+
+	bluetooth: bluetooth {
+		compatible = "brcm,bcm43438-bt";
+		pinctrl-names = "default";
+		pinctrl-0 = <&bt_en_pins_default>;
+		/* BT Device Control interrupts */
+		interrupt-names = "host-wakeup";
+		interrupt-parent = <&main_gpio0>;
+		interrupts = <38 IRQ_TYPE_EDGE_BOTH>;
+		device-wakeup-gpios = <&main_gpio1 30 GPIO_ACTIVE_HIGH>;
+		shutdown-gpios = <&main_gpio0 71 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&sdhci2 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_mmc2_wifi_pins_default>;
+	vmmc-supply = <&reg_wifi_en>;
+	bus-width = <4>;
+	non-removable;
+	no-1-8-v;
+	ti,fails-without-test-cd;
+	cap-power-off-card;
+	keep-power-in-suspend;
+	ti,driver-strength-ohm = <50>;
+	pm-ignore-notify;
+
+	assigned-clocks = <&k3_clks 157 158>;
+	assigned-clock-parents = <&k3_clks 157 160>;
+
+	brcmf: wifi@2 {
+		compatible = "brcm,bcm4329-fmac";
+		reg = <2>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&wifi_wlirq_pins_default>;
+	};
+};
