@@ -2049,8 +2049,8 @@ static int ar0144_get_mbus_config(struct v4l2_subdev *sd, unsigned int pad,
 	struct ar0144 *sensor = to_ar0144(sd);
 	struct ar0144_businfo *info = &sensor->info;
 
-	cfg->flags = info->flags;
 	cfg->type = info->bus_type;
+	cfg->bus.mipi_csi2.flags = info->flags;
 
 	return 0;
 }
@@ -3468,24 +3468,6 @@ static int ar0144_parse_mipi_props(struct ar0144 *sensor,
 		return -EINVAL;
 	}
 
-	sensor->info.flags = bus_cfg->bus.mipi_csi2.flags;
-	sensor->info.flags |= V4L2_MBUS_CSI2_CHANNEL_0;
-
-	switch (sensor->info.num_lanes) {
-	case 1:
-		sensor->info.flags |= V4L2_MBUS_CSI2_1_LANE;
-		break;
-	case 2:
-		sensor->info.flags |= V4L2_MBUS_CSI2_2_LANE;
-		break;
-	case 4:
-		sensor->info.flags |= V4L2_MBUS_CSI2_4_LANE;
-		break;
-	default:
-		dev_err(sensor->dev, "Wrong number of lanes configured");
-		break;
-	}
-
 	for (i = 0; i < data->size_timing0; i++) {
 		tmp = data->timing0[i].value;
 		fwnode_property_read_u32(ep, data->timing0[i].name, &tmp);
@@ -3683,7 +3665,7 @@ out_media:
 	return ret;
 }
 
-static int ar0144_remove(struct i2c_client *i2c)
+static void ar0144_remove(struct i2c_client *i2c)
 {
 	struct v4l2_subdev *sd = i2c_get_clientdata(i2c);
 	struct ar0144 *sensor = to_ar0144(sd);
@@ -3692,8 +3674,6 @@ static int ar0144_remove(struct i2c_client *i2c)
 	v4l2_ctrl_handler_free(&sensor->ctrls);
 	media_entity_cleanup(&sd->entity);
 	mutex_destroy(&sensor->lock);
-
-	return 0;
 }
 
 static const struct ar0144_sensor_limits ar0144_limits = {
