@@ -135,6 +135,12 @@ properties:
               - ti,j742s2-evm
           - const: ti,j742s2
 
+      - description: K3 AM68 SoC PHYTEC phyBOARD-Izar
+        items:
+          - const: phytec,am68-phyboard-izar-rdk
+          - const: phytec,am68-phycore-som
+          - const: ti,j721s2
+
       - description: K3 J784s4 SoC
         items:
           - enum:
