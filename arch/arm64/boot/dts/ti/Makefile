@@ -407,6 +407,7 @@ dtb-$(CONFIG_ARCH_K3) += k3-v3link-imx219-0-0.dtbo \
 
 # Enable support for device-tree overlays
 DTC_FLAGS_k3-am625-beagleplay += -@
+DTC_FLAGS_k3-am625-phyboard-lyra-rdk += -@
 DTC_FLAGS_k3-am625-sk += -@
 DTC_FLAGS_k3-am62-lp-sk += -@
 DTC_FLAGS_k3-am62x-sk-csi2-v3link-fusion += -@
