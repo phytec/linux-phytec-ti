@@ -12,8 +12,27 @@
 
 &{/} {
 	panel {
-		compatible = "edt,etml1010g3dra";
+		compatible = "panel-lvds";
 		backlight = <&backlight>;
+		width-mm = <216>;
+		height-mm = <135>;
+		data-mapping = "vesa-24";
+
+		panel-timing {
+			/* 1280x800@60Hz */
+			clock-frequency = <78933333>;
+			hactive = <1280>;
+			vactive = <800>;
+			hsync-len = <20>;
+			hfront-porch = <132>;
+			hback-porch = <68>;
+			vfront-porch = <49>;
+			vback-porch = <15>;
+			vsync-len = <8>;
+			hsync-active = <0>;
+			vsync-active = <0>;
+			de-active = <1>;
+		};
 
 		port {
 			panel_in: endpoint {
@@ -58,7 +77,6 @@
 &dss {
 	assigned-clocks = <&k3_clks 158 14>;
 	assigned-clock-parents = <&k3_clks 158 16>;
-	assigned-clock-rates = <78950000>;
 	status = "okay";
 };
 
