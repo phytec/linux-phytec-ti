@@ -87,6 +87,24 @@
 			reg = <0x00 0xa3100000 0x00 0xf00000>;
 			no-map;
 		};
+
+		mcu_m4fss_dma_memory_region: m4f-dma-memory@a4000000 {
+			compatible = "shared-dma-pool";
+			reg = <0x00 0xa4000000 0x00 0x100000>;
+			no-map;
+		};
+
+		mcu_m4fss_memory_region: m4f-memory@a4100000 {
+			compatible = "shared-dma-pool";
+			reg = <0x00 0xa4100000 0x00 0xf00000>;
+			no-map;
+		};
+
+		rtos_ipc_memory_region: ipc-memories@a5000000 {
+			reg = <0x00 0xa5000000 0x00 0x00800000>;
+			alignment = <0x1000>;
+			no-map;
+		};
 	};
 
 	leds {
@@ -148,6 +166,8 @@
 
 	leds_pins_default: leds-pins-default {
 		pinctrl-single,pins = <
+			/* no MCU pinctrl support yet? */
+			/* AM64X_MCU_IOPAD(0x0, PIN_OUTPUT, 0)	/* (B7) MCU_SPI1_CS1.MCU_GPIO0_6 */
 			AM64X_IOPAD(0x0030, PIN_OUTPUT, 7)	/* (L18) OSPI0_CSn1.GPIO0_12 */
 		>;
 	};
@@ -175,7 +195,7 @@
 		>;
 	};
 
-	rtc_pins_default: rtc-defaults-pins {
+	rtc_pins_default: rtc-pins-default {
 		pinctrl-single,pins = <
 			AM64X_IOPAD(0x0278, PIN_INPUT, 7)	/* (C19) EXTINTn.GPIO1_70 */
 		>;
@@ -185,6 +205,10 @@
 &cpsw3g {
 	pinctrl-names = "default";
 	pinctrl-0 = <&cpsw_rgmii1_pins_default>;
+
+	cpts@3d000 {
+		ti,pps = <7 1>;
+	};
 };
 
 &cpsw3g_mdio {
@@ -215,8 +239,6 @@
 };
 
 &mailbox0_cluster2 {
-	status = "okay";
-
 	mbox_main_r5fss0_core0: mbox-main-r5fss0-core0 {
 		ti,mbox-rx = <0 0 2>;
 		ti,mbox-tx = <1 0 2>;
@@ -232,9 +254,11 @@
 	status = "disabled";
 };
 
-&mailbox0_cluster4 {
-	status = "okay";
+&mailbox0_cluster3 {
+	status = "disabled";
+};
 
+&mailbox0_cluster4 {
 	mbox_main_r5fss1_core0: mbox-main-r5fss1-core0 {
 		ti,mbox-rx = <0 0 2>;
 		ti,mbox-tx = <1 0 2>;
@@ -251,7 +275,10 @@
 };
 
 &mailbox0_cluster6 {
-	status = "disabled";
+	mbox_m4_0: mbox-m4-0 {
+		ti,mbox-rx = <0 0 2>;
+		ti,mbox-tx = <1 0 2>;
+	};
 };
 
 &mailbox0_cluster7 {
@@ -268,6 +295,7 @@
 		compatible = "atmel,24c32";
 		pinctrl-names = "default";
 		pinctrl-0 = <&eeprom_wp_pins_default>;
+		wp-gpios = <&main_gpio1 42 GPIO_ACTIVE_HIGH>;
 		pagesize = <32>;
 		reg = <0x50>;
 	};
@@ -280,6 +308,50 @@
 		interrupt-parent = <&main_gpio1>;
 		interrupts = <70 IRQ_TYPE_EDGE_FALLING>;
 		wakeup-source;
+	};
+
+	pmic@61 {
+		compatible = "ti,lp8733";
+		reg = <0x61>;
+
+		buck0-in-supply =<&vcc_5v0_som>;
+		buck1-in-supply =<&vcc_5v0_som>;
+		ldo0-in-supply =<&vdd_3v3>;
+		ldo1-in-supply =<&vdd_3v3>;
+
+		regulators {
+			vdd_core: buck0 {
+				regulator-name = "VDD_CORE";
+				regulator-min-microvolt = <750000>;
+				regulator-max-microvolt = <750000>;
+				regulator-always-on;
+				regulator-boot-on;
+			};
+
+			vdd_3v3: buck1 {
+				regulator-name = "VDD_3V3";
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-boot-on;
+				regulator-always-on;
+			};
+
+			vdd_1v8_ldo0: ldo0 {
+				regulator-name = "VDD_1V8_LDO0";
+				regulator-min-microvolt = <1800000>;
+				regulator-max-microvolt = <1800000>;
+				regulator-boot-on;
+				regulator-always-on;
+			};
+
+			vdda_1v8: ldo1 {
+				regulator-name = "VDDA_1V8";
+				regulator-min-microvolt = <1800000>;
+				regulator-max-microvolt = <1800000>;
+				regulator-always-on;
+				regulator-boot-on;
+			};
+		};
 	};
 };
 
@@ -307,11 +379,21 @@
 			<&main_r5fss1_core1_memory_region>;
 };
 
+&mcu_gpio0 {
+	status = "disable";
+};
+
+&mcu_m4fss {
+	mboxes = <&mailbox0_cluster6 &mbox_m4_0>;
+	memory-region = <&mcu_m4fss_dma_memory_region>,
+			<&mcu_m4fss_memory_region>;
+};
+
 &ospi0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&ospi0_pins_default>;
 
-	flash@0 {
+	serial_flash: flash@0 {
 		compatible = "jedec,spi-nor";
 		reg = <0x0>;
 		spi-tx-bus-width = <8>;
@@ -331,4 +413,27 @@
 	ti,driver-strength-ohm = <50>;
 	disable-wp;
 	keep-power-in-suspend;
+};
+
+&tscadc0{
+	adc {
+		ti,adc-channels = <0 1 2 3 4 5 6 7>;
+	};
+};
+
+#define TS_OFFSET(pa, val)     (0x4+(pa)*4) (0x10000 | val)
+
+&timesync_router {
+	pinctrl-names = "default";
+	pinctrl-0 = <&mcu_cpts_pps>;
+
+	/* Example of the timesync routing */
+	mcu_cpts_pps: mcu-cpts-pps {
+		pinctrl-single,pins = <
+			/* pps [cpts genf1] in22 -> out37 [cpts hw8_push] */
+			TS_OFFSET(37, 22)
+			/* pps [cpts genf1] in22 -> out25 [SYNC1_OUT pin] */
+			TS_OFFSET(25, 22)
+		>;
+	};
 };
