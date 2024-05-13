@@ -14,7 +14,7 @@
 #include <dt-bindings/leds/leds-pca9532.h>
 #include <dt-bindings/mux/ti-serdes.h>
 #include <dt-bindings/phy/phy.h>
-#include "k3-am68-phycore-som.dtsi"
+#include "k3-am68-phycore-som-rev0.dtsi"
 
 / {
 	compatible = "phytec,am68-phyboard-izar-rdk-rev0",
