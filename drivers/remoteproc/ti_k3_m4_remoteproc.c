@@ -332,7 +332,7 @@ static int k3_m4_rproc_attach(struct rproc *rproc)
 	if (ret)
 		return ret;
 
-	dev_err(dev, "M4 initialized in IPC-only mode\n");
+	dev_info(dev, "M4 initialized in IPC-only mode\n");
 	return 0;
 }
 
@@ -354,7 +354,7 @@ static int k3_m4_rproc_detach(struct rproc *rproc)
 	}
 
 	mbox_free_channel(kproc->mbox);
-	dev_err(dev, "M4 deinitialized in IPC-only mode\n");
+	dev_info(dev, "M4 deinitialized in IPC-only mode\n");
 	return 0;
 }
 
@@ -480,11 +480,11 @@ static int k3_m4_rproc_probe(struct platform_device *pdev)
 
 	/* configure devices for either remoteproc or IPC-only mode */
 	if (p_state) {
-		dev_err(dev, "configured M4 for IPC-only mode\n");
+		dev_info(dev, "configured M4 for IPC-only mode\n");
 		rproc->state = RPROC_DETACHED;
 		kproc->ipc_only = true;
 	} else {
-		dev_err(dev, "configured M4 for remoteproc mode\n");
+		dev_info(dev, "configured M4 for remoteproc mode\n");
 		/*
 		 * ensure the M4 local reset is asserted to ensure the core
 		 * doesn't execute bogus code in .prepare() when the module
