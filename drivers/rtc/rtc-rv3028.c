@@ -1000,6 +1000,9 @@ static int rv3028_probe(struct i2c_client *client)
 	if (ret)
 		return ret;
 
+	if (client->irq > 0)
+		device_init_wakeup(&client->dev, true);
+
 	nvmem_cfg.priv = rv3028->regmap;
 	devm_rtc_nvmem_register(rv3028->rtc, &nvmem_cfg);
 	eeprom_cfg.priv = rv3028;
