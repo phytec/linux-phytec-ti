@@ -175,6 +175,7 @@ dtb-$(CONFIG_ARCH_K3) += k3-v3link-imx219-0-0.dtbo \
 
 # PHYTEC overlays for SOM autodetection
 dtb-$(CONFIG_ARCH_K3) += k3-am6-phycore-disable-spi-nor.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am6-phycore-disable-rtc.dtbo
 
 #Enable support for device-tree overlays
 DTC_FLAGS_k3-am62-lp-sk += -@
