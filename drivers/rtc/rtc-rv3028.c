@@ -979,7 +979,7 @@ static int rv3028_probe(struct i2c_client *client)
 		mode = RV3028_BACKUP_BSM_DISABLE_DFLT;
 
 	if (mode != mode_old) {
-		ret = regmap_update_bits(rv3028->regmap, RV3028_BACKUP,
+		ret = rv3028_update_cfg(rv3028, RV3028_BACKUP,
 					 RV3028_BACKUP_BSM, mode);
 		if (ret)
 			return ret;
