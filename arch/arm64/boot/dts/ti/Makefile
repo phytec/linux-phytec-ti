@@ -29,6 +29,7 @@ dtb-$(CONFIG_ARCH_K3) += k3-am625-sk-rpi-hdr-ehrpwm.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am625-sk-mcspi-loopback.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-x39-spi0.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-x17-spi0.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-vm016-mipi.dtbo
 
 # Boards with AM62Ax SoC
 k3-am62a7-sk-csi2-imx219-dtbs := k3-am62a7-sk.dtb k3-am62x-sk-csi2-imx219.dtbo
