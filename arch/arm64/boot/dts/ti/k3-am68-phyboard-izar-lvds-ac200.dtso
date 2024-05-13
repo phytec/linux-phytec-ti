@@ -25,10 +25,10 @@
 	backlight: backlight {
 		compatible = "pwm-backlight";
 		pinctrl-names = "default";
-		pinctrl-0 = <&main_lvds_pins_default &wkup_lvds_pins_default>;
+		pinctrl-0 = <&main_lvds_pins_default>;
 		pwms = <&main_ehrpwm0 1 6666666 0>;
 		power-supply = <&reg_lvds_en>;
-		enable-gpios = <&wkup_gpio0 17 GPIO_ACTIVE_LOW>;
+		enable-gpios = <&exp2 12 GPIO_ACTIVE_LOW>;
 		brightness-levels = <0 32 64 96 128 160 192 224 255>;
 		default-brightness-level = <6>;
 	};
@@ -38,24 +38,15 @@
 		regulator-name = "lvds_en";
 		regulator-min-microvolt = <12000000>;
 		regulator-max-microvolt = <12000000>;
-		gpio = <&main_gpio0 1 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
+		gpio = <&exp2 13 GPIO_ACTIVE_HIGH>;
 	};
 };
 
 &main_pmx0 {
 	main_lvds_pins_default: main-panel-pins-default {
 		pinctrl-single,pins = <
-			J721S2_IOPAD(0x004, PIN_OUTPUT, 7) /* (W25) MCAN12_TX.GPIO0_1 */
 			J721S2_IOPAD(0x064, PIN_OUTPUT, 9) /* (W28) MCAN0_TX.EHRPWM0_B */
-		>;
-	};
-};
-
-&wkup_pmx0 {
-	wkup_lvds_pins_default: wkup-lvds_pins_default {
-		pinctrl-single,pins = <
-			J721S2_WKUP_IOPAD(0x004, PIN_OUTPUT, 7) /* (E20) MCU_OSPI0_LBCLKO.WKUP_GPIO0_17 */
 		>;
 	};
 };
