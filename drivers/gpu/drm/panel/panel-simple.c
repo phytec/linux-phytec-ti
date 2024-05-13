@@ -1831,31 +1831,6 @@ static const struct panel_desc eink_vb3300_kca = {
 	.connector_type = DRM_MODE_CONNECTOR_DPI,
 };
 
-static const struct drm_display_mode edt_etml1010g3dra_mode = {
-	.clock = 78950,
-	.hdisplay = 1280,
-	.hsync_start = 1280 + 132,
-	.hsync_end = 1280 + 132 + 20,
-	.htotal = 1280 + 132 + 20 + 68,
-	.vdisplay = 800,
-	.vsync_start = 800 + 49,
-	.vsync_end = 800 + 49 + 8,
-	.vtotal = 800 + 49 + 8 + 15,
-};
-
-static const struct panel_desc edt_etml1010g3dra = {
-	.modes = &edt_etml1010g3dra_mode,
-	.num_modes = 1,
-	.bpc = 8,
-	.size = {
-		.width = 216,
-		.height = 135,
-	},
-	.bus_format = MEDIA_BUS_FMT_RGB888_1X7X4_SPWG,
-	.bus_flags = DRM_BUS_FLAG_DE_HIGH,
-	.connector_type = DRM_MODE_CONNECTOR_LVDS,
-};
-
 static const struct display_timing evervision_vgg804821_timing = {
 	.pixelclock = { 27600000, 33300000, 50000000 },
 	.hactive = { 800, 800, 800 },
@@ -4243,9 +4218,6 @@ static const struct of_device_id platform_of_match[] = {
 	}, {
 		.compatible = "eink,vb3300-kca",
 		.data = &eink_vb3300_kca,
-	}, {
-		.compatible = "edt,etml1010g3dra",
-		.data = &edt_etml1010g3dra,
 	}, {
 		.compatible = "evervision,vgg804821",
 		.data = &evervision_vgg804821,
