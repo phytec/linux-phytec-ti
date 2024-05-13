@@ -8,6 +8,7 @@
 /plugin/;
 
 #include "k3-pinctrl.h"
+#include <dt-bindings/pwm/pwm.h>
 
 &{/} {
 	pwmfan0: pwm-fan {
@@ -15,7 +16,7 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&main_pwmfan_pins_default>;
 		cooling-levels = <1 90 150 200 255>;
-		pwms = <&main_ehrpwm0 0 6666666 0>;
+		pwms = <&main_ehrpwm0 0 6666666 PWM_POLARITY_INVERTED>;
 		#cooling-cells = <2>;
 	};
 };
