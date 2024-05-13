@@ -1,0 +1,33 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
+ * Author: Primoz Fiser <primoz.fiser@norik.com>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include "k3-pinctrl.h"
+
+&{/} {
+	pwmfan0: pwm-fan {
+		compatible = "pwm-fan";
+		pinctrl-names = "default";
+		pinctrl-0 = <&main_pwmfan_pins_default>;
+		cooling-levels = <1 90 150 200 255>;
+		pwms = <&main_ehrpwm0 0 6666666 0>;
+		#cooling-cells = <2>;
+	};
+};
+
+&main_pmx0 {
+	main_pwmfan_pins_default: main-pwmfan-pins-default {
+		pinctrl-single,pins = <
+			J721S2_IOPAD(0x0cc, PIN_OUTPUT, 5) /* (AE27) SPI0_CS0.EHRPWM0_A */
+		>;
+	};
+};
+
+&main_ehrpwm0 {
+	status = "okay";
+};

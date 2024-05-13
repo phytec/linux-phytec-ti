@@ -112,8 +112,11 @@ dtb-$(CONFIG_ARCH_K3) += k3-j721e-common-proc-board-infotainment.dtbo
 
 # Boards with J721s2 SoC
 dtb-$(CONFIG_ARCH_K3) += k3-am68-phyboard-izar-rdk.dtb
+dtb-$(CONFIG_ARCH_K3) += k3-am68-phyboard-izar-rdk-rev0.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am68-phyboard-izar-lvds-ac200.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am68-phyboard-izar-lvds-ac200-rev0.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am68-phyboard-izar-pwm-fan.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am68-phyboard-izar-pwm-fan-rev0.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am68-phyboard-izar-vm016-mipi-csi0.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am68-phyboard-izar-vm016-mipi-csi1.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am68-phyboard-izar-vm017-mipi-csi0.dtbo
