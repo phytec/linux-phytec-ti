@@ -141,6 +141,20 @@
 			no-map;
 		};
 	};
+
+	vdd_sd_dv: gpio-regulator-sd {
+		/* Output of TLV71033 */
+		compatible = "regulator-gpio";
+		regulator-name = "VDD_SD_DV";
+		pinctrl-names = "default";
+		pinctrl-0 = <&vdd_sd_dv_pins_default>;
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-boot-on;
+		gpios = <&main_gpio0 1 GPIO_ACTIVE_HIGH>;
+		states = <3300000 0x0>,
+			 <1800000 0x1>;
+	};
 };
 
 &main_pmx0 {
@@ -173,6 +187,12 @@
 			J721S2_IOPAD(0x0b4, PIN_OUTPUT, 6) /* (U25) MCASP1_AXR4.RGMII1_TXC */
 			J721S2_IOPAD(0x09c, PIN_OUTPUT, 6) /* (T24) MCASP0_AXR11.RGMII1_TX_CTL */
 			J721S2_IOPAD(0x070, PIN_INPUT, 7) /* (R27) MCAN1_RX.GPIO0_28 */
+		>;
+	};
+
+	vdd_sd_dv_pins_default: vdd-sd-dv-pins-default {
+		pinctrl-single,pins = <
+			J721S2_IOPAD(0x004, PIN_OUTPUT, 7) /* (W25) MCAN12_TX.GPIO0_1 */
 		>;
 	};
 };
@@ -477,6 +497,11 @@
 	no-mmc-hs400;
 	ti,driver-strength-ohm = <50>;
 	disable-wp;
+};
+
+/* SD card */
+&main_sdhci1 {
+	vqmmc-supply = <&vdd_sd_dv>;
 };
 
 /* also PMIC */

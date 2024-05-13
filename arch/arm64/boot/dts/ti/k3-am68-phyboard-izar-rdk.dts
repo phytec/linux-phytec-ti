@@ -406,8 +406,6 @@
 	pinctrl-names = "default";
 	disable-wp;
 	vmmc-supply = <&vcc_3v3>;
-	/* 1.8v broken on alpha HW */
-	no-1-8-v;
 };
 
 &main_spi6 {
