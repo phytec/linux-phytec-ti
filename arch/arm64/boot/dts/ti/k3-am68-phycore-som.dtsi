@@ -141,20 +141,6 @@
 			no-map;
 		};
 	};
-
-	/* Dummy regulator to enable OSPI0 */
-	vdd_ospi: regulator-ospi {
-		compatible = "regulator-fixed";
-		regulator-name = "vdd_ospi";
-		regulator-min-microvolt = <3300000>;
-		regulator-max-microvolt = <3300000>;
-		regulator-boot-on;
-		regulator-always-on;
-		enable-active-high;
-		pinctrl-names = "default";
-		pinctrl-0 = <&vdd_ospi_pins_default>;
-		gpio = <&wkup_gpio0 3 GPIO_ACTIVE_HIGH>;
-	};
 };
 
 &main_pmx0 {
@@ -186,6 +172,7 @@
 			J721S2_IOPAD(0x098, PIN_OUTPUT, 6) /* (V25) MCASP0_AXR10.RGMII1_TD3 */
 			J721S2_IOPAD(0x0b4, PIN_OUTPUT, 6) /* (U25) MCASP1_AXR4.RGMII1_TXC */
 			J721S2_IOPAD(0x09c, PIN_OUTPUT, 6) /* (T24) MCASP0_AXR11.RGMII1_TX_CTL */
+			J721S2_IOPAD(0x070, PIN_INPUT, 7) /* (R27) MCAN1_RX.GPIO0_28 */
 		>;
 	};
 };
@@ -228,12 +215,6 @@
 		pinctrl-single,pins = <
 			J721S2_WKUP_IOPAD(0x0a0, PIN_INPUT_PULLUP, 0) /* (G24) MCU_I2C0_SCL */
 			J721S2_WKUP_IOPAD(0x0a4, PIN_INPUT_PULLUP, 0) /* (J25) MCU_I2C0_SDA */
-		>;
-	};
-
-	vdd_ospi_pins_default: vdd-ospi-pins-default {
-		pinctrl-single,pins = <
-			J721S2_WKUP_IOPAD(0x064, PIN_OUTPUT, 7) /* (C27) WKUP_GPIO0_3 */
 		>;
 	};
 
@@ -412,9 +393,10 @@
 
 	phy1: ethernet-phy@0 {
 		reg = <0>;
+		interrupt-parent = <&main_gpio0>;
+		interrupts = <28 IRQ_TYPE_EDGE_FALLING>;
 		ti,clk-output-sel = <DP83867_CLK_O_SEL_OFF>;
 		ti,fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
-		ti,min-output-impedance;
 		ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
 	};
 };
@@ -434,7 +416,7 @@
 		reg = <0x2d>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&wkup_sn65dsi83_pins_default>;
-		/* enable-gpios = <&wkup_gpio0 11 GPIO_ACTIVE_HIGH>; */
+		enable-gpios = <&wkup_gpio0 11 GPIO_ACTIVE_LOW>;
 		status = "disabled";
 
 		sn65dsi83_ports: ports {
