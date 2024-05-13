@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2022 PHYTEC Messtechnik GmbH
+ * Author: Wadim Egorov <w.egorov@phytec.de>
+ */
+/dts-v1/;
+/plugin/;
+
+#include "k3-pinctrl.h"
+
+&main_pmx0 {
+	main_spi0_pins_default: main-spi0-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x01bc, PIN_INPUT, 0)       /* (A14) SPI0_CLK */
+			AM62X_IOPAD(0x01b4, PIN_OUTPUT, 0)      /* (A13) SPI0_CS0 */
+			AM62X_IOPAD(0x01c0, PIN_OUTPUT, 0)      /* (B13) SPI0_D0 */
+			AM62X_IOPAD(0x01c4, PIN_INPUT, 0)       /* (B14) SPI0_D1 */
+		>;
+	};
+};
+
+&main_spi0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_spi0_pins_default>;
+	ti,pindir-d0-out-d1-in = <1>;
+
+	spidev@0 {
+		spi-max-frequency = <24000000>;
+		reg = <0>;
+		compatible = "rohm,dh2228fv";
+	};
+};
