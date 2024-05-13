@@ -75,7 +75,7 @@
 			reg = <0x82e4 0x4>;
 			clocks = <&k3_clks 157 10>;
 			assigned-clocks = <&k3_clks 157 10>;
-			assigned-clock-parents = <&k3_clks 157 18>;
+			assigned-clock-parents = <&k3_clks 157 17>;
 			#clock-cells = <0>;
 		};
 	};
