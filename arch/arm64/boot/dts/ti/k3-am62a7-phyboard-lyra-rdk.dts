@@ -143,7 +143,7 @@
 &main_pmx0 {
 	audio_ext_refclk1_pins_default: audio-ext-refclk1-pins-default {
 		pinctrl-single,pins = <
-			AM62X_IOPAD(0x0a0, PIN_OUTPUT, 1) /* (K25) GPMC0_WPn.AUDIO_EXT_REFCLK1 */
+			AM62AX_IOPAD(0x00a0, PIN_OUTPUT, 1) /* (K17) GPMC0_WPn.AUDIO_EXT_REFCLK1 */
 		>;
 	};
 
