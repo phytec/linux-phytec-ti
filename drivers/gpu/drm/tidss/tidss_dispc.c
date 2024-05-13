@@ -1096,6 +1096,14 @@ struct dispc_bus_format *dispc_vp_find_bus_fmt(struct dispc_device *dispc,
 {
 	unsigned int i;
 
+	/*
+	 * HACK: On j721e, VP3 is hardcoded to connect to internal DPI to DSI
+	 * bridge which only supports MEDIA_BUS_FMT_RGB888_1X24 bus format.
+	 */
+	if (dispc->feat->output_type[vp_idx] == DISPC_OUTPUT_INTERNAL &&
+	    dispc->feat->subrev == DISPC_J721E && vp_idx == 2)
+		return &dispc_bus_formats[3];
+
 	for (i = 0; i < ARRAY_SIZE(dispc_bus_formats); ++i) {
 		if (dispc_bus_formats[i].bus_fmt == bus_fmt)
 			return &dispc_bus_formats[i];
