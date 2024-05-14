@@ -3896,7 +3896,7 @@ static struct i2c_driver ar0144_i2c_driver = {
 		.name = "ar0144",
 		.of_match_table	= of_match_ptr(ar0144_of_match),
 	},
-	.probe_new	= ar0144_probe,
+	.probe		= ar0144_probe,
 	.remove		= ar0144_remove,
 	.id_table	= ar0144_id_table,
 };
