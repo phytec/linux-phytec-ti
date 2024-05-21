@@ -1163,6 +1163,16 @@ static int omap_dm_timer_probe(struct platform_device *pdev)
 	list_add_tail(&timer->node, &omap_timer_list);
 	spin_unlock_irqrestore(&dm_timer_lock, flags);
 
+	if (dev->of_node
+		&& of_find_property(dev->of_node, "ti,timer-auto-run", NULL)) {
+
+		ret = omap_dm_timer_start(&timer->cookie);
+		if (ret < 0) {
+			dev_err(dev, "%s: omap_dm_timer_start failed!\n", __func__);
+			return ret;
+		}
+	}
+
 	dev_dbg(dev, "Device Probed.\n");
 
 	return 0;
