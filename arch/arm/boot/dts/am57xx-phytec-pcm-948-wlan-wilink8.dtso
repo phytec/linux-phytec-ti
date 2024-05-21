@@ -1,0 +1,132 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
+ * Author: Primoz Fiser <primoz.fiser@norik.com>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/dra.h>
+
+&{/} {
+	wlan_en_reg: regulator-wlan-en {
+		compatible = "regulator-fixed";
+		pinctrl-names = "default";
+		pinctrl-0 = <&wlan_pins_default>;
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		regulator-name = "WLAN_EN";
+		gpio = <&gpio1 24 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
+};
+
+&dra7_iodelay_core {
+	mmc3_iodelay_conf: mmc3_iodelay_conf {
+		pinctrl-pin-array = <
+			0x678 A_DELAY_PS(406) G_DELAY_PS(0)	/* CFG_MMC3_CLK_IN */
+			0x680 A_DELAY_PS(659) G_DELAY_PS(0)	/* CFG_MMC3_CLK_OUT */
+			0x684 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_CMD_IN */
+			0x688 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_CMD_OEN */
+			0x68c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_CMD_OUT */
+			0x690 A_DELAY_PS(130) G_DELAY_PS(0)	/* CFG_MMC3_DAT0_IN */
+			0x694 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT0_OEN */
+			0x698 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT0_OUT */
+			0x69c A_DELAY_PS(169) G_DELAY_PS(0)	/* CFG_MMC3_DAT1_IN */
+			0x6a0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT1_OEN */
+			0x6a4 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT1_OUT */
+			0x6a8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT2_IN */
+			0x6ac A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT2_OEN */
+			0x6b0 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT2_OUT */
+			0x6b4 A_DELAY_PS(457) G_DELAY_PS(0)	/* CFG_MMC3_DAT3_IN */
+			0x6b8 A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT3_OEN */
+			0x6bc A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_MMC3_DAT3_OUT */
+		>;
+	};
+};
+
+&dra7_pmx_core {
+	wlan_pins_default: wlan_pins_default {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x379c, PIN_OUTPUT_PULLDOWN | MUX_MODE14)	/* (AB8) mmc3_dat6.gpio1_24 */
+			DRA7XX_CORE_IOPAD(0x37a0, PIN_INPUT_PULLDOWN | MUX_MODE14)	/* (AB5) mmc3_dat7.gpio1_25 */
+		>;
+	};
+
+	bt_pin_default: bt_pin_default {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x3794, PIN_OUTPUT_PULLDOWN | MUX_MODE14)	/* (AC8) mmc3_dat4.gpio1_22 */
+		>;
+	};
+
+	mmc3_pins_default: mmc3_pins_default {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x377c, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE0)	/* (AD4) mmc3_clk */
+			DRA7XX_CORE_IOPAD(0x3780, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE0)	/* (AC4) mmc3_cmd */
+			DRA7XX_CORE_IOPAD(0x3784, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE0)	/* (AC7) mmc3_dat0 */
+			DRA7XX_CORE_IOPAD(0x3788, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE0)	/* (AC6) mmc3_dat1 */
+			DRA7XX_CORE_IOPAD(0x378c, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE0)	/* (AC9) mmc3_dat2 */
+			DRA7XX_CORE_IOPAD(0x3790, PIN_INPUT_PULLUP | MODE_SELECT | MUX_MODE0)	/* (AC3) mmc3_dat3 */
+		>;
+	};
+
+	mmc3_pins_sleep: mmc3_pins_sleep {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x377c, PIN_INPUT_PULLDOWN | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3780, PIN_INPUT_PULLDOWN | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3784, PIN_INPUT_PULLDOWN | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3788, PIN_INPUT_PULLDOWN | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x378c, PIN_INPUT_PULLDOWN | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3790, PIN_INPUT_PULLDOWN | MUX_MODE15)
+		>;
+	};
+
+	uart10_pins_default: uart10_pins_default {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x3570, PIN_INPUT_SLEW | MUX_MODE8)	/* (D1) vin2a_d2.uart10_rxd */
+			DRA7XX_CORE_IOPAD(0x3574, PIN_INPUT_SLEW | MUX_MODE8)	/* (E2) vin2a_d3.uart10_txd */
+			DRA7XX_CORE_IOPAD(0x3578, PIN_INPUT_SLEW | MUX_MODE8)	/* (D2) vin2a_d4.uart10_ctsn */
+			DRA7XX_CORE_IOPAD(0x357c, PIN_INPUT_SLEW | MUX_MODE8)	/* (F4) vin2a_d5.uart10_rtsn */
+		>;
+	};
+};
+
+&mmc3 {
+	status = "okay";
+	pinctrl-names = "default", "sleep", "hs", "sdr12", "sdr25", "sdr50";
+	pinctrl-0 = <&mmc3_pins_default &mmc3_iodelay_conf>;
+	pinctrl-1 = <&mmc3_pins_sleep>;
+	pinctrl-2 = <&mmc3_pins_default &mmc3_iodelay_conf>;
+	pinctrl-3 = <&mmc3_pins_default &mmc3_iodelay_conf>;
+	pinctrl-4 = <&mmc3_pins_default &mmc3_iodelay_conf>;
+	pinctrl-5 = <&mmc3_pins_default &mmc3_iodelay_conf>;
+	bus-width = <4>;
+	vmmc-supply = <&wlan_en_reg>;
+	ti,non-removable;
+	cap-power-off-card;
+	keep-power-in-suspend;
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	wlcore: wlcore@2 {
+		compatible = "ti,wl1835";
+		reg = <2>;
+		interrupt-parent = <&gpio1>;
+		interrupts = <25 IRQ_TYPE_EDGE_RISING>;
+	};
+};
+
+&uart10 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart10_pins_default &bt_pin_default>;
+
+	bluetooth {
+		compatible = "ti,wl1835-st";
+		enable-gpios = <&gpio1 22 GPIO_ACTIVE_HIGH>;
+	};
+};

@@ -1,0 +1,48 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
+ * Author: Primoz Fiser <primoz.fiser@norik.com>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/thermal/thermal.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/dra.h>
+
+&{/} {
+	gpio_fan: gpio-fan {
+		compatible = "gpio-fan";
+		pinctrl-names = "default";
+		pinctrl-0 = <&fan_pins_default>;
+		gpios =  <&gpio7 5 GPIO_ACTIVE_HIGH>;
+		gpio-fan,speed-map = <0 0 13000 1>;
+		cooling-min-state = <0>;
+		cooling-max-state = <1>;
+		#cooling-cells = <2>;
+	};
+};
+
+&dra7_pmx_core {
+	fan_pins_default: fan_pins_default {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x3448, PIN_OUTPUT | MUX_MODE14)	/* (T6) gpmc_a2.gpio7_5 */
+		>;
+	};
+};
+
+&cpu_trips {
+	cpu_alert1: cpu_alert1 {
+		temperature = <40000>; /* millicelsius */
+		hysteresis = <2000>; /* millicelsius */
+		type = "active";
+	};
+};
+
+&cpu_cooling_maps {
+	map1 {
+		trip = <&cpu_alert1>;
+		cooling-device = <&gpio_fan THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+	};
+};
