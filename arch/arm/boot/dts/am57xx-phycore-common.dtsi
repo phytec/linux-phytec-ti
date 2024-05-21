@@ -52,6 +52,25 @@
 			reg = <0x0 0x95800000 0x0 0x3800000>;
 			reusable;
 		};
+
+		cmem_block_mem_0: cmem-block-mem@a0000000 {
+			reg = <0x0 0xa0000000 0x0 0x0c000000>;
+			no-map;
+		};
+	};
+
+	cmem {
+		status = "okay";
+		compatible = "ti,cmem";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		#pool-size-cells = <2>;
+
+		cmem_block_0: cmem-block@0 {
+			reg = <0>;
+			memory-region = <&cmem_block_mem_0>;
+			cmem-buf-pools = <1 0x0 0x0c000000>;
+		};
 	};
 
 	vdd_3v3: regulator-vdd-3v3 {
