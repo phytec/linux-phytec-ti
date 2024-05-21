@@ -1,0 +1,83 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
+ * Author: Primoz Fiser <primoz.fiser@norik.com>
+ */
+
+#include <dt-bindings/gpio/gpio.h>
+
+&dra7_pmx_core {
+	gpmc_nand_pins_default: gpmc_nand_pins_default {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x3400, PIN_INPUT_SLEW | MUX_MODE0)			/* (M6) gpmc_ad0 */
+			DRA7XX_CORE_IOPAD(0x3404, PIN_INPUT_SLEW | MUX_MODE0)			/* (M2) gpmc_ad1 */
+			DRA7XX_CORE_IOPAD(0x3408, PIN_INPUT_SLEW | MUX_MODE0)			/* (L5) gpmc_ad2 */
+			DRA7XX_CORE_IOPAD(0x340c, PIN_INPUT_SLEW | MUX_MODE0)			/* (M1) gpmc_ad3 */
+			DRA7XX_CORE_IOPAD(0x3410, PIN_INPUT_SLEW | MUX_MODE0)			/* (L6) gpmc_ad4 */
+			DRA7XX_CORE_IOPAD(0x3414, PIN_INPUT_SLEW | MUX_MODE0)			/* (L4) gpmc_ad5 */
+			DRA7XX_CORE_IOPAD(0x3418, PIN_INPUT_SLEW | MUX_MODE0)			/* (L3) gpmc_ad6 */
+			DRA7XX_CORE_IOPAD(0x341c, PIN_INPUT_SLEW | MUX_MODE0)			/* (L2) gpmc_ad7 */
+			DRA7XX_CORE_IOPAD(0x34b4, PIN_OUTPUT_PULLUP | SLEWCONTROL | MUX_MODE0)	/* (T1) gpmc_cs0 */
+			DRA7XX_CORE_IOPAD(0x34c4, PIN_OUTPUT | SLEWCONTROL | MUX_MODE0)		/* (N1) gpmc_advn_ale */
+			DRA7XX_CORE_IOPAD(0x34c8, PIN_OUTPUT | SLEWCONTROL | MUX_MODE0)		/* (M5) gpmc_oen_ren */
+			DRA7XX_CORE_IOPAD(0x34cc, PIN_OUTPUT | SLEWCONTROL | MUX_MODE0)		/* (M3) gpmc_wen */
+			DRA7XX_CORE_IOPAD(0x34d0, PIN_OUTPUT | SLEWCONTROL | MUX_MODE0)		/* (N6) gpmc_ben0 */
+			DRA7XX_CORE_IOPAD(0x34d8, PIN_INPUT_SLEW | MUX_MODE14)			/* (N2) gpmc_wait0.gpio2_28 */
+			DRA7XX_CORE_IOPAD(0x356c, PIN_INPUT_PULLUP | MUX_MODE15)		/* (F3) vin2a_d1.off */
+		>;
+	};
+};
+
+/* Enable NAND */
+&elm {
+	status = "okay";
+};
+
+&gpmc {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&gpmc_nand_pins_default>;
+
+	ranges = <0 0 0x08000000 0x01000000>;		/* minimum GPMC partition = 16MB */
+
+	nand@0,0 {
+		compatible = "ti,omap2-nand";
+		reg = <0 0 4>;				/* device IO registers */
+		interrupt-parent = <&gpmc>;
+		interrupts = <0 IRQ_TYPE_NONE>,		/* fifoevent */
+			<1 IRQ_TYPE_NONE>;		/* termcount */
+		rb-gpios = <&gpio2 28 GPIO_ACTIVE_HIGH>;	/* gpmc_wait0 pin */
+
+		ti,nand-ecc-opt = "bch16";
+		ti,elm-id = <&elm>;
+		nand-bus-width = <8>;
+		gpmc,device-width = <1>;
+		gpmc,sync-clk-ps = <0>;
+		gpmc,cs-on-ns = <0>;
+		gpmc,cs-rd-off-ns = <35>;
+		gpmc,cs-wr-off-ns = <25>;
+		gpmc,adv-on-ns = <0>;
+		gpmc,adv-rd-off-ns = <35>;
+		gpmc,adv-wr-off-ns = <25>;
+		gpmc,we-on-ns = <0>;
+		gpmc,we-off-ns = <15>;
+		gpmc,oe-on-ns = <15>;
+		gpmc,oe-off-ns = <30>;
+		gpmc,access-ns = <35>;
+		gpmc,wr-access-ns = <25>;
+		gpmc,rd-cycle-ns = <35>;
+		gpmc,wr-cycle-ns = <25>;
+		gpmc,bus-turnaround-ns = <0>;
+		gpmc,cycle2cycle-delay-ns = <0>;
+		gpmc,clk-activation-ns = <0>;
+		gpmc,wr-data-mux-bus-ns = <0>;
+
+		#address-cells = <1>;
+		#size-cells = <1>;
+	};
+};
+
+/* Disable eMMC */
+&mmc2 {
+	status = "disabled";
+};

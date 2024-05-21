@@ -206,6 +206,12 @@ Boards (incomplete list of examples):
 - AM5718 IDK
   compatible = "ti,am5718-idk", "ti,am5718", "ti,dra7"
 
+- AM57XX PHYTEC phyCORE-AM57x
+  compatible = "phytec,am57xx-phycore-som", "ti,am5716", "ti,dra722", "ti,dra72", "ti,dra7";
+
+- AM57XX PHYTEC PCM-948 AM57x RDK
+  compatible = "phytec,am57xx-pcm-948", "phytec,am57xx-phycore-som", "ti,dra7";
+
 - DRA762 EVM:  Software Development Board for DRA762
   compatible = "ti,dra76-evm", "ti,dra762", "ti,dra7"
 

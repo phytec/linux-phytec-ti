@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
+ * Author: Primoz Fiser <primoz.fiser@norik.com>
+ */
+
+/dts-v1/;
+
+#include "am5716-phycore-som.dtsi"
+#include "am57xx-pcm-948.dtsi"
+
+/*
+ * NOTE: Disable CAL (Camera Adaptation Layer) to maintain compatibility
+ * between different phyCORE-AM57x kit variants. With this in place, it is
+ * possible to boot all variants with this generic dts. However please note
+ * it is highly recommended to use appropriate dts for specific phyCORE-AM57x
+ * kit variant to ensure optimal performance.
+ */
+&l4_per2 {
+	target-module@5b000 {			/* 0x4845b000, ap 59 46.0 */
+		status = "disabled";
+	};
+};
