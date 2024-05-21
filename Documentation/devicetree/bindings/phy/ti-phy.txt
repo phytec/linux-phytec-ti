@@ -57,6 +57,9 @@ Optional properties:
    register that contains the SATA_PLL_SOFT_RESET bit. Only valid for sata_phy.
  - syscon-pcs : phandle/offset pair. Phandle to the system control module and the
    register offset to write the PCS delay value.
+ - syscon-acspcie-tx-rx : phandle, offset, and value used to set
+   ACSPCIe mode via PCIE_TX_RX_CONTROL register. Value should be
+   0x0 for Power Down, 0x1 for TX Mode, or 0x2 for RX mode
 
 Deprecated properties:
  - ctrl-module : phandle of the control module used by PHY driver to power on
