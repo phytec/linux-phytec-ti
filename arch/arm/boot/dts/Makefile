@@ -1020,7 +1020,15 @@ dtb-$(CONFIG_SOC_DRA7XX) += \
 	am5728-phytec-pcm-948-40A00111I.dtb \
 	am5728-phytec-pcm-948-50500111I.dtb \
 	am5729-phytec-pcm-948-10306111I.dtb \
-	am5749-phytec-pcm-948-32302111I.dtb
+	am5749-phytec-pcm-948-32302111I.dtb \
+	am57xx-phytec-pcm-948-gpio-fan.dtbo \
+	am57xx-phytec-pcm-948-x28-spidev.dtbo \
+	am57xx-phytec-pcm-948-lcd-017.dtbo \
+	am57xx-phytec-pcm-948-lcd-018.dtbo \
+	am57xx-phytec-pcm-948-vm-009.dtbo \
+	am57xx-phytec-pcm-948-vm-011.dtbo \
+	am57xx-phytec-pcm-948-vm-016.dtbo \
+	am57xx-phytec-pcm-948-wlan-wilink8.dtbo
 dtb-$(CONFIG_ARCH_ORION5X) += \
 	orion5x-kuroboxpro.dtb \
 	orion5x-lacie-d2-network.dtb \
