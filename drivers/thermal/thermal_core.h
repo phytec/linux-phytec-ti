@@ -23,6 +23,8 @@
 #define DEFAULT_THERMAL_GOVERNOR       "user_space"
 #elif defined(CONFIG_THERMAL_DEFAULT_GOV_POWER_ALLOCATOR)
 #define DEFAULT_THERMAL_GOVERNOR       "power_allocator"
+#elif defined(CONFIG_THERMAL_GOV_TWO_STAGE)
+#define DEFAULT_THERMAL_GOVERNOR       "two_stage"
 #endif
 
 /* Initial state of a cooling device during binding */

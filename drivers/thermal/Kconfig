@@ -126,6 +126,13 @@ config THERMAL_DEFAULT_GOV_POWER_ALLOCATOR
 	  system and device power allocation. This governor can only
 	  operate on cooling devices that implement the power API.
 
+config THERMAL_DEFAULT_GOV_TWO_STAGE
+	bool "two_stage"
+	select THERMAL_GOV_TWO_STAGE
+	help
+	  Use the two_stage governor as default. This is used to
+	  enable or disable devices with only two stages.
+
 endchoice
 
 config THERMAL_GOV_FAIR_SHARE
@@ -160,6 +167,11 @@ config THERMAL_GOV_POWER_ALLOCATOR
 	help
 	  Enable this to manage platform thermals by dynamically
 	  allocating and limiting power to devices.
+
+config THERMAL_GOV_TWO_STAGE
+	bool "Two_stage thermal governor"
+	help
+	  Enable this to manage platform thermals using a two-stage governor.
 
 config CPU_THERMAL
 	bool "Generic cpu cooling support"
