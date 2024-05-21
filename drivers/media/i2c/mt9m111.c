@@ -1129,12 +1129,42 @@ static int mt9m111_enum_mbus_code(struct v4l2_subdev *sd,
 	return 0;
 }
 
+static int mt9m111_s_stream_on(struct mt9m111 *mt9m111)
+{
+	int ret;
+
+	ret = mt9m111_s_power(&mt9m111->subdev, 1);
+	if (ret < 0)
+		return -EINVAL;
+	mt9m111->is_streaming = true;
+
+	return 0;
+}
+
+static int mt9m111_s_stream_off(struct mt9m111 *mt9m111)
+{
+	int ret;
+
+	ret = mt9m111_s_power(&mt9m111->subdev, 0);
+	if (ret < 0)
+		return -EINVAL;
+	mt9m111->is_streaming = false;
+
+	return 0;
+}
+
 static int mt9m111_s_stream(struct v4l2_subdev *sd, int enable)
 {
 	struct mt9m111 *mt9m111 = container_of(sd, struct mt9m111, subdev);
 
-	mt9m111->is_streaming = !!enable;
-	return 0;
+	if (enable && mt9m111->is_streaming)
+		return -EBUSY;
+	else if (!enable && !mt9m111->is_streaming)
+		return -EINVAL;
+	else if (enable)
+		return mt9m111_s_stream_on(mt9m111);
+	else
+		return mt9m111_s_stream_off(mt9m111);
 }
 
 static int mt9m111_init_cfg(struct v4l2_subdev *sd,
@@ -1208,10 +1238,6 @@ static int mt9m111_video_probe(struct i2c_client *client)
 	s32 data;
 	int ret;
 
-	ret = mt9m111_s_power(&mt9m111->subdev, 1);
-	if (ret < 0)
-		return ret;
-
 	data = reg_read(CHIP_VERSION);
 
 	switch (data) {
@@ -1237,7 +1263,6 @@ static int mt9m111_video_probe(struct i2c_client *client)
 	ret = v4l2_ctrl_handler_setup(&mt9m111->hdl);
 
 done:
-	mt9m111_s_power(&mt9m111->subdev, 0);
 	return ret;
 }
 
@@ -1377,6 +1402,8 @@ static int mt9m111_probe(struct i2c_client *client)
 	mt9m111->lastpage	= -1;
 	mutex_init(&mt9m111->power_lock);
 
+	ret = mt9m111_s_power(&mt9m111->subdev, 1);
+
 	ret = mt9m111_video_probe(client);
 	if (ret < 0)
 		goto out_entityclean;
@@ -1393,6 +1420,7 @@ out_entityclean:
 	media_entity_cleanup(&mt9m111->subdev.entity);
 out_hdlfree:
 #endif
+	ret = mt9m111_s_power(&mt9m111->subdev, 0);
 	v4l2_ctrl_handler_free(&mt9m111->hdl);
 
 	return ret;
@@ -1402,6 +1430,7 @@ static void mt9m111_remove(struct i2c_client *client)
 {
 	struct mt9m111 *mt9m111 = to_mt9m111(client);
 
+	mt9m111_s_power(&mt9m111->subdev, 0);
 	v4l2_async_unregister_subdev(&mt9m111->subdev);
 	media_entity_cleanup(&mt9m111->subdev.entity);
 	v4l2_ctrl_handler_free(&mt9m111->hdl);
