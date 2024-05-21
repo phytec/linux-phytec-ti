@@ -795,7 +795,9 @@ static int dss_dpi_select_source_dra7xx(struct dss_device *dss, int port,
 {
 	switch (port) {
 	case 0:
-		return dss_dpi_select_source_omap5(dss, port, channel);
+		if (channel != OMAP_DSS_CHANNEL_LCD)
+			return -EINVAL;
+		break;
 	case 1:
 		if (channel != OMAP_DSS_CHANNEL_LCD2)
 			return -EINVAL;
@@ -808,7 +810,7 @@ static int dss_dpi_select_source_dra7xx(struct dss_device *dss, int port,
 		return -EINVAL;
 	}
 
-	return 0;
+	return dss_dpi_select_source_omap5(dss, port, channel);
 }
 
 int dss_dpi_select_source(struct dss_device *dss, int port,
