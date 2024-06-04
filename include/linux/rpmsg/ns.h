@@ -27,6 +27,23 @@ struct rpmsg_ns_msg {
 } __packed;
 
 /**
+ * struct rpmsg_ns_msg_ext - dynamic name service announcement message v2
+ * @name: name of remote service that is published
+ * @desc: description of remote service
+ * @addr: address of remote service that is published
+ * @flags: indicates whether service is created or destroyed
+ *
+ * Interchangeable nameservice message with rpmsg_ns_msg. This one has
+ * the addition of the desc field for extra flexibility.
+ */
+struct rpmsg_ns_msg_ext {
+	char name[RPMSG_NAME_SIZE];
+	char desc[RPMSG_NAME_SIZE];
+	u32 addr;
+	u32 flags;
+} __packed;
+
+/**
  * enum rpmsg_ns_flags - dynamic name service announcement flags
  *
  * @RPMSG_NS_CREATE: a new remote service was just created

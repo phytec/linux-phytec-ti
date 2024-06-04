@@ -32,17 +32,26 @@ static int rpmsg_ns_cb(struct rpmsg_device *rpdev, void *data, int len,
 		       void *priv, u32 src)
 {
 	struct rpmsg_ns_msg *msg = data;
+	struct rpmsg_ns_msg_ext *msg_ext = data;
 	struct rpmsg_device *newch;
 	struct rpmsg_channel_info chinfo;
 	struct device *dev = rpdev->dev.parent;
 	int ret;
+	u32 addr;
+	u32 flags;
 
 #if defined(CONFIG_DYNAMIC_DEBUG)
 	dynamic_hex_dump("NS announcement: ", DUMP_PREFIX_NONE, 16, 1,
 			 data, len, true);
 #endif
-
-	if (len != sizeof(*msg)) {
+	if (len == sizeof(*msg)) {
+		addr = rpmsg32_to_cpu(rpdev, msg->addr);
+		flags = rpmsg32_to_cpu(rpdev, msg->flags);
+	} else if (len == sizeof(*msg_ext)) {
+		addr = rpmsg32_to_cpu(rpdev, msg_ext->addr);
+		flags = rpmsg32_to_cpu(rpdev, msg_ext->flags);
+		msg_ext->desc[RPMSG_NAME_SIZE - 1] = '\0';
+	} else {
 		dev_err(dev, "malformed ns msg (%d)\n", len);
 		return -EINVAL;
 	}
@@ -52,13 +61,13 @@ static int rpmsg_ns_cb(struct rpmsg_device *rpdev, void *data, int len,
 
 	strncpy(chinfo.name, msg->name, sizeof(chinfo.name));
 	chinfo.src = RPMSG_ADDR_ANY;
-	chinfo.dst = rpmsg32_to_cpu(rpdev, msg->addr);
+	chinfo.dst = addr;
 
 	dev_info(dev, "%sing channel %s addr 0x%x\n",
-		 rpmsg32_to_cpu(rpdev, msg->flags) & RPMSG_NS_DESTROY ?
+		 flags & RPMSG_NS_DESTROY ?
 		 "destroy" : "creat", msg->name, chinfo.dst);
 
-	if (rpmsg32_to_cpu(rpdev, msg->flags) & RPMSG_NS_DESTROY) {
+	if (flags & RPMSG_NS_DESTROY) {
 		ret = rpmsg_release_channel(rpdev, &chinfo);
 		if (ret)
 			dev_err(dev, "rpmsg_destroy_channel failed: %d\n", ret);
