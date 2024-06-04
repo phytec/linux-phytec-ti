@@ -67,9 +67,9 @@
 	};
 };
 
-/* move dsp1 to timer15 to free up timer5 */
+/* move dsp1 to timer14 to free up timer5 */
 &dsp1 {
-	ti,timers = <&timer15>;
+	ti,timers = <&timer14>;
 };
 
 /* timer5 required to enable camera clk */
