@@ -259,7 +259,7 @@
 	memory-region = <&dsp1_memory_region>;
 };
 
-&gpio4 {
+&gpio4_target {
 	ti,no-reset-on-init;
 	ti,no-idle-on-init;
 };
