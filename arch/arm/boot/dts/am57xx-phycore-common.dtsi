@@ -506,6 +506,10 @@
 	status = "okay";
 };
 
+&pruss1_mdio {
+	status = "disabled";
+};
+
 &pru1_0 {
 	mboxes = <&mailbox3 &mbox_pru1_0>;
 	status = "okay";
@@ -518,6 +522,10 @@
 
 &pruss2 {
 	status = "okay";
+};
+
+&pruss2_mdio {
+	status = "disabled";
 };
 
 &pru2_0 {
