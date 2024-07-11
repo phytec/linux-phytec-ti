@@ -421,7 +421,6 @@
 /* eMMC */
 &main_sdhci0 {
 	non-removable;
-	no-mmc-hs400;
 	ti,driver-strength-ohm = <50>;
 	disable-wp;
 	status = "okay";
