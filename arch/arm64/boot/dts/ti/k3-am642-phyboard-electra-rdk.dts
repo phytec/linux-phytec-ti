@@ -57,9 +57,8 @@
 		standby-gpios = <&main_gpio0 35 GPIO_ACTIVE_HIGH>;
 	};
 
-
 	/* Dual Ethernet application node on PRU-ICSSG0 */
-	icssg0_eth: icssg0-eth {
+	ethernet {
 		compatible = "ti,am642-icssg-prueth";
 		pinctrl-names = "default";
 		pinctrl-0 = <&icssg0_rgmii1_pins_default &icssg0_rgmii2_pins_default>;
@@ -82,24 +81,23 @@
 
 		ti,mii-g-rt = <&icssg0_mii_g_rt>;
 		ti,mii-rt = <&icssg0_mii_rt>;
-		iep = <&icssg0_iep0>, <&icssg0_iep1>;
+		ti,iep = <&icssg0_iep0>, <&icssg0_iep1>;
+		ti,pa-stats = <&icssg0_pa_stats>;
 
 		interrupt-parent = <&icssg0_intc>;
 		interrupts = <24 0 2>, <25 1 3>;
 		interrupt-names = "tx_ts0", "tx_ts1";
 
-		dmas = <&main_pktdma 0xc100 0>, /* egress slice 0 */
-		       <&main_pktdma 0xc101 0>, /* egress slice 0 */
-		       <&main_pktdma 0xc102 0>, /* egress slice 0 */
-		       <&main_pktdma 0xc103 0>, /* egress slice 0 */
-		       <&main_pktdma 0xc104 0>, /* egress slice 1 */
-		       <&main_pktdma 0xc105 0>, /* egress slice 1 */
-		       <&main_pktdma 0xc106 0>, /* egress slice 1 */
-		       <&main_pktdma 0xc107 0>, /* egress slice 1 */
-		       <&main_pktdma 0x4100 0>, /* ingress slice 0 */
-		       <&main_pktdma 0x4101 0>, /* ingress slice 1 */
-		       <&main_pktdma 0x4102 0>, /* mgmnt rsp slice 0 */
-		       <&main_pktdma 0x4103 0>; /* mgmnt rsp slice 1 */
+		dmas = <&main_pktdma 0xc100 15>, /* egress slice 0 */
+		       <&main_pktdma 0xc101 15>, /* egress slice 0 */
+		       <&main_pktdma 0xc102 15>, /* egress slice 0 */
+		       <&main_pktdma 0xc103 15>, /* egress slice 0 */
+		       <&main_pktdma 0xc104 15>, /* egress slice 1 */
+		       <&main_pktdma 0xc105 15>, /* egress slice 1 */
+		       <&main_pktdma 0xc106 15>, /* egress slice 1 */
+		       <&main_pktdma 0xc107 15>, /* egress slice 1 */
+		       <&main_pktdma 0x4100 15>, /* ingress slice 0 */
+		       <&main_pktdma 0x4101 15>; /* ingress slice 1 */
 		dma-names = "tx0-0", "tx0-1", "tx0-2", "tx0-3",
 			    "tx1-0", "tx1-1", "tx1-2", "tx1-3",
 			    "rx0", "rx1";
@@ -111,7 +109,7 @@
 				reg = <0>;
 				phy-handle = <&icssg0_phy1>;
 				phy-mode = "rgmii-id";
-				syscon-rgmii-delay = <&main_conf 0x4100>;
+				ti,syscon-rgmii-delay = <&main_conf 0x4100>;
 				/* Filled in by bootloader */
 				local-mac-address = [00 00 00 00 00 00];
 			};
@@ -120,7 +118,7 @@
 				reg = <1>;
 				phy-handle = <&icssg0_phy2>;
 				phy-mode = "rgmii-id";
-				syscon-rgmii-delay = <&main_conf 0x4104>;
+				ti,syscon-rgmii-delay = <&main_conf 0x4104>;
 				/* Filled in by bootloader */
 				local-mac-address = [00 00 00 00 00 00];
 			};
@@ -330,9 +328,6 @@
 		ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
 		tx-fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
 		rx-fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
-		ti,led-0-active-low;
-		ti,led-2-active-low;
-
 		reset-gpios = <&main_gpio1 18 GPIO_ACTIVE_LOW>;
 		reset-assert-us = <1000>;
 		reset-deassert-us = <1000>;
@@ -344,9 +339,6 @@
 		ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
 		tx-fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
 		rx-fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
-		ti,led-0-active-low;
-		ti,led-2-active-low;
-
 		reset-gpios = <&main_gpio1 19 GPIO_ACTIVE_LOW>;
 		reset-assert-us = <1000>;
 		reset-deassert-us = <1000>;
