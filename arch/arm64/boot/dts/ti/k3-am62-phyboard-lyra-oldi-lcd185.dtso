@@ -17,17 +17,22 @@
 		compatible = "lincolntech,lcd185-101ct";
 		backlight = <&backlight>;
 
-		port@0 {
-			dual-lvds-odd-pixels;
-			lcd_in0: endpoint {
-				remote-endpoint = <&oldi_out0>;
-			};
-		};
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
 
-		port@1 {
-			dual-lvds-even-pixels;
-			lcd_in1: endpoint {
-				remote-endpoint = <&oldi_out1>;
+			port@0 {
+				dual-lvds-odd-pixels;
+				lcd_in0: endpoint {
+					remote-endpoint = <&oldi_0_out>;
+				};
+			};
+
+			port@1 {
+				dual-lvds-even-pixels;
+				lcd_in1: endpoint {
+					remote-endpoint = <&oldi_1_out>;
+				};
 			};
 		};
 	};
@@ -43,6 +48,56 @@
 
 		enable-gpios = <&gpio_exp 5 GPIO_ACTIVE_HIGH>;
 		pwms = <&epwm0 1 50000 0>;
+	};
+};
+
+&dss {
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_oldi0_pins_default &main_dss0_pins_default>;
+};
+
+&dss_ports {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	/* VP1: Output to OLDI */
+	port@0 {
+		reg = <0>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		dpi0_out0: endpoint@0 {
+			reg = <0>;
+			remote-endpoint = <&oldi_0_in>;
+		};
+
+		dpi0_out1: endpoint@1 {
+			reg = <1>;
+			remote-endpoint = <&oldi_1_in>;
+		};
+	};
+};
+
+&epwm0 {
+	status = "okay";
+};
+
+&main_i2c1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	touchscreen@5d {
+		compatible = "goodix,gt928";
+		reg = <0x5d>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&touch_screen_pins_default>;
+
+		interrupt-parent = <&main_gpio0>;
+		interrupts = <19 IRQ_TYPE_LEVEL_LOW>;
+
+		reset-gpios = <&main_gpio0 18 GPIO_ACTIVE_HIGH>;
+		irq-gpios = <&main_gpio0 19 GPIO_ACTIVE_HIGH>;
 	};
 };
 
@@ -86,53 +141,48 @@
 	};
 };
 
-&epwm0 {
+&oldi0 {
 	status = "okay";
 };
 
-&dss {
-	pinctrl-names = "default";
-	pinctrl-0 = <&main_oldi0_pins_default &main_dss0_pins_default>;
+&oldi1 {
+	status = "okay";
 };
 
-&dss_ports {
+&oldi0_ports {
 	#address-cells = <1>;
 	#size-cells = <0>;
 
-	/* VP1: LVDS Output */
 	port@0 {
 		reg = <0>;
+		oldi_0_in: endpoint {
+			remote-endpoint = <&dpi0_out0>;
+		};
+	};
 
-		oldi_out0: endpoint {
+	port@1 {
+		reg = <1>;
+		oldi_0_out: endpoint {
 			remote-endpoint = <&lcd_in0>;
 		};
 	};
-
-	/* VP1: LVDS Output */
-	port@2 {
-		reg = <2>;
-
-		oldi_out1: endpoint {
-			remote-endpoint = <&lcd_in1>;
-		};
-	};
 };
 
-&main_i2c1 {
+&oldi1_ports {
 	#address-cells = <1>;
 	#size-cells = <0>;
 
-	touchscreen@5d {
-		compatible = "goodix,gt928";
-		reg = <0x5d>;
+	port@0 {
+		reg = <0>;
+		oldi_1_in: endpoint {
+			remote-endpoint = <&dpi0_out1>;
+		};
+	};
 
-		pinctrl-names = "default";
-		pinctrl-0 = <&touch_screen_pins_default>;
-
-		interrupt-parent = <&main_gpio0>;
-		interrupts = <19 IRQ_TYPE_LEVEL_LOW>;
-
-		reset-gpios = <&main_gpio0 18 GPIO_ACTIVE_HIGH>;
-		irq-gpios = <&main_gpio0 19 GPIO_ACTIVE_HIGH>;
+	port@1 {
+		reg = <1>;
+		oldi_1_out: endpoint {
+			remote-endpoint = <&lcd_in1>;
+		};
 	};
 };
