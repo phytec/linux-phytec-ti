@@ -354,3 +354,8 @@
 	non-removable;
 	status = "okay";
 };
+
+&wkup_r5fss0 {
+	/* Runs dedicated Device Management firmware */
+	status = "reserved";
+};
