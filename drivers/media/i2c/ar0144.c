@@ -2487,6 +2487,9 @@ static int ar0144_s_ctrl(struct v4l2_ctrl *ctrl)
 					 BIT_LED_DELAY(ctrl->val));
 		break;
 	case V4L2_CID_X_DYNAMIC_PIXEL_CORRECTION:
+		if (sensor->is_streaming)
+			return -EBUSY;
+
 		val = ctrl->val ? BIT_PIX_DEF_1D_DDC_EN : 0;
 
 		ret = ar0144_update_bits(sensor, AR0144_PIX_DEF_ID,
