@@ -340,8 +340,8 @@ struct ar0144 {
 	struct v4l2_mbus_framefmt fmt;
 	struct v4l2_rect crop;
 	unsigned int bpp;
-	unsigned int w_scale;
-	unsigned int h_scale;
+	unsigned int w_skip;
+	unsigned int h_skip;
 	unsigned int vblank;
 	unsigned int hblank;
 	unsigned int hlen;
@@ -1516,8 +1516,8 @@ static int ar0144_config_pll(struct ar0144 *sensor)
 
 static int ar0144_config_frame(struct ar0144 *sensor)
 {
-	unsigned int height = sensor->fmt.height * sensor->h_scale;
-	unsigned int width = sensor->fmt.width * sensor->w_scale;
+	unsigned int height = sensor->fmt.height * sensor->h_skip;
+	unsigned int width = sensor->fmt.width * sensor->w_skip;
 	int ret;
 	u16 x_end, y_end;
 
@@ -1555,12 +1555,12 @@ static int ar0144_config_frame(struct ar0144 *sensor)
 		return ret;
 
 	ret = ar0144_write(sensor, AR0144_X_ODD_INC,
-			   (sensor->w_scale << 1) - 1);
+			   (sensor->w_skip << 1) - 1);
 	if (ret)
 		return ret;
 
 	ret = ar0144_write(sensor, AR0144_Y_ODD_INC,
-			   (sensor->h_scale << 1) - 1);
+			   (sensor->h_skip << 1) - 1);
 	if (ret)
 		return ret;
 
@@ -1868,7 +1868,7 @@ static int ar0144_set_fmt(struct v4l2_subdev *sd,
 	struct v4l2_mbus_framefmt *fmt;
 	struct v4l2_rect *crop;
 	unsigned int width, height;
-	unsigned int w_scale, h_scale;
+	unsigned int w_skip, h_skip;
 
 	mutex_lock(&sensor->lock);
 
@@ -1902,16 +1902,16 @@ static int ar0144_set_fmt(struct v4l2_subdev *sd,
 	height = clamp_t(unsigned int, format->format.height,
 			 1, crop->height);
 
-	w_scale = ar0144_find_skipfactor(crop->width, width);
-	h_scale = ar0144_find_skipfactor(crop->height, height);
+	w_skip = ar0144_find_skipfactor(crop->width, width);
+	h_skip = ar0144_find_skipfactor(crop->height, height);
 
-	fmt->width = crop->width / w_scale;
-	fmt->height = crop->height / h_scale;
+	fmt->width = crop->width / w_skip;
+	fmt->height = crop->height / h_skip;
 
 	if (format->which == V4L2_SUBDEV_FORMAT_ACTIVE) {
 		sensor->bpp = sensor_format->bpp;
-		sensor->w_scale = w_scale;
-		sensor->h_scale = h_scale;
+		sensor->w_skip = w_skip;
+		sensor->h_skip = h_skip;
 		sensor->hlen = ar0144_get_hlength(sensor);
 		sensor->vlen = ar0144_get_vlength(sensor);
 	}
@@ -3338,8 +3338,8 @@ static void ar0144_set_defaults(struct ar0144 *sensor)
 	sensor->fmt.code = sensor->formats[sensor->num_fmts - 1].code;
 	sensor->bpp = sensor->formats[sensor->num_fmts - 1].bpp;
 
-	sensor->w_scale = 1;
-	sensor->h_scale = 1;
+	sensor->w_skip = 1;
+	sensor->h_skip = 1;
 	sensor->hblank = sensor->model->data->limits->hblank.min;
 	sensor->vblank = sensor->model->data->limits->vblank.min;
 	sensor->hlen = sensor->model->data->limits->hlen.min;
