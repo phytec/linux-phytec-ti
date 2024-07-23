@@ -1545,7 +1545,7 @@ static int ar0144_config_frame(struct ar0144 *sensor)
 	if (ret)
 		return ret;
 
-	ret = ar0144_write(sensor, AR0144_FRAME_LENGTH_LINES, sensor->vlen);
+	ret = ar0144_write(sensor, AR0144_FRAME_LENGTH_LINES, sensor->vlen - 5);
 	if (ret)
 		return ret;
 
@@ -3679,7 +3679,7 @@ static const struct ar0144_sensor_limits ar0144_limits = {
 	.hlen		= {1488,	65534     },
 	.vlen		= {29,		65535     },
 	.hblank		= {208,		65535     },
-	.vblank		= {22,		65535     },
+	.vblank		= {27,		65535     },
 	.ext_clk	= {6000000,	48000000  },
 	.div_lim	= {1,		63	  },
 	.mul_lim	= {32,		254	  },
@@ -3725,7 +3725,7 @@ static const struct ar0144_sensor_limits ar0234_limits = {
 	.hlen		= {2448,	65534     },
 	.vlen		= {29,		65535     },
 	.hblank		= {200,		65535     },
-	.vblank		= {16,		65535     },
+	.vblank		= {21,		65535     },
 	.ext_clk	= {6000000,	54000000  },
 	.div_lim	= {1,		63	  },
 	.mul_lim	= {32,		254	  },
