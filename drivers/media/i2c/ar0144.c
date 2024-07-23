@@ -293,17 +293,12 @@ struct ar0144_format {
 };
 
 struct ar0144_businfo {
-	enum v4l2_mbus_type bus_type;
-	unsigned int flags;
+	struct v4l2_mbus_config buscfg;
 	unsigned long target_link_frequency;
 	const s64 *link_freqs;
 
-	unsigned int bus_width;
-	unsigned int data_shift;
 	unsigned int slew_rate_dat;
 	unsigned int slew_rate_clk;
-
-	unsigned int num_lanes;
 };
 
 struct ar0144_pll_config {
@@ -1344,7 +1339,7 @@ static int ar0144_enter_standby(struct ar0144 *sensor)
 	/* In MIPI mode the sensor might be in LP-11 test mode so make sure
 	 * to disable it.
 	 */
-	if (sensor->info.bus_type == V4L2_MBUS_CSI2_DPHY)
+	if (sensor->info.buscfg.type == V4L2_MBUS_CSI2_DPHY)
 		ret = ar0144_clear_bits(sensor, AR0144_SER_CTRL_STAT,
 					BIT_FRAMER_TEST_MODE);
 
@@ -1358,7 +1353,7 @@ static int ar0144_mipi_enter_lp11(struct ar0144 *sensor)
 
 	val = AR0144_TEST_MODE_LP11 | AR0144_TEST_LANE_0;
 
-	if (sensor->info.num_lanes == 2)
+	if (sensor->info.buscfg.bus.mipi_csi2.num_data_lanes == 2)
 		val |= AR0144_TEST_LANE_1;
 
 	ret = ar0144_write(sensor, AR0144_SERIAL_TEST, val);
@@ -1427,7 +1422,7 @@ static int ar0144_s_power(struct v4l2_subdev *sd, int on)
 			goto out;
 
 		/* Enable MIPI LP-11 test mode as required by e.g. i.MX 6 */
-		if (sensor->info.bus_type == V4L2_MBUS_CSI2_DPHY &&
+		if (sensor->info.buscfg.type == V4L2_MBUS_CSI2_DPHY &&
 		    !sensor->is_streaming) {
 			ret = ar0144_mipi_enter_lp11(sensor);
 			if (ret) {
@@ -1579,7 +1574,9 @@ static int ar0144_config_frame(struct ar0144 *sensor)
 static int ar0144_config_parallel(struct ar0144 *sensor)
 {
 	int ret;
-	unsigned int bpp = sensor->bpp + sensor->info.data_shift;
+	unsigned int bpp;
+
+	bpp = sensor->bpp + sensor->info.buscfg.bus.parallel.data_shift;
 
 	ret = ar0144_write(sensor, AR0144_DATA_FORMAT_BITS,
 			   BIT_DATA_FMT_IN(bpp) | BIT_DATA_FMT_OUT(bpp));
@@ -1656,7 +1653,7 @@ static int ar0144_stream_on(struct ar0144 *sensor)
 	 * So we have to unset streaming and disable test mode before
 	 * configuring the sensor.
 	 */
-	if (sensor->info.bus_type == V4L2_MBUS_CSI2_DPHY) {
+	if (sensor->info.buscfg.type == V4L2_MBUS_CSI2_DPHY) {
 		ret = ar0144_enter_standby(sensor);
 		if (ret)
 			return ret;
@@ -1677,7 +1674,7 @@ static int ar0144_stream_on(struct ar0144 *sensor)
 	if (ret)
 		return ret;
 
-	if (sensor->info.bus_type == V4L2_MBUS_PARALLEL)
+	if (sensor->info.buscfg.type == V4L2_MBUS_PARALLEL)
 		ret = ar0144_config_parallel(sensor);
 	else
 		ret = ar0144_config_mipi(sensor);
@@ -2096,10 +2093,8 @@ static int ar0144_get_mbus_config(struct v4l2_subdev *sd, unsigned int pad,
 				  struct v4l2_mbus_config *cfg)
 {
 	struct ar0144 *sensor = to_ar0144(sd);
-	struct ar0144_businfo *info = &sensor->info;
 
-	cfg->type = info->bus_type;
-	cfg->bus.mipi_csi2.flags = info->flags;
+	*cfg = sensor->info.buscfg;
 
 	return 0;
 }
@@ -2535,7 +2530,7 @@ static int ar0144_g_volatile_ctrl(struct v4l2_ctrl *ctrl)
 		ctrl->val = val;
 		break;
 	case V4L2_CID_LINK_FREQ:
-		if (sensor->info.bus_type == V4L2_MBUS_PARALLEL)
+		if (sensor->info.buscfg.type == V4L2_MBUS_PARALLEL)
 			break;
 
 		ctrl->val = index;
@@ -2907,12 +2902,12 @@ static int ar0144_create_ctrls(struct ar0144 *sensor)
 			ctrl_cfg.max = data->max_tp_color;
 			break;
 		case V4L2_CID_X_EMBEDDED_DATA:
-			if (sensor->info.bus_type == V4L2_MBUS_CSI2_DPHY)
+			if (sensor->info.buscfg.type == V4L2_MBUS_CSI2_DPHY)
 				continue;
 
 			break;
 		case V4L2_CID_ANALOGUE_GAIN:
-			if (sensor->info.bus_type == V4L2_MBUS_PARALLEL)
+			if (sensor->info.buscfg.type == V4L2_MBUS_PARALLEL)
 				ctrl_cfg.max = data->max_parallel_again;
 			else
 				ctrl_cfg.max = data->max_mipi_again;
@@ -3097,7 +3092,7 @@ static int ar0144_init_mipi_sensor(struct ar0144 *sensor)
 	if (ret)
 		return ret;
 
-	switch (sensor->info.num_lanes) {
+	switch (sensor->info.buscfg.bus.mipi_csi2.num_data_lanes) {
 	case 1:
 		val = BIT_SINGLE_LANE;
 		break;
@@ -3204,15 +3199,18 @@ static int ar0144_calculate_pll(struct ar0144 *sensor,
 	unsigned long pix_clk;
 	unsigned long pix_target;
 	unsigned long diff, diff_old;
-	unsigned int lanes = sensor->info.num_lanes;
+	unsigned int lanes;
 	unsigned int div, mul, vt_sys_div, vt_pix_div;
 	unsigned int op_multiplier = 2;
 	unsigned int pix_clk_multiplier = 1;
 
-	if (sensor->info.bus_type == V4L2_MBUS_PARALLEL)
+	if (sensor->info.buscfg.type == V4L2_MBUS_PARALLEL) {
 		pix_target = link_freq;
-	else
+		lanes = 1;
+	} else {
+		lanes = sensor->info.buscfg.bus.mipi_csi2.num_data_lanes;
 		pix_target = ar0144_clk_mul_div(link_freq, 2 * lanes, bpp);
+	}
 
 	if (sensor->model->chip == AR0234)
 		pix_clk_multiplier = lanes;
@@ -3309,7 +3307,7 @@ static int ar0144_calculate_pll(struct ar0144 *sensor,
 		dev_dbg(dev, "%s op_sys_div: %d pll_div: %d pll_mul: %d\n",
 			__func__, pll->op_sys_div, div, mul);
 
-		if (sensor->info.bus_type == V4L2_MBUS_PARALLEL)
+		if (sensor->info.buscfg.type == V4L2_MBUS_PARALLEL)
 			pll->ser_freq = pix_clk;
 		else
 			pll->ser_freq = ar0144_clk_mul_div(pix_clk, bpp,
@@ -3369,6 +3367,7 @@ static int ar0144_setup_pll(struct ar0144 *sensor)
 static void ar0144_set_defaults(struct ar0144 *sensor)
 {
 	struct ar0144_model_data *data = sensor->model->data;
+	unsigned char bus_width;
 
 	sensor->crop.left = data->def_offset_x;
 	sensor->crop.top = data->def_offset_y;
@@ -3402,8 +3401,10 @@ static void ar0144_set_defaults(struct ar0144 *sensor)
 	}
 
 	/* In case of parallel bus data-shifting re-calculate num_fmts */
-	if (sensor->info.bus_type == V4L2_MBUS_PARALLEL)
-		sensor->num_fmts = bpp_to_index(sensor, sensor->info.bus_width) + 1;
+	if (sensor->info.buscfg.type == V4L2_MBUS_PARALLEL) {
+		bus_width = sensor->info.buscfg.bus.parallel.bus_width;
+		sensor->num_fmts = bpp_to_index(sensor, bus_width) + 1;
+	}
 
 	sensor->fmt.code = sensor->formats[sensor->num_fmts - 1].code;
 	sensor->bpp = sensor->formats[sensor->num_fmts - 1].bpp;
@@ -3469,33 +3470,31 @@ static int ar0144_parse_parallel_props(struct ar0144 *sensor,
 				       struct fwnode_handle *ep,
 				       struct v4l2_fwnode_endpoint *bus_cfg)
 {
+	struct v4l2_mbus_config_parallel *parallel_bus;
 	unsigned int tmp;
 
-	sensor->info.flags = bus_cfg->bus.parallel.flags;
-	sensor->info.bus_width = bus_cfg->bus.parallel.bus_width;
-	sensor->info.data_shift = bus_cfg->bus.parallel.data_shift;
-	/* Required for PLL calculation */
-	sensor->info.num_lanes = 1;
+	sensor->info.buscfg.bus.parallel = bus_cfg->bus.parallel;
+	parallel_bus = &sensor->info.buscfg.bus.parallel;
 
-	if (sensor->info.bus_width != 8 &&
-	    sensor->info.bus_width != 10 &&
-	    sensor->info.bus_width != 12) {
+	if (parallel_bus->bus_width != 8 &&
+	    parallel_bus->bus_width != 10 &&
+	    parallel_bus->bus_width != 12) {
 		dev_err(sensor->dev, "Wrong bus width configured");
 		return -EINVAL;
 	}
 
-	if (sensor->info.data_shift != 0 &&
-	    sensor->info.data_shift != 2 &&
-	    sensor->info.data_shift != 4) {
+	if (parallel_bus->data_shift != 0 &&
+	    parallel_bus->data_shift != 2 &&
+	    parallel_bus->data_shift != 4) {
 		dev_err(sensor->dev, "Wrong data shift configured");
 		return -EINVAL;
 	}
 
 	if ((sensor->model->chip == AR0144 &&
-	    sensor->info.bus_width + sensor->info.data_shift > 12) ||
+	    parallel_bus->bus_width + parallel_bus->data_shift > 12) ||
 	    (sensor->model->chip == AR0234 &&
-	    sensor->info.bus_width + sensor->info.data_shift > 10) ||
-	    (sensor->info.bus_width + sensor->info.data_shift < 8)) {
+	    parallel_bus->bus_width + parallel_bus->data_shift > 10) ||
+	    (parallel_bus->bus_width + parallel_bus->data_shift < 8)) {
 		dev_err(sensor->dev,
 		    "Wrong combined bus width configured for %s",
 		    sensor->model->chip == AR0234 ? "AR0234" : "AR0144");
@@ -3521,9 +3520,9 @@ static int ar0144_parse_mipi_props(struct ar0144 *sensor,
 	unsigned int tmp;
 	int i;
 
-	sensor->info.num_lanes = bus_cfg->bus.mipi_csi2.num_data_lanes;
-	if (sensor->info.num_lanes < 1 ||
-	    sensor->info.num_lanes > data->max_lanes) {
+	sensor->info.buscfg.bus.mipi_csi2 = bus_cfg->bus.mipi_csi2;
+	if (sensor->info.buscfg.bus.mipi_csi2.num_data_lanes < 1 ||
+	    sensor->info.buscfg.bus.mipi_csi2.num_data_lanes > data->max_lanes) {
 		dev_err(sensor->dev, "Wrong number of lanes configured");
 		return -EINVAL;
 	}
@@ -3614,7 +3613,7 @@ static int ar0144_of_probe(struct ar0144 *sensor)
 		goto out_put;
 	}
 
-	info->bus_type = bus_cfg.bus_type;
+	info->buscfg.type = bus_cfg.bus_type;
 
 	if (bus_cfg.nr_of_link_frequencies != 1) {
 		dev_err(dev, "Link frequency required\n");
@@ -3622,14 +3621,14 @@ static int ar0144_of_probe(struct ar0144 *sensor)
 		goto out_put;
 	}
 
-	if (info->bus_type == V4L2_MBUS_PARALLEL &&
+	if (info->buscfg.type == V4L2_MBUS_PARALLEL &&
 	    bus_cfg.link_frequencies[0] > data->max_parallel_link_freq) {
 		dev_err(dev, "Parallel Link frequency exceeds maximum\n");
 		ret = -EINVAL;
 		goto out_put;
 	}
 
-	if (info->bus_type == V4L2_MBUS_CSI2_DPHY &&
+	if (info->buscfg.type == V4L2_MBUS_CSI2_DPHY &&
 	    bus_cfg.link_frequencies[0] > data->max_mipi_link_freq) {
 		dev_err(dev, "MIPI Link frequency exceeds maximum\n");
 		ret = -EINVAL;
@@ -3638,7 +3637,7 @@ static int ar0144_of_probe(struct ar0144 *sensor)
 
 	info->target_link_frequency = bus_cfg.link_frequencies[0];
 
-	switch (info->bus_type) {
+	switch (info->buscfg.type) {
 	case V4L2_MBUS_PARALLEL:
 		ret = ar0144_parse_parallel_props(sensor, ep, &bus_cfg);
 		break;
@@ -3720,7 +3719,7 @@ static int ar0144_probe(struct i2c_client *i2c)
 	if (ret)
 		goto out_media;
 
-	if (sensor->info.bus_type == V4L2_MBUS_CSI2_DPHY)
+	if (sensor->info.buscfg.type == V4L2_MBUS_CSI2_DPHY)
 		ret = ar0144_init_mipi_sensor(sensor);
 	else
 		ret = ar0144_init_parallel_sensor(sensor);
