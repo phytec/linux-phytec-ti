@@ -24,10 +24,10 @@
 	status = "okay";
 
 	vm017_csi0: vm017-csi0@36 {
-		compatible = "onnn,ar0521";
+		compatible = "onsemi,ar0521";
 		reg = <0x36>;
 
-		clock-names = "extclk";
+		clock-names = "ext";
 		clocks = <&clk_cam_csi0>;
 
 		port {
