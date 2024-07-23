@@ -342,8 +342,6 @@ struct ar0144 {
 	unsigned int bpp;
 	unsigned int w_skip;
 	unsigned int h_skip;
-	unsigned int vblank;
-	unsigned int hblank;
 	unsigned int hlen;
 	unsigned int vlen;
 	bool embedded_data;
@@ -358,6 +356,7 @@ struct ar0144 {
 
 	struct v4l2_ctrl *exp_ctrl;
 	struct v4l2_ctrl *vblank_ctrl;
+	struct v4l2_ctrl *hblank_ctrl;
 	struct ar0144_gains gains;
 
 	struct vvcam_mode_info_s vvcam_mode;
@@ -1845,18 +1844,63 @@ out:
 	return ret;
 }
 
-static unsigned int ar0144_get_hlength(struct ar0144 *sensor)
+static void ar0144_update_blankings(struct ar0144 *sensor)
 {
-	return clamp_t(unsigned int, sensor->fmt.width + sensor->hblank,
-		       sensor->model->data->limits->hlen.min,
-		       sensor->model->data->limits->hlen.max);
-}
+	const struct ar0144_sensor_limits *limits = sensor->model->data->limits;
+	unsigned int width = sensor->fmt.width;
+	unsigned int height = sensor->fmt.height;
+	unsigned int hblank_min, hblank_max;
+	unsigned int vblank_min, vblank_max;
+	unsigned int hblank_value, hblank_default;
+	unsigned int vblank_value, vblank_default;
 
-static unsigned int ar0144_get_vlength(struct ar0144 *sensor)
-{
-	return clamp_t(unsigned int, sensor->fmt.height + sensor->vblank,
-		       sensor->model->data->limits->vlen.min,
-		       sensor->model->data->limits->vlen.max);
+	hblank_min = limits->hblank.min;
+	if (width + limits->hblank.min < limits->hlen.min)
+		hblank_min = limits->hlen.min - width;
+
+	vblank_min = limits->vblank.min;
+	if (height + limits->vblank.min < limits->vlen.min)
+		vblank_min = limits->vlen.min - height;
+
+	hblank_max = limits->hlen.max - width;
+	vblank_max = limits->vlen.max - height;
+
+	hblank_value = sensor->hblank_ctrl->cur.val;
+	hblank_default = sensor->hblank_ctrl->default_value;
+
+	vblank_value = sensor->vblank_ctrl->cur.val;
+	vblank_default = sensor->vblank_ctrl->default_value;
+
+	if (hblank_value < hblank_min)
+		__v4l2_ctrl_s_ctrl(sensor->hblank_ctrl, hblank_min);
+
+	if (hblank_value > hblank_max)
+		__v4l2_ctrl_s_ctrl(sensor->hblank_ctrl, hblank_max);
+
+	if (vblank_value < vblank_min)
+		__v4l2_ctrl_s_ctrl(sensor->vblank_ctrl, vblank_min);
+
+	if (vblank_value > vblank_max)
+		__v4l2_ctrl_s_ctrl(sensor->vblank_ctrl, vblank_max);
+
+	__v4l2_ctrl_modify_range(sensor->hblank_ctrl, hblank_min, hblank_max,
+				 sensor->hblank_ctrl->step,
+				 hblank_min);
+
+	__v4l2_ctrl_modify_range(sensor->vblank_ctrl, vblank_min, vblank_max,
+				 sensor->vblank_ctrl->step,
+				 vblank_min);
+
+
+	/*
+	 * If the previous value was equal the previous default value, readjust
+	 * the updated value to the new default value as well.
+	 */
+	if (hblank_value == hblank_default)
+		__v4l2_ctrl_s_ctrl(sensor->hblank_ctrl, hblank_min);
+
+	if (vblank_value == vblank_default)
+		__v4l2_ctrl_s_ctrl(sensor->vblank_ctrl, vblank_min);
 }
 
 static int ar0144_set_fmt(struct v4l2_subdev *sd,
@@ -1912,8 +1956,10 @@ static int ar0144_set_fmt(struct v4l2_subdev *sd,
 		sensor->bpp = sensor_format->bpp;
 		sensor->w_skip = w_skip;
 		sensor->h_skip = h_skip;
-		sensor->hlen = ar0144_get_hlength(sensor);
-		sensor->vlen = ar0144_get_vlength(sensor);
+
+		ar0144_update_blankings(sensor);
+		sensor->hlen = fmt->width + sensor->hblank_ctrl->cur.val;
+		sensor->vlen = fmt->height + sensor->vblank_ctrl->cur.val;
 	}
 
 	format->format = *fmt;
@@ -2249,6 +2295,8 @@ static int ar0144_set_digital_gain(struct ar0144 *sensor,
 static int ar0144_s_ctrl(struct v4l2_ctrl *ctrl)
 {
 	struct ar0144 *sensor = ctrl->priv;
+	unsigned int vlen_old;
+	unsigned int hlen_old;
 	int ret = 0;
 	u16 val;
 
@@ -2260,15 +2308,19 @@ static int ar0144_s_ctrl(struct v4l2_ctrl *ctrl)
 				break;
 		}
 
-		sensor->vblank = ctrl->val;
-		sensor->vlen = ar0144_get_vlength(sensor);
+		vlen_old = sensor->vlen;
+		sensor->vlen = sensor->fmt.height + ctrl->val;
 
 		if (sensor->is_streaming) {
 			ret = ar0144_config_frame(sensor);
-			if (ret)
+			if (ret) {
+				sensor->vlen = vlen_old;
 				break;
+			}
 
 			ret = ar0144_group_param_release(sensor);
+			if (ret)
+				sensor->vlen = vlen_old;
 		}
 
 		break;
@@ -2279,15 +2331,19 @@ static int ar0144_s_ctrl(struct v4l2_ctrl *ctrl)
 				break;
 		}
 
-		sensor->hblank = ctrl->val;
-		sensor->hlen = ar0144_get_hlength(sensor);
+		hlen_old = sensor->hlen;
+		sensor->hlen = sensor->fmt.width + ctrl->val;
 
 		if (sensor->is_streaming) {
 			ret = ar0144_config_frame(sensor);
-			if (ret)
+			if (ret) {
+				sensor->hlen = hlen_old;
 				break;
+			}
 
 			ret = ar0144_group_param_release(sensor);
+			if (ret)
+				sensor->hlen = hlen_old;
 		}
 
 		break;
@@ -2870,7 +2926,7 @@ static int ar0144_create_ctrls(struct ar0144 *sensor)
 			ctrl_cfg.def = data->def_height;
 			break;
 		case V4L2_CID_HBLANK:
-			ctrl_cfg.min = data->limits->hblank.min;
+			ctrl_cfg.min = data->limits->hlen.min - data->def_width;
 			ctrl_cfg.def = ctrl_cfg.min;
 			break;
 		case V4L2_CID_VBLANK:
@@ -2914,6 +2970,9 @@ static int ar0144_create_ctrls(struct ar0144 *sensor)
 			break;
 		case V4L2_CID_VBLANK:
 			sensor->vblank_ctrl = ctrl;
+			break;
+		case V4L2_CID_HBLANK:
+			sensor->hblank_ctrl = ctrl;
 			break;
 		case V4L2_CID_ANALOGUE_GAIN:
 			sensor->gains.ana_ctrl = ctrl;
@@ -3304,13 +3363,15 @@ static int ar0144_setup_pll(struct ar0144 *sensor)
 
 static void ar0144_set_defaults(struct ar0144 *sensor)
 {
-	sensor->crop.left = sensor->model->data->def_offset_x;
-	sensor->crop.top = sensor->model->data->def_offset_y;
-	sensor->crop.width = sensor->model->data->def_width;
-	sensor->crop.height = sensor->model->data->def_height;
+	struct ar0144_model_data *data = sensor->model->data;
 
-	sensor->fmt.width = sensor->model->data->def_width;
-	sensor->fmt.height = sensor->model->data->def_height;
+	sensor->crop.left = data->def_offset_x;
+	sensor->crop.top = data->def_offset_y;
+	sensor->crop.width = data->def_width;
+	sensor->crop.height = data->def_height;
+
+	sensor->fmt.width = data->def_width;
+	sensor->fmt.height = data->def_height;
 	sensor->fmt.field = V4L2_FIELD_NONE;
 	sensor->fmt.colorspace = V4L2_COLORSPACE_SRGB;
 
@@ -3340,10 +3401,8 @@ static void ar0144_set_defaults(struct ar0144 *sensor)
 
 	sensor->w_skip = 1;
 	sensor->h_skip = 1;
-	sensor->hblank = sensor->model->data->limits->hblank.min;
-	sensor->vblank = sensor->model->data->limits->vblank.min;
-	sensor->hlen = sensor->model->data->limits->hlen.min;
-	sensor->vlen = sensor->fmt.height + sensor->vblank;
+	sensor->hlen = data->limits->hlen.min;
+	sensor->vlen = sensor->fmt.height + data->limits->vblank.min;
 	sensor->gains.red = 1000;
 	sensor->gains.greenr = 1000;
 	sensor->gains.greenb = 1000;
