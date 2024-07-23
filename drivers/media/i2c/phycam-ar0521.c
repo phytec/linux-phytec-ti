@@ -251,8 +251,7 @@ struct ar0521_sensor_limits {
 };
 
 struct ar0521_businfo {
-	unsigned int num_lanes;
-	unsigned int flags;
+	struct v4l2_mbus_config_mipi_csi2 buscfg;
 	const s64 *link_freqs;
 
 	u16 t_hs_prep;
@@ -953,7 +952,7 @@ static int ar0521_config_mipi(struct ar0521 *sensor)
 
 	ret = ar0521_write(sensor, AR0521_SERIAL_FORMAT,
 			   BIT_TYPE(AR0521_TYPE_MIPI) |
-			   BIT_LANES(sensor->info.num_lanes));
+			   BIT_LANES(sensor->info.buscfg.num_data_lanes));
 	if (ret)
 		return ret;
 
@@ -1415,8 +1414,8 @@ static int ar0521_get_mbus_config(struct v4l2_subdev *sd, unsigned int pad,
 {
 	struct ar0521 *sensor = to_ar0521(sd);
 
-	cfg->flags = sensor->info.flags;
 	cfg->type = V4L2_MBUS_CSI2_DPHY;
+	cfg->bus.mipi_csi2 = sensor->info.buscfg;
 
 	return 0;
 }
@@ -1608,14 +1607,14 @@ static int ar0521_set_digital_gain(struct ar0521 *sensor,
 static int ar0521_s_ctrl(struct v4l2_ctrl *ctrl)
 {
 	struct ar0521 *sensor = ctrl->priv;
+	unsigned int vlen_old;
+	unsigned int hlen_old;
 	int ret = 0;
 	u16 val;
 	u16 mask;
 
 	switch (ctrl->id) {
 	case V4L2_CID_VBLANK:
-		unsigned int vlen_old;
-
 		if (sensor->is_streaming) {
 			ret = ar0521_group_param_hold(sensor);
 			if (ret)
@@ -1639,8 +1638,6 @@ static int ar0521_s_ctrl(struct v4l2_ctrl *ctrl)
 
 		break;
 	case V4L2_CID_HBLANK:
-		unsigned int hlen_old;
-
 		if (sensor->is_streaming) {
 			ret = ar0521_group_param_hold(sensor);
 			if (ret)
@@ -2631,21 +2628,7 @@ static int ar0521_parse_endpoint(struct device *dev, struct ar0521 *sensor,
 		return ret;
 	}
 
-	sensor->info.num_lanes = buscfg.bus.mipi_csi2.num_data_lanes;
-	sensor->info.flags = buscfg.bus.mipi_csi2.flags;
-	sensor->info.flags |= V4L2_MBUS_CSI2_CHANNEL_0;
-	switch (sensor->info.num_lanes) {
-	case 2:
-		sensor->info.flags |= V4L2_MBUS_CSI2_2_LANE;
-		break;
-	case 4:
-		sensor->info.flags |= V4L2_MBUS_CSI2_4_LANE;
-		break;
-	default:
-		dev_err(dev, "Wrong number of lanes configured");
-		ret = -EINVAL;
-		goto out;
-	}
+	sensor->info.buscfg = buscfg.bus.mipi_csi2;
 
 	if (buscfg.nr_of_link_frequencies != 1) {
 		dev_err(dev, "MIPI link frequency required\n");
@@ -2670,7 +2653,7 @@ static int ar0521_parse_endpoint(struct device *dev, struct ar0521 *sensor,
 		ret = ar0521_calculate_pll(dev, &sensor->pll[i], ext_freq,
 					   buscfg.link_frequencies[0],
 					   index_to_bpp(i),
-					   sensor->info.num_lanes);
+					   sensor->info.buscfg.num_data_lanes);
 		if (ret)
 			goto out;
 
@@ -2848,7 +2831,7 @@ out_media:
 	return ret;
 }
 
-static int ar0521_remove(struct i2c_client *i2c)
+static void ar0521_remove(struct i2c_client *i2c)
 {
 	struct v4l2_subdev *sd = i2c_get_clientdata(i2c);
 	struct ar0521 *sensor = to_ar0521(sd);
@@ -2860,8 +2843,6 @@ static int ar0521_remove(struct i2c_client *i2c)
 	v4l2_ctrl_handler_free(&sensor->ctrls);
 	media_entity_cleanup(&sd->entity);
 	mutex_destroy(&sensor->lock);
-
-	return 0;
 }
 
 static const struct i2c_device_id ar0521_id_table[] = {
