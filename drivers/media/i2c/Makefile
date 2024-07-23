@@ -107,6 +107,7 @@ obj-$(CONFIG_VIDEO_OV9650) += ov9650.o
 obj-$(CONFIG_VIDEO_OV9734) += ov9734.o
 obj-$(CONFIG_VIDEO_OX05B1S) += ox05b1s.o
 obj-$(CONFIG_VIDEO_AR0144) += ar0144.o
+obj-$(CONFIG_VIDEO_PHYCAM_AR0521) += phycam-ar0521.o
 obj-$(CONFIG_VIDEO_RDACM20) += rdacm20.o
 obj-$(CONFIG_VIDEO_RDACM21) += rdacm21.o
 obj-$(CONFIG_VIDEO_RJ54N1) += rj54n1cb0c.o
