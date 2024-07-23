@@ -1449,10 +1449,6 @@ static const struct v4l2_subdev_ops ar0521_subdev_ops = {
 	.pad			= &ar0521_subdev_pad_ops,
 };
 
-static const struct media_entity_operations ar0521_entity_ops = {
-	.get_fwnode_pad		= v4l2_subdev_get_fwnode_pad_1_to_1,
-};
-
 static int ar0521_set_analogue_gain(struct ar0521 *sensor, unsigned int val)
 {
 	unsigned int coarse, fine;
@@ -2799,7 +2795,6 @@ static int ar0521_probe(struct i2c_client *i2c,
 	sd->flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
 	sd->internal_ops = &ar0521_subdev_internal_ops;
 	sd->entity.function = MEDIA_ENT_F_CAM_SENSOR;
-	sd->entity.ops = &ar0521_entity_ops;
 
 	sensor->pad.flags = MEDIA_PAD_FL_SOURCE;
 	ret = media_entity_pads_init(&sd->entity, 1, &sensor->pad);
