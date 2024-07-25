@@ -333,7 +333,7 @@
 		reg = <0x20>;
 		gpio-controller;
 		#gpio-cells = <2>;
-		gpio-line-names = "HALF/nFULL_EN", "RS$485/nRS232_EN", "MCU_ETH_nRESET", "",
+		gpio-line-names = "HALF/nFULL_EN", "RS485/nRS232_EN", "MCU_ETH_nRESET", "",
 				"PCIe_nRESET", "USB2.0-Hub_nRESET", "USB3.0-Hub_nRESET", "PEB_AV_BL_EN";
 		interrupt-parent = <&main_gpio0>;
 		interrupts = <8 IRQ_TYPE_EDGE_FALLING>;
