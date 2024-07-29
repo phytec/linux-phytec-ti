@@ -512,7 +512,7 @@ static u32 *sii902x_bridge_atomic_get_input_bus_fmts(struct drm_bridge *bridge,
 	if (!input_fmts)
 		return NULL;
 
-	input_fmts[0] = MEDIA_BUS_FMT_RGB888_1X24;
+	input_fmts[0] = MEDIA_BUS_FMT_RGB565_1X16;
 	*num_input_fmts = 1;
 
 	return input_fmts;
