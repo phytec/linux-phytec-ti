@@ -437,6 +437,7 @@
 	i2c_som_rtc: rtc@68 {
 		compatible = "microcrystal,rv4162";
 		reg = <0x68>;
+		wakeup-source;
 	};
 };
 
