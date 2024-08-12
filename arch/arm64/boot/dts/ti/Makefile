@@ -31,7 +31,6 @@ dtb-$(CONFIG_ARCH_K3) += k3-am625-verdin-wifi-yavia.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am625-phyboard-lyra-1-4-ghz-opp.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62x-phyboard-lyra-gpio-fan.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62a7-sk-e3-max-opp.dtbo
-dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-x39-spi0.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-x17-spi0.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-vm016-mipi.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-oldi-lcd185.dtbo
@@ -215,8 +214,6 @@ k3-am625-phyboard-lyra-1-4-ghz-opp.dtbs := k3-am625-phyboard-lyra-rdk.dtb \
 	k3-am625-phyboard-lyra-1-4-ghz-opp.dtbo
 k3-am625-phyboard-lyra-gpio-fan-dtbs := k3-am625-phyboard-lyra-rdk.dtb \
 	k3-am62x-phyboard-lyra-gpio-fan.dtbo
-k3-am625-phyboard-lyra-x39-spi0-dtbs := k3-am625-phyboard-lyra-rdk.dtb \
-	k3-am62-phyboard-lyra-x39-spi0.dtbo
 k3-am625-phyboard-lyra-x17-spi0-dtbs := k3-am625-phyboard-lyra-rdk.dtb \
 	k3-am62-phyboard-lyra-x17-spi0.dtbo
 k3-am625-phyboard-lyra-vm016-mipi-dtbs := k3-am625-phyboard-lyra-rdk.dtb \
