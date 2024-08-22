@@ -29,6 +29,7 @@ dtb-$(CONFIG_ARCH_K3) += k3-am625-sk-rpi-hdr-ehrpwm.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am625-sk-mcspi-loopback.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-x39-spi0.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-x17-spi0.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-x17-evse.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-vm016-mipi.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-oldi-lcd185.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-gpio-fan.dtbo
