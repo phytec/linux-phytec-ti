@@ -38,25 +38,25 @@
 	transceiver1: can-phy1 {
 		compatible = "ti,tcan1043";
 		#phy-cells = <0>;
-		max-bitrate = <5000000>;
+		max-bitrate = <8000000>;
 	};
 
 	transceiver2: can-phy2 {
 		compatible = "ti,tcan1043";
 		#phy-cells = <0>;
-		max-bitrate = <5000000>;
+		max-bitrate = <8000000>;
 	};
 
 	transceiver3: can-phy3 {
 		compatible = "ti,tcan1043";
 		#phy-cells = <0>;
-		max-bitrate = <5000000>;
+		max-bitrate = <8000000>;
 	};
 
 	transceiver4: can-phy4 {
 		compatible = "ti,tcan1043";
 		#phy-cells = <0>;
-		max-bitrate = <5000000>;
+		max-bitrate = <8000000>;
 	};
 
 	vcc_12v0: regulator-12v0 {
