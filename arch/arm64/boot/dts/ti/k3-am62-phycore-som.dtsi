@@ -205,6 +205,13 @@
 	};
 };
 
+&a53_opp_table {
+	opp-1400000000 {
+		opp-hz = /bits/ 64 <1400000000>;
+		opp-supported-hw = <0x01 0x0004>;
+	};
+};
+
 &mcu_m4fss {
 	mboxes = <&mailbox0_cluster0 &mbox_m4_0>;
 	memory-region = <&mcu_m4fss_dma_memory_region>,
@@ -265,8 +272,8 @@
 		regulators {
 			vdd_core: buck1 {
 				regulator-name = "VDD_CORE";
-				regulator-min-microvolt = <750000>;
-				regulator-max-microvolt = <750000>;
+				regulator-min-microvolt = <850000>;
+				regulator-max-microvolt = <850000>;
 				regulator-boot-on;
 				regulator-always-on;
 			};
