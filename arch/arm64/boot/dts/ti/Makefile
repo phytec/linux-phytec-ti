@@ -96,6 +96,7 @@ dtb-$(CONFIG_ARCH_K3) += k3-am642-evm-sk-cpsw3g-pps.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am642-phyboard-electra-rdk.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am642-phyboard-electra-gpio-fan.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am642-phyboard-electra-pcie-usb2.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am642-phyboard-electra-peb-c-010.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am64-phyboard-electra-x27-uart3-spi1.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am642-sk.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am642-sk-pwm.dtbo
