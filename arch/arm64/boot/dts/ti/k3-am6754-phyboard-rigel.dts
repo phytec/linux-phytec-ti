@@ -452,8 +452,13 @@
 	status = "okay";
 };
 
+&usb0_phy_ctrl {
+	bootph-all;
+};
+
 &usb0 {
 	usb-role-switch;
+	bootph-all;
 
 	port {
 		typec_hs: endpoint {
