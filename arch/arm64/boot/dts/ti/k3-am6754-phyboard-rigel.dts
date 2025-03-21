@@ -457,7 +457,10 @@
 };
 
 &usb0 {
-	usb-role-switch;
+	dr_mode = "host";
+	maximum-speed = "super-speed";
+	phys = <&serdes0_usb_link>;
+	phy-names = "cdns3,usb3-phy";
 	bootph-all;
 
 	port {
@@ -469,7 +472,4 @@
 
 &usb1 {
 	dr_mode = "host";
-	pinctrl-names = "default";
-	phys = <&serdes0_usb_link>;
-	phy-names = "cdns3,usb3-phy";
 };
