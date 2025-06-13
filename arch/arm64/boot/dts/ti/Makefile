@@ -31,7 +31,6 @@ dtb-$(CONFIG_ARCH_K3) += k3-am625-verdin-wifi-mallow.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am625-verdin-wifi-yavia.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am62x-phyboard-lyra-gpio-fan.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62a7-sk-e3-max-opp.dtbo
-dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-x39-spi0.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-x17-spi0.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-x17-evse.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-vm016-mipi.dtbo
