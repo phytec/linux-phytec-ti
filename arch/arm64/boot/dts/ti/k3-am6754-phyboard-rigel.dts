@@ -114,6 +114,15 @@
 		regulator-boot-on;
 	};
 
+	vcc_3v3_sw: regulator-vcc-3v3-sw {
+		compatible = "regulator-fixed";
+		regulator-name = "VCC_3V3_SW";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+		regulator-boot-on;
+	};
+
 	vcc_speaker: regulator-vcc-speaker {
 		compatible = "regulator-fixed";
 		regulator-name = "VCC_SPEAKER";
@@ -437,6 +446,14 @@
 		compatible = "atmel,24c02";
 		reg = <0x51>;
 		pagesize = <16>;
+	};
+
+	i2c_mux: i2c-mux@77 {
+		compatible = "nxp,pca9547";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0x77>;
+		vdd-supply = <&vcc_3v3_sw>;
 	};
 };
 
