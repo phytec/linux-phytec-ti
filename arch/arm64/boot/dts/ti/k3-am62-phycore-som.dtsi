@@ -412,6 +412,10 @@
 	status = "okay";
 };
 
+&wkup_r5fss0 {
+	status = "okay";
+};
+
 &wkup_r5fss0_core0 {
 	mboxes = <&mailbox0_cluster0 &mbox_r5_0>;
 	memory-region = <&wkup_r5fss0_core0_dma_memory_region>,
