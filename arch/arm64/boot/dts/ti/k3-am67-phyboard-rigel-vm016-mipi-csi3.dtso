@@ -1,0 +1,68 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/*
+ * Copyright (C) 2025 PHYTEC America LLC
+ * Author: Nathan Morrisson <nmorrisson@phytec.com>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+
+&{/} {
+	clk_cam_csi3: clk-cam-csi3 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <27000000>;
+		status = "okay";
+	};
+};
+
+&i2c_mux {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	i2c@3 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <3>;
+
+		vm016_mipi_csi3: camera@10 {
+			compatible = "onsemi,ar0144";
+			reg = <0x10>;
+
+			clocks = <&clk_cam_csi3>;
+			clock-names = "ext";
+
+			port {
+				vm016_mipi_csi3_ep: endpoint {
+					remote-endpoint = <&csi2rx3_in_sensor>;
+					clock-lanes = <0>;
+					data-lanes = <1 2>;
+					clock-noncontinuous = <1>;
+					bus-type = <4>; /* MIPI_CSI2_DPHY */
+					link-frequencies = /bits/ 64 <222750000>;
+				};
+			};
+		};
+	};
+};
+
+&csi3_port0 {
+	status = "okay";
+
+	csi2rx3_in_sensor: endpoint {
+		remote-endpoint = <&vm016_mipi_csi3_ep>;
+		bus-type = <4>; /* CSI2 DPHY. */
+		clock-lanes = <0>;
+		data-lanes = <1 2>;
+	};
+};
+
+&dphy3 {
+	status = "okay";
+};
+
+&ti_csi2rx3 {
+	status = "okay";
+};
