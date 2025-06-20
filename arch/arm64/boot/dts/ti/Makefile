@@ -72,6 +72,7 @@ dtb-$(CONFIG_ARCH_K3) += k3-am62l3-evm-ecap-capture.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62l3-evm-m2-cc3351.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62l3-evm-nand.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62l3-evm-pwm.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am62l3-libra-rdk-fpsc.dtb
 
 # Boards with AM62Px SoC
 dtb-$(CONFIG_ARCH_K3) += k3-am62p5-sk.dtb
@@ -560,6 +561,7 @@ DTC_FLAGS_k3-am625-phyboard-lyra-rdk += -@
 DTC_FLAGS_k3-am62a7-phyboard-lyra-rdk += -@
 DTC_FLAGS_k3-am625-sk += -@
 DTC_FLAGS_k3-am62l3-evm += -@
+DTC_FLAGS_k3-am62l3-libra-rdk-fpsc += -@
 DTC_FLAGS_k3-am62-lp-sk += -@
 DTC_FLAGS_k3-am654-base-board += -@
 DTC_FLAGS_k3-am62x-sk-csi2-v3link-fusion += -@
