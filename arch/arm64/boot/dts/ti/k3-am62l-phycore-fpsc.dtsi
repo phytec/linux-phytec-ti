@@ -51,6 +51,17 @@
 		off-on-delay-us = <20000>;
 		bootph-all;
 	};
+
+	regulator-vpp-1v8 {
+		compatible = "regulator-fixed";
+		regulator-name = "VPP_1V8";
+		pinctrl-names = "default";
+		pinctrl-0 = <&vpp_1v8_pins_default>;
+		gpio = <&main_gpio0 13 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
 };
 
 &pmx0 {
@@ -112,6 +123,12 @@
 			AM62LX_IOPAD(0x0074, PIN_OUTPUT, 7) /* (C23) OSPI0_CSn3.GPIO0_14 */
 		>;
 		bootph-all;
+	};
+
+	vpp_1v8_pins_default: vpp-1v8-pins-default {
+		pinctrl-single,pins = <
+			AM62LX_IOPAD(0x0070, PIN_OUTPUT, 7) /* (D18) OSPI0_CSN2.GPIO0_13 */
+		>;
 	};
 
 	wkup_i2c0_pins_default: wkup-i2c0-default-pins {
