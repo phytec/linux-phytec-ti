@@ -354,6 +354,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_mmc1_pins_default>;
 	bootph-all;
+	no-1-8-v;
 	status = "okay";
 };
 
