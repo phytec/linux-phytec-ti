@@ -286,6 +286,7 @@
 				  "UART1_BT_RS_SEL", "UART1_RS232_485_SEL";
 		interrupt-parent = <&main_gpio0>;
 		interrupts = <32 IRQ_TYPE_EDGE_FALLING>;
+		vcc-supply = <&reg_vdd_3v3>;
 	};
 
 };
@@ -298,6 +299,7 @@
 	temperature-sensor@4f {
 		compatible = "nxp,p3t1755";
 		reg = <0x4f>;
+		vs-supply = <&reg_vdd_1v8>;
 	};
 };
 

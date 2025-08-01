@@ -180,6 +180,7 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&main_sn65dsi83_pins_default>;
 		enable-gpios = <&main_gpio0 1 GPIO_ACTIVE_HIGH>;
+		vcc-supply = <&buck2_reg>;
 		/* enabled in panel overlay */
 		status = "disabled";
 	};
@@ -249,6 +250,7 @@
 		compatible = "atmel,24c32";
 		pagesize = <32>;
 		reg = <0x50>;
+		vcc-supply = <&buck2_reg>;
 		bootph-all;
 	};
 
