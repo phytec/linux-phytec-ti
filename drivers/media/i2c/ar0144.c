@@ -3051,6 +3051,10 @@ static int ar0144_create_ctrls(struct ar0144 *sensor)
 	return 0;
 }
 
+static struct ar0144_register ar0144_mipi_regs[] = {
+	{.reg = 0x30b0, .val = 0x0028},
+};
+
 static struct ar0144_register ar0234_mipi_regs[] = {
 	{.reg = 0x30ba, .val = 0x0000},
 	{.reg = 0x3ed0, .val = 0xff44},
@@ -3070,6 +3074,8 @@ static struct ar0144_register ar0234_parallel_regs[] = {
 static int ar0144_init_mipi_sensor(struct ar0144 *sensor)
 {
 	struct ar0144_model_data *data = sensor->model->data;
+	struct ar0144_register *mipi_regs;
+	unsigned int num_regs;
 	int ret, i;
 	u16 val = 0;
 
@@ -3155,13 +3161,16 @@ static int ar0144_init_mipi_sensor(struct ar0144 *sensor)
 	if (ret)
 		return ret;
 
-	/* Following settings are only relevant for AR0234 sensor */
-	if (sensor->model->chip == AR0144)
-		return 0;
+	if (sensor->model->chip == AR0144) {
+		mipi_regs = ar0144_mipi_regs;
+		num_regs = ARRAY_SIZE(ar0144_mipi_regs);
+	} else {
+		mipi_regs = ar0234_mipi_regs;
+		num_regs = ARRAY_SIZE(ar0234_mipi_regs);
+	}
 
-	for (i = 0; i < ARRAY_SIZE(ar0234_mipi_regs); i++) {
-		ret = ar0144_write(sensor, ar0234_mipi_regs[i].reg,
-				   ar0234_mipi_regs[i].val);
+	for (i = 0; i < num_regs; i++) {
+		ret = ar0144_write(sensor, mipi_regs[i].reg, mipi_regs[i].val);
 		if (ret)
 			return ret;
 	}
