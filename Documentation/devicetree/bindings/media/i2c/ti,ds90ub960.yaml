@@ -60,6 +60,12 @@ properties:
         description:
           Enable manual strobe position and EQ level
 
+      ti,framesync:
+        type: boolean
+        description:
+          Enable FrameSync on back channel GPIOs. Requires bc_gpio to be
+          configured.
+
       ti,aeq-strobe-min:
         $ref: /schemas/types.yaml#/definitions/int32
         minimum: -7
