@@ -1,0 +1,99 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (C) 2025 PHYTEC Messtechnik GmbH
+ * Author: Steffen Hemer <s.hemer@phytec.de>
+ */
+
+&{/} {
+	clk_des_csi0: clk-cam-csi0 {
+		#clock-cells = <0>;
+		compatible = "fixed-clock";
+		clock-frequency = <24000000>;
+	};
+};
+
+&main_i2c4 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	clock-frequency = <100000>;
+	status = "okay";
+
+	ds90ub954_csi0: deserializer@3d {
+		compatible = "ti,ds90ub954-q1";
+		reg = <0x3d>;
+
+		clocks = <&clk_des_csi0>;
+		clock-names = "refclk";
+
+		i2c-alias-pool = <0x4a 0x4b 0x4c 0x4d 0x4e 0x4f>;
+
+		ports {
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+			port@0 {
+				reg = <0>;
+				des_csi0_port0_in: endpoint {};
+			};
+
+			port@1 {
+				reg = <1>;
+				des_csi0_port1_in: endpoint {};
+			};
+
+			port@2 {
+				reg = <2>;
+				des_csi0_out: endpoint {
+					remote-endpoint = <&csi2rx0_in_sensor>;
+					link-frequencies = /bits/ 64 <400000000>;
+					data-lanes = <1 2 3 4>;
+				};
+			};
+		};
+
+		links {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			ti,aeq-strobe-min = <0>;
+			ti,aeq-strobe-max = <3>;
+
+			des_csi0_port0_link: link@0 {
+				reg = <0>;
+				i2c-alias = <0x45>;
+
+				ti,strobe-base-delay = <6>;
+				ti,aeq-eq-min = <2>;
+				ti,aeq-eq-max = <14>;
+			};
+
+			des_csi0_port1_link: link@1 {
+				reg = <1>;
+				i2c-alias = <0x46>;
+
+				ti,strobe-base-delay = <6>;
+				ti,aeq-eq-min = <2>;
+				ti,aeq-eq-max = <14>;
+			};
+		};
+	};
+};
+
+&csi0_port0 {
+	status = "okay";
+
+	csi2rx0_in_sensor: endpoint {
+		remote-endpoint = <&des_csi0_out>;
+		bus-type = <4>; /* CSI2 DPHY. */
+		clock-lanes = <0>;
+		data-lanes = <1 2 3 4>;
+	};
+};
+
+&dphy_rx0 {
+	status = "okay";
+};
+
+&ti_csi2rx0 {
+	status = "okay";
+};
