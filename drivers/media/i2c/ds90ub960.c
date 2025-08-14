@@ -459,6 +459,7 @@ struct ub960_rxport {
 		bool manual_eq;
 
 		s8 strobe_pos;
+		u8 strobe_base_delay;
 
 		union {
 			struct {
@@ -1288,7 +1289,8 @@ static void ub960_clear_rx_errors(struct ub960_data *priv)
 }
 
 static int ub960_rxport_get_strobe_pos(struct ub960_data *priv,
-				       unsigned int nport, s8 *strobe_pos)
+				       unsigned int nport, s8 *strobe_pos,
+				       s8 *base_delay)
 {
 	u8 v;
 	u8 clk_delay, data_delay;
@@ -1297,23 +1299,21 @@ static int ub960_rxport_get_strobe_pos(struct ub960_data *priv,
 	ub960_read_ind(priv, UB960_IND_TARGET_RX_ANA(nport),
 		       UB960_IR_RX_ANA_STROBE_SET, &v);
 
-	clk_delay = (v & UB960_IR_RX_ANA_STROBE_SET_CLK_NO_EXTRA_DELAY) ?
-			    0 : UB960_MANUAL_STROBE_EXTRA_DELAY;
-
-	data_delay = (v & UB960_IR_RX_ANA_STROBE_SET_DATA_NO_EXTRA_DELAY) ?
-			     0 : UB960_MANUAL_STROBE_EXTRA_DELAY;
+	*base_delay = (v & UB960_IR_RX_ANA_STROBE_SET_CLK_NO_EXTRA_DELAY) &&
+		      (v & UB960_IR_RX_ANA_STROBE_SET_DATA_NO_EXTRA_DELAY) ?
+			0 : UB960_MANUAL_STROBE_EXTRA_DELAY;
 
 	ret = ub960_rxport_read(priv, nport, UB960_RR_SFILTER_STS_0, &v);
 	if (ret)
 		return ret;
 
-	clk_delay += v & UB960_RR_SFILTER_STS_0_SFILTER_CDLY_MASK;
+	clk_delay = v & UB960_RR_SFILTER_STS_0_SFILTER_CDLY_MASK;
 
 	ub960_rxport_read(priv, nport, UB960_RR_SFILTER_STS_1, &v);
 	if (ret)
 		return ret;
 
-	data_delay += v & UB960_RR_SFILTER_STS_1_SFILTER_DDLY_MASK;
+	data_delay = v & UB960_RR_SFILTER_STS_1_SFILTER_DDLY_MASK;
 
 	*strobe_pos = data_delay - clk_delay;
 
@@ -1321,27 +1321,19 @@ static int ub960_rxport_get_strobe_pos(struct ub960_data *priv,
 }
 
 static void ub960_rxport_set_strobe_pos(struct ub960_data *priv,
-					unsigned int nport, s8 strobe_pos)
+					unsigned int nport, s8 strobe_pos,
+					s8 base_delay)
 {
-	u8 clk_delay, data_delay;
-	u8 strobe_set;
+	u8 strobe_set = 0;
 
-	strobe_set = UB960_IR_RX_ANA_STROBE_SET_CLK_NO_EXTRA_DELAY |
-		     UB960_IR_RX_ANA_STROBE_SET_DATA_NO_EXTRA_DELAY;
+	if (base_delay == 0)
+		strobe_set = UB960_IR_RX_ANA_STROBE_SET_CLK_NO_EXTRA_DELAY |
+			     UB960_IR_RX_ANA_STROBE_SET_DATA_NO_EXTRA_DELAY;
 
-	if (strobe_pos < UB960_MIN_AEQ_STROBE_POS) {
-		clk_delay = abs(strobe_pos) - UB960_MANUAL_STROBE_EXTRA_DELAY;
-		strobe_set = clk_delay;
-	} else if (strobe_pos > UB960_MAX_AEQ_STROBE_POS) {
-		data_delay = strobe_pos - UB960_MANUAL_STROBE_EXTRA_DELAY;
-		strobe_set = data_delay << UB960_IR_RX_ANA_STROBE_SET_DATA_DELAY_SHIFT;
-	} else if (strobe_pos < 0) {
-		clk_delay = abs(strobe_pos);
-		strobe_set |= clk_delay;
-	} else if (strobe_pos > 0) {
-		data_delay = strobe_pos;
-		strobe_set |= data_delay << UB960_IR_RX_ANA_STROBE_SET_DATA_DELAY_SHIFT;
-	}
+	if (strobe_pos < 0)
+		strobe_set |= abs(strobe_pos);
+	else if (strobe_pos > 0)
+		strobe_set |= strobe_pos << UB960_IR_RX_ANA_STROBE_SET_DATA_DELAY_SHIFT;
 
 	ub960_write_ind(priv, UB960_IND_TARGET_RX_ANA(nport),
 			UB960_IR_RX_ANA_STROBE_SET, strobe_set);
@@ -1437,10 +1429,8 @@ static void ub960_rxport_config_eq(struct ub960_data *priv, unsigned int nport)
 
 	/* The rest are port specific */
 
-	if (priv->strobe.manual)
-		ub960_rxport_set_strobe_pos(priv, nport, rxport->eq.strobe_pos);
-	else if (!priv->hw_data->ignore_strobe_pos)
-		ub960_rxport_set_strobe_pos(priv, nport, 0);
+	ub960_rxport_set_strobe_pos(priv, nport, rxport->eq.strobe_pos,
+				    rxport->eq.strobe_base_delay);
 
 	if (rxport->eq.manual_eq) {
 		ub960_rxport_set_eq_level(priv, nport,
@@ -1592,7 +1582,8 @@ static int ub960_rxport_wait_locks(struct ub960_data *priv,
 	dev_dbg(dev, "Wait locks done in %u loops\n", loops);
 	for_each_set_bit(nport, &port_mask, priv->hw_data->num_rxports) {
 		struct ub960_rxport *rxport = priv->rxports[nport];
-		s8 strobe_pos, eq_level;
+		s8 strobe_pos;
+		u8 eq_level, strobe_base_delay;
 		u16 v;
 
 		if (!rxport)
@@ -1605,7 +1596,7 @@ static int ub960_rxport_wait_locks(struct ub960_data *priv,
 
 		ub960_rxport_read16(priv, nport, UB960_RR_RX_FREQ_HIGH, &v);
 
-		ret = ub960_rxport_get_strobe_pos(priv, nport, &strobe_pos);
+		ret = ub960_rxport_get_strobe_pos(priv, nport, &strobe_pos, &strobe_base_delay);
 		if (ret)
 			return ret;
 
@@ -1613,8 +1604,8 @@ static int ub960_rxport_wait_locks(struct ub960_data *priv,
 		if (ret)
 			return ret;
 
-		dev_dbg(dev, "\trx%u: locked, SP: %d, EQ: %u, freq %llu Hz\n",
-			nport, strobe_pos, eq_level, (v * 1000000ULL) >> 8);
+		dev_dbg(dev, "\trx%u: locked, SP: %d (BD: %u), EQ: %u, freq %llu Hz\n",
+			nport, strobe_pos, strobe_base_delay, eq_level, (v * 1000000ULL) >> 8);
 	}
 
 	return 0;
@@ -3128,7 +3119,7 @@ static int ub960_log_status(struct v4l2_subdev *sd)
 
 	for (nport = 0; nport < priv->hw_data->num_rxports; nport++) {
 		struct ub960_rxport *rxport = priv->rxports[nport];
-		u8 eq_level;
+		u8 eq_level, strobe_base_delay;
 		s8 strobe_pos;
 		unsigned int i;
 
@@ -3181,9 +3172,9 @@ static int ub960_log_status(struct v4l2_subdev *sd)
 				 ((v >> UB960_XR_SFILTER_CFG_SFILTER_MAX_SHIFT) & 0xf) - 7);
 		}
 
-		ub960_rxport_get_strobe_pos(priv, nport, &strobe_pos);
+		ub960_rxport_get_strobe_pos(priv, nport, &strobe_pos, &strobe_base_delay);
 
-		dev_info(dev, "\tStrobe pos %d\n", strobe_pos);
+		dev_info(dev, "\tStrobe pos %d (base delay: %u)\n", strobe_pos, strobe_base_delay);
 
 		/* EQ */
 
@@ -3367,6 +3358,7 @@ ub960_parse_dt_rxport_link_properties(struct ub960_data *priv,
 	u32 rx_mode;
 	u32 cdr_mode;
 	s32 strobe_pos;
+	u32 strobe_base_delay;
 	u32 eq_level;
 	u32 ser_i2c_alias;
 	u32 bc_gpio;
@@ -3423,6 +3415,8 @@ ub960_parse_dt_rxport_link_properties(struct ub960_data *priv,
 	rxport->eq.manual_eq = false;
 	rxport->eq.aeq.eq_level_min = UB960_MIN_EQ_LEVEL;
 	rxport->eq.aeq.eq_level_max = UB960_MAX_EQ_LEVEL;
+	rxport->eq.strobe_pos = 0;
+	rxport->eq.strobe_base_delay = 0;
 
 	ret = fwnode_property_read_u32(link_fwnode, "ti,strobe-pos",
 				       &strobe_pos);
@@ -3440,12 +3434,44 @@ ub960_parse_dt_rxport_link_properties(struct ub960_data *priv,
 			return -EINVAL;
 		}
 
-		/* NOTE: ignored unless global manual strobe pos is also set */
-		rxport->eq.strobe_pos = strobe_pos;
+		if (strobe_pos < UB960_MIN_AEQ_STROBE_POS) {
+			rxport->eq.strobe_pos = strobe_pos + UB960_MANUAL_STROBE_EXTRA_DELAY;
+			rxport->eq.strobe_base_delay = UB960_MANUAL_STROBE_EXTRA_DELAY;
+		} else if (strobe_pos > UB960_MAX_AEQ_STROBE_POS) {
+			rxport->eq.strobe_pos = strobe_pos - UB960_MANUAL_STROBE_EXTRA_DELAY;
+			rxport->eq.strobe_base_delay = UB960_MANUAL_STROBE_EXTRA_DELAY;
+		} else {
+			rxport->eq.strobe_pos = strobe_pos;
+		}
+
+		/* NOTE: strobe_pos is ignored unless global manual strobe pos is also set */
 		if (!priv->strobe.manual)
 			dev_warn(dev,
 				 "rx%u: 'ti,strobe-pos' ignored as 'ti,manual-strobe' not set\n",
 				 nport);
+	}
+
+	ret = fwnode_property_read_u32(link_fwnode, "ti,strobe-base-delay",
+				       &strobe_base_delay);
+	if (ret) {
+		if (ret != -EINVAL) {
+			dev_err(dev, "rx%u: failed to read '%s': %d\n", nport,
+				"ti,strobe-base-delay", ret);
+			return ret;
+		}
+	} else {
+		if (strobe_base_delay != UB960_MANUAL_STROBE_EXTRA_DELAY &&
+		    strobe_base_delay != 0) {
+			dev_err(dev, "rx%u: illegal 'strobe-base-delay' value: %d\n",
+				nport, strobe_base_delay);
+			return -EINVAL;
+		}
+
+		if (rxport->eq.strobe_base_delay)
+			dev_warn(dev, "rx%u: base delay already set by '%s', ignoring '%s'",
+				 nport, "ti,strobe-pos", "ti,strobe-base-delay");
+		else
+			rxport->eq.strobe_base_delay = strobe_base_delay;
 	}
 
 	ret = fwnode_property_read_u32(link_fwnode, "ti,eq-level", &eq_level);
