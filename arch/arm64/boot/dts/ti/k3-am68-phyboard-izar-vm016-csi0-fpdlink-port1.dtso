@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (C) 2025 PHYTEC Messtechnik GmbH
+ * Author: Steffen Hemer <s.hemer@phytec.de>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include "k3-am68-phyboard-izar-csi0-fpdlink-port1.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+
+&i2c_csi0_port1 {
+	camera@10 {
+		#address-cells = <0x1>;
+		#size-cells = <0x0>;
+
+		compatible = "onsemi,ar0144";
+		reg = <0x10>;
+		clocks = <&ser_csi0_port1>;
+		clock-names = "ext";
+		isp-bus-info = "csi0";
+
+		assigned-clocks = <&ser_csi0_port1>;
+		assigned-clock-rates = <26666666>;
+
+		reset-gpios = <&ser_csi0_port1 3 GPIO_ACTIVE_LOW>;
+		onsemi,reset-delay-ms = <100>;
+
+		port@0 {
+			reg = <0>;
+
+			vm016_csi0_port1_ep: endpoint {
+				remote-endpoint = <&ser_csi0_port1_in>;
+				bus-type = <4>; /* MIPI CSI-2 D-PHY */
+				link-frequencies = /bits/ 64 <222750000>;
+				data-lanes = <1 2>;
+				clock-lanes = <0>;
+				clock-noncontinuous = <1>;
+				onsemi,t-hs-prep = <1>;
+				onsemi,t-clk-post = <9>;
+			};
+		};
+	};
+
+	eeprom@56 {
+		compatible = "atmel,24c02";
+		reg = <0x56>;
+		pagesize = <16>;
+	};
+};
+
+&ser_csi0_port1_in {
+	remote-endpoint = <&vm016_csi0_port1_ep>;
+	data-lanes = <1 2>;
+};
