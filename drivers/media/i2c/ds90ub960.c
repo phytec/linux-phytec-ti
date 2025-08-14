@@ -195,6 +195,8 @@
 	 UB960_RR_BCC_STATUS_SLAVE_TO | UB960_RR_BCC_STATUS_RESP_ERR)
 
 #define UB960_RR_FPD3_CAP			0x4a
+#define UB960_RR_FPD3_CAP_FPD3_ENC_CRC_CAP	BIT(3)
+
 #define UB960_RR_RAW_EMBED_DTYPE		0x4b
 #define UB960_RR_RAW_EMBED_DTYPE_LINES_SHIFT	6
 
@@ -310,6 +312,8 @@
 #define UB960_SR_MODE_IDX_STS			0xb8
 #define UB960_SR_LINK_ERROR_COUNT		0xb9
 #define UB960_SR_FPD3_ENC_CTL			0xba
+#define UB960_SR_FPD3_ENC_CTL_FPD3_ENC_CRC_DIS	BIT(7)
+
 #define UB960_SR_FV_MIN_TIME			0xbc
 #define UB960_SR_GPIO_PD_CTL			0xbe
 
@@ -1907,6 +1911,12 @@ static void ub960_init_rx_port_ub960(struct ub960_data *priv,
 
 		break;
 	}
+	/* Enable FPD3 encoder link enhanced CRC check */
+	ub960_rxport_update_bits(priv, nport, UB960_RR_FPD3_CAP,
+				 UB960_RR_FPD3_CAP_FPD3_ENC_CRC_CAP,
+				 UB960_RR_FPD3_CAP_FPD3_ENC_CRC_CAP);
+	ub960_rxport_update_bits(priv, nport, UB960_SR_FPD3_ENC_CTL,
+				 UB960_SR_FPD3_ENC_CTL_FPD3_ENC_CRC_DIS, 0);
 
 	/* LV_POLARITY & FV_POLARITY */
 	ub960_rxport_update_bits(priv, nport, UB960_RR_PORT_CONFIG2, 0x3,
