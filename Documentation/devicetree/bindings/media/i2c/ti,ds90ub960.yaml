@@ -144,6 +144,16 @@ properties:
               pin input data on up to four available slots to send on
               the back channel per each remote serializer connection.
 
+          ti,aeq-eq-min:
+            $ref: /schemas/types.yaml#/definitions/uint32
+            maximum: 14
+            description: AEQ min EQ level
+
+          ti,aeq-eq-max:
+            $ref: /schemas/types.yaml#/definitions/uint32
+            maximum: 14
+            description: AEQ max EQ level
+
           serializer:
             type: object
             description: FPD-Link Serializer node
