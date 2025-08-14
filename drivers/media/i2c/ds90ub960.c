@@ -323,6 +323,7 @@
 
 #define UB960_RR_AEQ_STATUS			0xd3
 #define UB960_RR_AEQ_STATUS_STATUS_2		GENMASK(5, 3)
+#define UB960_RR_AEQ_STATUS_STATUS_2_SHIFT	3
 #define UB960_RR_AEQ_STATUS_STATUS_1		GENMASK(2, 0)
 
 #define UB960_RR_AEQ_BYPASS			0xd4
@@ -1369,7 +1370,7 @@ static int ub960_rxport_get_eq_level(struct ub960_data *priv,
 		return ret;
 
 	*eq_level = (v & UB960_RR_AEQ_STATUS_STATUS_1) +
-		    (v & UB960_RR_AEQ_STATUS_STATUS_2);
+		    ((v & UB960_RR_AEQ_STATUS_STATUS_2) >> UB960_RR_AEQ_STATUS_STATUS_2_SHIFT);
 
 	return 0;
 }
