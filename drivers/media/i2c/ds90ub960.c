@@ -605,10 +605,15 @@ static const struct ub960_format_info ub960_formats[] = {
 	{ .code	= MEDIA_BUS_FMT_SGRBG8_1X8, .bpp = 8, .datatype = MIPI_CSI2_DT_RAW8, },
 	{ .code	= MEDIA_BUS_FMT_SGBRG8_1X8, .bpp = 8, .datatype = MIPI_CSI2_DT_RAW8, },
 	{ .code	= MEDIA_BUS_FMT_SBGGR8_1X8, .bpp = 8, .datatype = MIPI_CSI2_DT_RAW8, },
+
 	{ .code	= MEDIA_BUS_FMT_SRGGB10_1X10, .bpp = 10, .datatype = MIPI_CSI2_DT_RAW10, },
 	{ .code	= MEDIA_BUS_FMT_SGRBG10_1X10, .bpp = 10, .datatype = MIPI_CSI2_DT_RAW10, },
 	{ .code	= MEDIA_BUS_FMT_SGBRG10_1X10, .bpp = 10, .datatype = MIPI_CSI2_DT_RAW10, },
 	{ .code	= MEDIA_BUS_FMT_SBGGR10_1X10, .bpp = 10, .datatype = MIPI_CSI2_DT_RAW10, },
+
+	{ .code = MEDIA_BUS_FMT_Y12_1X12, .bpp = 12, .datatype = MIPI_CSI2_DT_RAW12, },
+	{ .code = MEDIA_BUS_FMT_Y10_1X10, .bpp = 10, .datatype = MIPI_CSI2_DT_RAW10, },
+	{ .code = MEDIA_BUS_FMT_Y8_1X8, .bpp = 8, .datatype = MIPI_CSI2_DT_RAW8, },
 };
 
 static const struct ub960_format_info *ub960_find_format(u32 code)
