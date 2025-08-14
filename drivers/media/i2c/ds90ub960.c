@@ -4074,7 +4074,10 @@ static int ub960_probe(struct i2c_client *client)
 	 */
 	priv->reg_current.indirect_target = 0xff;
 	priv->reg_current.rxport = 0xff;
-	priv->reg_current.txport = 0xff;
+	if (priv->hw_data->num_txports == 1)
+		priv->reg_current.txport = 0;
+	else
+		priv->reg_current.txport = 0xff;
 
 	priv->interval.numerator = 1;
 	priv->interval.denominator = 30;
