@@ -338,7 +338,9 @@
 #define UB960_RR_AEQ_MIN_MAX_AEQ_FLOOR_SHIFT	0
 
 #define UB960_RR_SFILTER_STS_0			0xd6
+#define UB960_RR_SFILTER_STS_0_SFILTER_CDLY_MASK	GENMASK(2, 0)
 #define UB960_RR_SFILTER_STS_1			0xd7
+#define UB960_RR_SFILTER_STS_1_SFILTER_DDLY_MASK	GENMASK(2, 0)
 #define UB960_RR_PORT_ICR_HI			0xd8
 #define UB960_RR_PORT_ICR_LO			0xd9
 #define UB960_RR_PORT_ISR_HI			0xda
@@ -382,13 +384,11 @@
 #define UB960_IR_PGEN_VFP			0x0f
 #define UB960_IR_PGEN_COLOR(n)			(0x10 + (n)) /* n < 15 */
 
-#define UB960_IR_RX_ANA_STROBE_SET_CLK		0x08
+#define UB960_IR_RX_ANA_STROBE_SET		0x08
 #define UB960_IR_RX_ANA_STROBE_SET_CLK_NO_EXTRA_DELAY	BIT(3)
-#define UB960_IR_RX_ANA_STROBE_SET_CLK_DELAY_MASK	GENMASK(2, 0)
-
-#define UB960_IR_RX_ANA_STROBE_SET_DATA		0x09
-#define UB960_IR_RX_ANA_STROBE_SET_DATA_NO_EXTRA_DELAY	BIT(3)
-#define UB960_IR_RX_ANA_STROBE_SET_DATA_DELAY_MASK	GENMASK(2, 0)
+#define UB960_IR_RX_ANA_STROBE_SET_CLK_DELAY_SHIFT	0
+#define UB960_IR_RX_ANA_STROBE_SET_DATA_NO_EXTRA_DELAY	BIT(7)
+#define UB960_IR_RX_ANA_STROBE_SET_DATA_DELAY_SHIFT	4
 
 /* EQ related */
 
@@ -1295,13 +1295,10 @@ static int ub960_rxport_get_strobe_pos(struct ub960_data *priv,
 	int ret;
 
 	ub960_read_ind(priv, UB960_IND_TARGET_RX_ANA(nport),
-		       UB960_IR_RX_ANA_STROBE_SET_CLK, &v);
+		       UB960_IR_RX_ANA_STROBE_SET, &v);
 
 	clk_delay = (v & UB960_IR_RX_ANA_STROBE_SET_CLK_NO_EXTRA_DELAY) ?
 			    0 : UB960_MANUAL_STROBE_EXTRA_DELAY;
-
-	ub960_read_ind(priv, UB960_IND_TARGET_RX_ANA(nport),
-		       UB960_IR_RX_ANA_STROBE_SET_DATA, &v);
 
 	data_delay = (v & UB960_IR_RX_ANA_STROBE_SET_DATA_NO_EXTRA_DELAY) ?
 			     0 : UB960_MANUAL_STROBE_EXTRA_DELAY;
@@ -1310,13 +1307,13 @@ static int ub960_rxport_get_strobe_pos(struct ub960_data *priv,
 	if (ret)
 		return ret;
 
-	clk_delay += v & UB960_IR_RX_ANA_STROBE_SET_CLK_DELAY_MASK;
+	clk_delay += v & UB960_RR_SFILTER_STS_0_SFILTER_CDLY_MASK;
 
 	ub960_rxport_read(priv, nport, UB960_RR_SFILTER_STS_1, &v);
 	if (ret)
 		return ret;
 
-	data_delay += v & UB960_IR_RX_ANA_STROBE_SET_DATA_DELAY_MASK;
+	data_delay += v & UB960_RR_SFILTER_STS_1_SFILTER_DDLY_MASK;
 
 	*strobe_pos = data_delay - clk_delay;
 
@@ -1327,24 +1324,27 @@ static void ub960_rxport_set_strobe_pos(struct ub960_data *priv,
 					unsigned int nport, s8 strobe_pos)
 {
 	u8 clk_delay, data_delay;
+	u8 strobe_set;
 
-	clk_delay = UB960_IR_RX_ANA_STROBE_SET_CLK_NO_EXTRA_DELAY;
-	data_delay = UB960_IR_RX_ANA_STROBE_SET_DATA_NO_EXTRA_DELAY;
+	strobe_set = UB960_IR_RX_ANA_STROBE_SET_CLK_NO_EXTRA_DELAY |
+		     UB960_IR_RX_ANA_STROBE_SET_DATA_NO_EXTRA_DELAY;
 
-	if (strobe_pos < UB960_MIN_AEQ_STROBE_POS)
+	if (strobe_pos < UB960_MIN_AEQ_STROBE_POS) {
 		clk_delay = abs(strobe_pos) - UB960_MANUAL_STROBE_EXTRA_DELAY;
-	else if (strobe_pos > UB960_MAX_AEQ_STROBE_POS)
+		strobe_set = clk_delay;
+	} else if (strobe_pos > UB960_MAX_AEQ_STROBE_POS) {
 		data_delay = strobe_pos - UB960_MANUAL_STROBE_EXTRA_DELAY;
-	else if (strobe_pos < 0)
-		clk_delay = abs(strobe_pos) | UB960_IR_RX_ANA_STROBE_SET_CLK_NO_EXTRA_DELAY;
-	else if (strobe_pos > 0)
-		data_delay = strobe_pos | UB960_IR_RX_ANA_STROBE_SET_DATA_NO_EXTRA_DELAY;
+		strobe_set = data_delay << UB960_IR_RX_ANA_STROBE_SET_DATA_DELAY_SHIFT;
+	} else if (strobe_pos < 0) {
+		clk_delay = abs(strobe_pos);
+		strobe_set |= clk_delay;
+	} else if (strobe_pos > 0) {
+		data_delay = strobe_pos;
+		strobe_set |= data_delay << UB960_IR_RX_ANA_STROBE_SET_DATA_DELAY_SHIFT;
+	}
 
 	ub960_write_ind(priv, UB960_IND_TARGET_RX_ANA(nport),
-			UB960_IR_RX_ANA_STROBE_SET_CLK, clk_delay);
-
-	ub960_write_ind(priv, UB960_IND_TARGET_RX_ANA(nport),
-			UB960_IR_RX_ANA_STROBE_SET_DATA, data_delay);
+			UB960_IR_RX_ANA_STROBE_SET, strobe_set);
 }
 
 static void ub960_rxport_set_strobe_range(struct ub960_data *priv,
