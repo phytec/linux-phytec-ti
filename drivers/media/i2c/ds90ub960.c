@@ -319,6 +319,7 @@
 #define UB960_RR_PORT_DEBUG			0xd0
 #define UB960_RR_AEQ_CTL2			0xd2
 #define UB960_RR_AEQ_CTL2_SET_AEQ_FLOOR		BIT(2)
+#define UB960_RR_AEQ_CTL2_AEQ_RESTART		BIT(3)
 
 #define UB960_RR_AEQ_STATUS			0xd3
 #define UB960_RR_AEQ_STATUS_STATUS_2		GENMASK(5, 3)
@@ -1457,6 +1458,10 @@ static void ub960_rxport_config_eq(struct ub960_data *priv, unsigned int nport)
 		ub960_rxport_update_bits(priv, nport, UB960_RR_AEQ_BYPASS,
 					 UB960_RR_AEQ_BYPASS_ENABLE, 0);
 	}
+
+	ub960_rxport_update_bits(priv, nport, UB960_RR_AEQ_CTL2,
+				 UB960_RR_AEQ_CTL2_AEQ_RESTART,
+				 UB960_RR_AEQ_CTL2_AEQ_RESTART);
 }
 
 static int ub960_rxport_link_ok(struct ub960_data *priv, unsigned int nport,
