@@ -480,6 +480,7 @@ struct ub960_rxport {
 	const struct i2c_client *aliased_clients[UB960_MAX_PORT_ALIASES];
 
 	u32 bc_gpio;
+	bool enable_bc_gpio;
 };
 
 struct ub960_asd {
@@ -1945,9 +1946,10 @@ static void ub960_init_rx_port_ub960(struct ub960_data *priv,
 	ub960_rxport_config_eq(priv, nport);
 
 	/* Back channel GPIOx Select FrameSync signal */
-	ub960_rxport_write(priv, nport,
-			   UB960_RR_BC_GPIO_CTL(rxport->bc_gpio / 2),
-			   (rxport->bc_gpio & BIT(0)) ? 0xa0 : 0x0a);
+	if (rxport->enable_bc_gpio)
+		ub960_rxport_write(priv, nport,
+				   UB960_RR_BC_GPIO_CTL(rxport->bc_gpio / 2),
+				   (rxport->bc_gpio & BIT(0)) ? 0xa0 : 0x0a);
 
 	/* Enable RX port */
 	ub960_update_bits(priv, UB960_SR_RX_PORT_CTL, BIT(nport), BIT(nport));
@@ -3435,6 +3437,8 @@ ub960_parse_dt_rxport_link_properties(struct ub960_data *priv,
 	rxport->eq.aeq.eq_level_max = UB960_MAX_EQ_LEVEL;
 	rxport->eq.strobe_pos = 0;
 	rxport->eq.strobe_base_delay = 0;
+	rxport->bc_gpio = 0;
+	rxport->enable_bc_gpio = false;
 
 	ret = fwnode_property_read_u32(link_fwnode, "ti,strobe-pos",
 				       &strobe_pos);
@@ -3555,11 +3559,15 @@ ub960_parse_dt_rxport_link_properties(struct ub960_data *priv,
 
 	ret = fwnode_property_read_u32(link_fwnode, "ti,bc-gpio", &bc_gpio);
 	if (ret) {
-		dev_err(dev, "rx%u: failed to read '%s': %d\n", nport,
-			"ti,bc-gpio", ret);
-		return ret;
+		if (ret != -EINVAL) {
+			dev_err(dev, "rx%u: failed to read '%s': %d\n", nport,
+				"ti,bc-gpio", ret);
+			return ret;
+		}
+	} else {
+		rxport->bc_gpio = bc_gpio;
+		rxport->enable_bc_gpio = true;
 	}
-	rxport->bc_gpio = bc_gpio;
 
 	rxport->ser.fwnode = fwnode_get_named_child_node(link_fwnode, "serializer");
 	if (!rxport->ser.fwnode) {
