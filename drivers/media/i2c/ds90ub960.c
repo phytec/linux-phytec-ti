@@ -3492,6 +3492,40 @@ ub960_parse_dt_rxport_link_properties(struct ub960_data *priv,
 		rxport->eq.manual.eq_level = eq_level;
 	}
 
+	ret = fwnode_property_read_u32(link_fwnode, "ti,aeq-eq-min", &eq_level);
+	if (ret) {
+		if (ret != -EINVAL) {
+			dev_err(dev, "rx%u: failed to read '%s': %d\n", nport,
+				"ti,aeq-eq-min", ret);
+			return ret;
+		}
+	} else {
+		if (eq_level > UB960_MAX_EQ_LEVEL) {
+			dev_err(dev, "rx%u: illegal 'ti,aeq-eq-min' value: %d\n",
+				nport, eq_level);
+			return -EINVAL;
+		}
+
+		rxport->eq.aeq.eq_level_min = eq_level;
+	}
+
+	ret = fwnode_property_read_u32(link_fwnode, "ti,aeq-eq-max", &eq_level);
+	if (ret) {
+		if (ret != -EINVAL) {
+			dev_err(dev, "rx%u: failed to read '%s': %d\n", nport,
+				"ti,aeq-eq-max", ret);
+			return ret;
+		}
+	} else {
+		if (eq_level > UB960_MAX_EQ_LEVEL) {
+			dev_err(dev, "rx%u: illegal 'ti,aeq-eq-max' value: %d\n",
+				nport, eq_level);
+			return -EINVAL;
+		}
+
+		rxport->eq.aeq.eq_level_max = eq_level;
+	}
+
 	ret = fwnode_property_read_u32(link_fwnode, "i2c-alias",
 				       &ser_i2c_alias);
 	if (ret) {
@@ -3648,6 +3682,7 @@ static int ub960_parse_dt_rxports(struct ub960_data *priv)
 	struct device *dev = &priv->client->dev;
 	struct fwnode_handle *links_fwnode;
 	unsigned int nport;
+	s32 strobe_min, strobe_max;
 	int ret;
 
 	links_fwnode = fwnode_get_named_child_node(dev_fwnode(dev), "links");
@@ -3657,10 +3692,32 @@ static int ub960_parse_dt_rxports(struct ub960_data *priv)
 	}
 
 	/* Defaults, recommended by TI */
-	priv->strobe.min = 2;
-	priv->strobe.max = 3;
+	strobe_min = 2;
+	strobe_max = 3;
 
 	priv->strobe.manual = fwnode_property_read_bool(links_fwnode, "ti,manual-strobe");
+
+	ret = fwnode_property_read_u32(links_fwnode, "ti,aeq-strobe-min", &strobe_min);
+	if (ret && ret != -EINVAL)
+		return dev_err_probe(dev, ret, "failed to read '%s': %d\n",
+				     "ti,aeq-strobe-min", ret);
+
+	ret = fwnode_property_read_u32(links_fwnode, "ti,aeq-strobe-max", &strobe_max);
+	if (ret && ret != -EINVAL) {
+		dev_err(dev, "failed to read '%s': %d\n", "ti,aeq-strobe-max", ret);
+		return -EINVAL;
+	}
+
+	if (strobe_min < UB960_MIN_AEQ_STROBE_POS ||
+	    strobe_max > UB960_MAX_AEQ_STROBE_POS) {
+		dev_err(dev, "illegal aeq-strobe range: [%d, %d] ([%d, %d])\n",
+			strobe_min, strobe_max,
+			UB960_MIN_AEQ_STROBE_POS, UB960_MAX_AEQ_STROBE_POS);
+		return -EINVAL;
+	}
+
+	priv->strobe.min = strobe_min;
+	priv->strobe.max = strobe_max;
 
 	for (nport = 0; nport < priv->hw_data->num_rxports; nport++) {
 		struct fwnode_handle *link_fwnode;
