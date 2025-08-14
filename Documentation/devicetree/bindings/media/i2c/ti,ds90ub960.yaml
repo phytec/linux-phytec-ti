@@ -120,6 +120,13 @@ properties:
             maximum: 13
             description: Manual strobe position
 
+          ti,strobe-base-delay:
+            $ref: /schemas/types.yaml#/definitions/uint32
+            description: Strobe base delay
+            oneOf:
+              - const: 0
+              - const: 6
+
           ti,eq-level:
             $ref: /schemas/types.yaml#/definitions/uint32
             maximum: 14
