@@ -18,6 +18,7 @@
 #include <linux/of_graph.h>
 
 #include <linux/v4l2-mediabus.h>
+#include <media/mipi-csi2.h>
 #include <media/v4l2-async.h>
 #include <media/v4l2-device.h>
 #include <media/v4l2-subdev.h>
@@ -2099,6 +2100,49 @@ static int ar0144_get_mbus_config(struct v4l2_subdev *sd, unsigned int pad,
 	return 0;
 }
 
+static int ar0144_get_frame_desc(struct v4l2_subdev *sd, unsigned int pad,
+				 struct v4l2_mbus_frame_desc *fd)
+{
+	struct ar0144 *sensor = to_ar0144(sd);
+	struct ar0144_businfo *info = &sensor->info;
+	struct v4l2_mbus_framefmt *fmt;
+
+	mutex_lock(&sensor->lock);
+
+	fmt = &sensor->fmt;
+
+	memset(fd, 0, sizeof(*fd));
+
+	if (info->buscfg.type == V4L2_MBUS_CSI2_DPHY) {
+		fd->type = V4L2_MBUS_FRAME_DESC_TYPE_CSI2;
+		fd->num_entries = 1;
+
+		fd->entry[0].pixelcode = fmt->code;
+		fd->entry[0].bus.csi2.vc = 0;
+
+		switch (sensor->bpp) {
+		case 8:
+			fd->entry[0].bus.csi2.dt = MIPI_CSI2_DT_RAW8;
+			break;
+		case 10:
+			fd->entry[0].bus.csi2.dt = MIPI_CSI2_DT_RAW10;
+			break;
+		case 12:
+			fd->entry[0].bus.csi2.dt = MIPI_CSI2_DT_RAW12;
+			break;
+		}
+	} else {
+		fd->type = V4L2_MBUS_FRAME_DESC_TYPE_PARALLEL;
+		fd->num_entries = 1;
+
+		fd->entry[0].pixelcode = fmt->code;
+	}
+
+	mutex_unlock(&sensor->lock);
+
+	return 0;
+}
+
 static const struct v4l2_subdev_core_ops ar0144_subdev_core_ops = {
 	.s_power		= ar0144_s_power,
 	.ioctl			= ar0144_priv_ioctl,
@@ -2121,6 +2165,7 @@ static const struct v4l2_subdev_pad_ops ar0144_subdev_pad_ops = {
 	.set_selection		= ar0144_set_selection,
 	.get_selection		= ar0144_get_selection,
 	.get_mbus_config	= ar0144_get_mbus_config,
+	.get_frame_desc		= ar0144_get_frame_desc,
 };
 
 static const struct v4l2_subdev_ops ar0144_subdev_ops = {
