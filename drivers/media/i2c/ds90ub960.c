@@ -417,8 +417,8 @@ enum ub960_rxport_mode {
 	RXPORT_MODE_RAW12_HF = 1,
 	RXPORT_MODE_RAW12_LF = 2,
 	RXPORT_MODE_CSI2_SYNC = 3,
-	RXPORT_MODE_CSI2_ASYNC = 4,
-	RXPORT_MODE_LAST = RXPORT_MODE_CSI2_ASYNC,
+	RXPORT_MODE_CSI2_NONSYNC = 4,
+	RXPORT_MODE_LAST = RXPORT_MODE_CSI2_NONSYNC,
 };
 
 enum ub960_rxport_cdr {
@@ -1629,7 +1629,7 @@ static unsigned long ub960_calc_bc_clk_rate_ub960(struct ub960_data *priv,
 		div = 1;
 		break;
 
-	case RXPORT_MODE_CSI2_ASYNC:
+	case RXPORT_MODE_CSI2_NONSYNC:
 		mult = 2;
 		div = 5;
 		break;
@@ -1653,7 +1653,7 @@ static unsigned long ub960_calc_bc_clk_rate_ub9702(struct ub960_data *priv,
 	case RXPORT_MODE_CSI2_SYNC:
 		return 47187500;
 
-	case RXPORT_MODE_CSI2_ASYNC:
+	case RXPORT_MODE_CSI2_NONSYNC:
 		return 9437500;
 
 	default:
@@ -1860,7 +1860,7 @@ static void ub960_init_rx_port_ub960(struct ub960_data *priv,
 		bc_freq_val = 0;
 		break;
 
-	case RXPORT_MODE_CSI2_ASYNC:
+	case RXPORT_MODE_CSI2_NONSYNC:
 		bc_freq_val = 2;
 		break;
 
@@ -1898,7 +1898,7 @@ static void ub960_init_rx_port_ub960(struct ub960_data *priv,
 		return;
 
 	case RXPORT_MODE_CSI2_SYNC:
-	case RXPORT_MODE_CSI2_ASYNC:
+	case RXPORT_MODE_CSI2_NONSYNC:
 		/* CSI-2 Mode (DS90UB953-Q1 compatible) */
 		ub960_rxport_update_bits(priv, nport, UB960_RR_PORT_CONFIG, 0x3,
 					 0x0);
@@ -1958,7 +1958,7 @@ static void ub960_init_rx_port_ub9702_fpd3(struct ub960_data *priv,
 		fpd_func_mode = 2;
 		break;
 
-	case RXPORT_MODE_CSI2_ASYNC:
+	case RXPORT_MODE_CSI2_NONSYNC:
 		bc_freq_val = 2;
 		fpd_func_mode = 2;
 		break;
@@ -2052,7 +2052,7 @@ static void ub960_init_rx_port_ub9702_fpd4(struct ub960_data *priv,
 		bc_freq_val = 6;
 		break;
 
-	case RXPORT_MODE_CSI2_ASYNC:
+	case RXPORT_MODE_CSI2_NONSYNC:
 		bc_freq_val = 2;
 		break;
 
@@ -2118,7 +2118,7 @@ static void ub960_init_rx_port_ub9702(struct ub960_data *priv,
 		return;
 
 	case RXPORT_MODE_CSI2_SYNC:
-	case RXPORT_MODE_CSI2_ASYNC:
+	case RXPORT_MODE_CSI2_NONSYNC:
 
 		break;
 	}
@@ -2450,7 +2450,7 @@ static int ub960_configure_ports_for_streaming(struct ub960_data *priv,
 
 		/* For the rest, we are only interested in parallel busses */
 		if (rxport->rx_mode == RXPORT_MODE_CSI2_SYNC ||
-		    rxport->rx_mode == RXPORT_MODE_CSI2_ASYNC)
+		    rxport->rx_mode == RXPORT_MODE_CSI2_NONSYNC)
 			continue;
 
 		if (rx_data[nport].num_streams > 2)
@@ -2509,7 +2509,7 @@ static int ub960_configure_ports_for_streaming(struct ub960_data *priv,
 			break;
 
 		case RXPORT_MODE_CSI2_SYNC:
-		case RXPORT_MODE_CSI2_ASYNC:
+		case RXPORT_MODE_CSI2_NONSYNC:
 			if (!priv->hw_data->is_ub9702) {
 				ub960_rxport_write(priv, nport,
 						   UB960_RR_CSI_VC_MAP,
