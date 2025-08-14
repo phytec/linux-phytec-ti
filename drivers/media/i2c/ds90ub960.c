@@ -1686,6 +1686,8 @@ static int ub960_rxport_add_serializer(struct ub960_data *priv, u8 nport)
 
 	ser_pdata->port = nport;
 	ser_pdata->atr = priv->atr;
+	ser_pdata->bc_gpio = rxport->bc_gpio;
+	ser_pdata->enable_bc_gpio = rxport->enable_bc_gpio;
 	if (priv->hw_data->is_ub9702)
 		ser_pdata->bc_rate = ub960_calc_bc_clk_rate_ub9702(priv, rxport);
 	else
