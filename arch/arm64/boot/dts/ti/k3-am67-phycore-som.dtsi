@@ -358,11 +358,6 @@
 	serial_flash: flash@0 {
 		compatible = "jedec,spi-nor";
 		reg = <0x0>;
-		/*
-		 * HACK: Use a reset GPIO for 1623.0 SoMs because
-		 * there is a missing pullup resistor on the reset.
-		 */
-		reset-gpios = <&main_gpio0 14 GPIO_ACTIVE_LOW>;
 		spi-tx-bus-width = <8>;
 		spi-rx-bus-width = <8>;
 		spi-max-frequency = <25000000>;
