@@ -279,6 +279,12 @@
 		>;
 		bootph-all;
 	};
+
+	main_usbc_power_pins_default: main-usbc-power-pins-default {
+		pinctrl-single,pins = <
+			J722S_IOPAD(0x254, PIN_INPUT, 7)	/* (E25) USB0_DRVVBUS.GPIO1_50 */
+		>;
+	};
 };
 
 &dss0 {
@@ -327,7 +333,16 @@
 };
 
 &main_gpio1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_usbc_power_pins_default>;
+
 	status = "okay";
+
+	p50-hog {
+		gpio-hog;
+		gpios = <50 GPIO_ACTIVE_HIGH>;
+		output-high;
+	};
 };
 
 &main_i2c0 {
@@ -396,24 +411,6 @@
 				  "GPIO2_LED", "GPIO3_MCU_CAN0_nEN",
 				  "GPIO4_BUT2", "GPIO5_MCU_CAN1_nEN",
 				  "GPIO6_AUDIO_GPIO", "GPIO7_AUDIO_USER_RESET";
-	};
-
-	usb-pd@22 {
-		compatible = "ti,tps6598x";
-		reg = <0x22>;
-
-		connector {
-			compatible = "usb-c-connector";
-			label = "USB-C";
-			self-powered;
-			data-role = "dual";
-			power-role = "sink";
-			port {
-				usb_con_hs: endpoint {
-					remote-endpoint = <&typec_hs>;
-				};
-			};
-		};
 	};
 
 	gpio_exp2: gpio@23 {
@@ -595,22 +592,19 @@
 
 &usbss1 {
 	ti,vbus-divider;
+	ti,usb2-only;
 	status = "okay";
 };
 
 &usb0 {
 	usb-role-switch;
-
-	port {
-		typec_hs: endpoint {
-			remote-endpoint = <&usb_con_hs>;
-		};
-	};
+	dr_mode = "host";
+	phys = <&serdes0_usb_link>;
+	phy-names = "usb3-phy";
+	maximum-speed = "super-speed";
 };
 
 &usb1 {
 	dr_mode = "host";
-	pinctrl-names = "default";
-	phys = <&serdes0_usb_link>;
-	phy-names = "cdns3,usb3-phy";
+	maximum-speed = "high-speed";
 };
