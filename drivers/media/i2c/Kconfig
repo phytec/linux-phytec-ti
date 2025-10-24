@@ -1263,8 +1263,10 @@ config VIDEO_SAA711X
 
 config VIDEO_AR0144
 	tristate "Onsemi AR0144 camera sensor support"
-	depends on I2C && VIDEO_V4L2 && VIDEO_V4L2_SUBDEV_API
-	depends on MEDIA_CAMERA_SUPPORT
+	depends on I2C && VIDEO_DEV
+	select MEDIA_CONTROLLER
+	select VIDEO_V4L2_SUBDEV_API
+	select V4L2_FWNODE
 	help
 	  This driver supports AR0144 cameras from Onsemiconductor, monochrome
 	  and colour models are supported as well as MIPI and parallel
