@@ -1,0 +1,190 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/*
+ * Copyright (C) 2025 PHYTEC America LLC
+ * Author: Nathan Morrisson <nmorrisson@phytec.com>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/pwm/pwm.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include "k3-pinctrl.h"
+
+&{/} {
+	display {
+		compatible = "lincolntech,lcd185-101ct";
+		backlight = <&backlight>;
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			port@0 {
+				dual-lvds-odd-pixels;
+				lcd_in0: endpoint {
+					remote-endpoint = <&oldi0_dss0_out>;
+				};
+			};
+
+			port@1 {
+				dual-lvds-even-pixels;
+				lcd_in1: endpoint {
+					remote-endpoint = <&oldi1_dss0_out>;
+				};
+			};
+		};
+	};
+
+	backlight: backlight {
+		pinctrl-names = "default";
+		pinctrl-0 = <&bl_pwm_pins_default>;
+
+		compatible = "pwm-backlight";
+
+		brightness-levels = <0 4 8 16 32 64 128 255>;
+		default-brightness-level = <6>;
+
+		enable-gpios = <&main_gpio0 15 GPIO_ACTIVE_HIGH>;
+		pwms = <&epwm0 1 50000 0>;
+	};
+};
+
+&main_pmx0 {
+	bl_pwm_pins_default: bl-pwm-pins-default {
+		pinctrl-single,pins = <
+			J722S_IOPAD(0x1b8, PIN_INPUT, 2)	/* (E20) SPI0_CS1.EHRPWM0_B */
+			J722S_IOPAD(0x03c, PIN_INPUT, 7) 	/* (U22) GPMC0_AD0.GPIO0_15 */
+		>;
+	};
+
+	touch_screen_pins_default: touch-screen-pins-default {
+		pinctrl-single,pins = <
+			J722S_IOPAD(0x048, PIN_OUTPUT, 7)	/* (V25) GPMC0_AD3.GPIO0_18 - RST */
+			J722S_IOPAD(0x04c, PIN_INPUT, 7)	/* (T20) GPMC0_AD4.GPIO0_19 - INT */
+		>;
+	};
+
+	main_oldi0_pins_default: main-oldi0-pins-default {
+		pinctrl-single,pins = <
+			J722S_IOPAD(0x0260, PIN_OUTPUT, 0)	/* (AE20) OLDI0_A0N */
+			J722S_IOPAD(0x025c, PIN_OUTPUT, 0)	/* (AD20) OLDI0_A0P */
+			J722S_IOPAD(0x0268, PIN_OUTPUT, 0)	/* (AC19) OLDI0_A1N */
+			J722S_IOPAD(0x0264, PIN_OUTPUT, 0)	/* (AD19) OLDI0_A1P */
+			J722S_IOPAD(0x0270, PIN_OUTPUT, 0)	/* (AA19) OLDI0_A2N */
+			J722S_IOPAD(0x026c, PIN_OUTPUT, 0)	/* (AB19) OLDI0_A2P */
+			J722S_IOPAD(0x0278, PIN_OUTPUT, 0)	/* (AD18) OLDI0_A3N */
+			J722S_IOPAD(0x0274, PIN_OUTPUT, 0)	/* (AD19) OLDI0_A3P */
+			J722S_IOPAD(0x0280, PIN_OUTPUT, 0)	/* (AD17) OLDI0_A4N */
+			J722S_IOPAD(0x027c, PIN_OUTPUT, 0)	/* (AD16) OLDI0_A4P */
+			J722S_IOPAD(0x0288, PIN_OUTPUT, 0)	/* (AB17) OLDI0_A5N */
+			J722S_IOPAD(0x0284, PIN_OUTPUT, 0)	/* (AC17) OLDI0_A5P */
+			J722S_IOPAD(0x0290, PIN_OUTPUT, 0)	/* (AC16) OLDI0_A6N */
+			J722S_IOPAD(0x028c, PIN_OUTPUT, 0)	/* (AC15) OLDI0_A6P */
+			J722S_IOPAD(0x0298, PIN_OUTPUT, 0)	/* (AB16) OLDI0_A7N */
+			J722S_IOPAD(0x0294, PIN_OUTPUT, 0)	/* (AA16) OLDI0_A7P */
+			J722S_IOPAD(0x02a0, PIN_OUTPUT, 0)	/* (AE18) OLDI0_CLK0N */
+			J722S_IOPAD(0x029c, PIN_OUTPUT, 0)	/* (AE17) OLDI0_CLK0P */
+			J722S_IOPAD(0x02a8, PIN_OUTPUT, 0)	/* (AD15) OLDI0_CLK1N */
+			J722S_IOPAD(0x02a4, PIN_OUTPUT, 0)	/* (AD14) OLDI0_CLK1P */
+		>;
+	};
+};
+
+&dss0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_oldi0_pins_default>;
+	status = "okay";
+};
+
+&dss0_ports {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	/* VP1: Output to OLDI */
+	port@0 {
+		reg = <0>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		dss0_out0: endpoint@0 {
+			reg = <0>;
+			remote-endpoint = <&oldi0_dss0_in>;
+		};
+
+		dss0_out1: endpoint@1 {
+			reg = <1>;
+			remote-endpoint = <&oldi1_dss0_in>;
+		};
+	};
+};
+
+&epwm0 {
+	status = "okay";
+};
+
+&main_i2c1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	touchscreen@5d {
+		compatible = "goodix,gt928";
+		reg = <0x5d>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&touch_screen_pins_default>;
+
+		interrupt-parent = <&main_gpio0>;
+		interrupts = <19 IRQ_TYPE_LEVEL_LOW>;
+
+		reset-gpios = <&main_gpio0 18 GPIO_ACTIVE_HIGH>;
+		irq-gpios = <&main_gpio0 19 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&oldi0_dss0 {
+	status = "okay";
+};
+
+&oldi1_dss0 {
+	status = "okay";
+};
+
+&oldi0_dss0_ports {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	port@0 {
+		reg = <0>;
+		oldi0_dss0_in: endpoint {
+			remote-endpoint = <&dss0_out0>;
+		};
+	};
+
+	port@1 {
+		reg = <1>;
+		oldi0_dss0_out: endpoint {
+			remote-endpoint = <&lcd_in0>;
+		};
+	};
+};
+
+&oldi1_dss0_ports {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	port@0 {
+		reg = <0>;
+		oldi1_dss0_in: endpoint {
+			remote-endpoint = <&dss0_out1>;
+		};
+	};
+
+	port@1 {
+		reg = <1>;
+		oldi1_dss0_out: endpoint {
+			remote-endpoint = <&lcd_in1>;
+		};
+	};
+};
