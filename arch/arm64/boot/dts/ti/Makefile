@@ -212,6 +212,7 @@ dtb-$(CONFIG_ARCH_K3) += k3-j721s2-evm-ub954.dtbo
 # Boards with J722s SoC
 dtb-$(CONFIG_ARCH_K3) += k3-am67a-beagley-ai.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am6754-phyboard-rigel.dtb
+dtb-$(CONFIG_ARCH_K3) += k3-am67-phyboard-rigel-dsi-lcd282.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am67-phyboard-rigel-vm016-mipi-csi0.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am67-phyboard-rigel-vm016-mipi-csi1.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am67-phyboard-rigel-vm016-mipi-csi2.dtbo
