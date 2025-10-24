@@ -43,6 +43,13 @@ properties:
               - ti,am62l3-evm
           - const: ti,am62l3
 
+      - description: K3 AM62L3 SoC PHYTEC FPSC based boards
+        items:
+          - enum:
+              - phytec,am62l3-phyflex-libra-rdk
+          - const: phytec,am62l-phyflex-fpsc-g
+          - const: ti,am62l3
+
       - description: K3 AM62P5 SoC and Boards
         items:
           - enum:
