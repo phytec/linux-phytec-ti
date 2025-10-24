@@ -598,19 +598,17 @@
 
 &usbss1 {
 	ti,vbus-divider;
-	ti,usb2-only;
 	status = "okay";
 };
 
 &usb0 {
-	usb-role-switch;
 	dr_mode = "host";
-	phys = <&serdes0_usb_link>;
-	phy-names = "usb3-phy";
-	maximum-speed = "super-speed";
+	maximum-speed = "high-speed";
 };
 
 &usb1 {
 	dr_mode = "host";
-	maximum-speed = "high-speed";
+	phys = <&serdes0_usb_link>;
+	phy-names = "cdns3,usb3-phy";
+	maximum-speed = "super-speed";
 };
