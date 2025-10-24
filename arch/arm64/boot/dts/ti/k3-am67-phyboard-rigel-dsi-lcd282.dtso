@@ -1,0 +1,126 @@
+// SPDX-License-Identifier: GPL-2.0 or MIT
+/*
+ * Copyright (C) 2025 PHYTEC America LLC
+ * Author: Nathan Morrisson <nmorrisson@phytec.com>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+#include "k3-pinctrl.h"
+
+&{/} {
+	backlight_dsi: backlight {
+		compatible = "pwm-backlight";
+		brightness-levels = <0 8 16 32 64 128 255>;
+		default-brightness-level = <6>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&bl_pwm_pins_default>;
+		pwms = <&epwm1 0 50000 1>;
+	};
+};
+
+&epwm1 {
+	status = "okay";
+};
+
+&main_pmx0 {
+	bl_pwm_pins_default: bl-pwm-pins-default {
+		pinctrl-single,pins = <
+			J722S_IOPAD(0x1bc, PIN_INPUT, 2)	/* (D20) SPI0_CLK.EHRPWM1_A */
+		>;
+	};
+
+	touch_screen_pins_default: touch-screen-pins-default {
+		pinctrl-single,pins = <
+			J722S_IOPAD(0x1c0, PIN_INPUT, 7)	/* (E19) SPI0_D0.GPIO1_18 */
+			J722S_IOPAD(0x1c4, PIN_INPUT, 7)	/* (E20) SPI0_D1.GPIO1_19 */
+		>;
+	};
+};
+
+&dphy_tx0 {
+	status = "okay";
+};
+
+&dsi0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@0 {
+			reg = <0>;
+
+			dsi0_out: endpoint {
+				remote-endpoint = <&display_in>;
+			};
+		};
+
+		port@1 {
+			reg = <1>;
+
+			dsi0_in: endpoint {
+				remote-endpoint = <&dss1_dpi1_out>;
+			};
+		};
+	};
+
+	display: panel@0 {
+		compatible = "lincolntech,lcd282";
+		reg = <0>;
+
+		backlight = <&backlight_dsi>;
+		dsi-lanes = <4>;
+		panel-bpc = <8>;
+
+		port {
+			display_in: endpoint {
+				remote-endpoint = <&dsi0_out>;
+			};
+		};
+	};
+};
+
+&dss1_ports {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	/* DSS1-VP1: DSI Output */
+	port@1 {
+		reg = <1>;
+
+		dss1_dpi1_out: endpoint {
+			remote-endpoint = <&dsi0_in>;
+		};
+	};
+};
+
+&main_i2c1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	touchscreen@38 {
+		compatible = "focaltech,ft8201";
+		reg = <0x38>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&touch_screen_pins_default>;
+
+		interrupt-parent = <&main_gpio1>;
+		interrupts = <18 IRQ_TYPE_EDGE_FALLING>;
+
+		touchscreen-size-x = <1200>;
+		touchscreen-size-y = <1920>;
+		touchscreen-inverted-x;
+		touchscreen-inverted-y;
+
+		reset-gpios = <&main_gpio1 19 GPIO_ACTIVE_LOW>;
+	};
+};
