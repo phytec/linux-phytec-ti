@@ -7,6 +7,7 @@
 /dts-v1/;
 
 #include <dt-bindings/net/ti-dp83867.h>
+#include <dt-bindings/input/input.h>
 #include <dt-bindings/phy/phy.h>
 #include "k3-serdes.h"
 #include "k3-j722s.dtsi"
@@ -41,6 +42,25 @@
 			hdmi_connector_in: endpoint {
 				remote-endpoint = <&sii9022_out>;
 			};
+		};
+	};
+
+	keys {
+		compatible = "gpio-keys";
+		autorepeat;
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_keys_pins_default>;
+
+		key-home {
+			label = "home";
+			linux,code = <KEY_HOME>;
+			gpios = <&main_gpio1 23 GPIO_ACTIVE_HIGH>;
+		};
+
+		key-menu {
+			label = "menu";
+			linux,code = <KEY_MENU>;
+			gpios = <&gpio_exp1 4 GPIO_ACTIVE_HIGH>;
 		};
 	};
 
@@ -155,6 +175,12 @@
 	gpio_exp2_int_pins_default: gpio-exp2-int-default-pins {
 		pinctrl-single,pins = <
 			J722S_IOPAD(0x0050, PIN_INPUT, 7)	/* (T24) GPMC0_AD5.GPIO0_20 */
+		>;
+	};
+
+	gpio_keys_pins_default: gpio-keys-default-pins {
+		pinctrl-single,pins = <
+			J722S_IOPAD(0x01d4, PIN_INPUT, 7)	/* (B21) UART0_RTSn.GPIO1_23 */
 		>;
 	};
 
