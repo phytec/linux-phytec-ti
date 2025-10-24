@@ -1,0 +1,49 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/*
+ * Overlay to show case the Low Power Modes on the phyBOARD-Lyra-AM62x.
+ *
+ * Copyright (C) 2024 PHYTEC Messtechnik GmbH
+ * Author: Wadim Egorov <w.egorov@phytec.de>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include "k3-pinctrl.h"
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+&main_pmx0 {
+	gpio_keys_pins_default: gpio-keys-default-pins {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x1d4, PIN_INPUT, 7) /* (B15) UART0_RTSn.GPIO1_23 */
+		>;
+	};
+};
+
+&{/} {
+	keys {
+		compatible = "gpio-keys";
+		autorepeat;
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_keys_pins_default>;
+
+		key-home {
+			label = "WAKEUPGPIO";
+			linux,code = <KEY_WAKEUP>;
+			interrupts-extended = <&main_gpio1 23 IRQ_TYPE_EDGE_RISING>, <&main_pmx0 0x1d4>;
+			interrupt-names = "irq", "wakeup";
+		};
+	};
+};
+
+/*
+ * HACK: Disable USB1 as the connected USB Hub seem to trigger wakeup signals.
+ */
+&usbss1 {
+	status = "disabled";
+};
+
+&usb1 {
+	status = "disabled";
+};
