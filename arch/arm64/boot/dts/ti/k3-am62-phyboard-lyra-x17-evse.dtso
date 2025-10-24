@@ -1,0 +1,90 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/*
+ * Copyright (C) 2024 PHYTEC Messtechnik GmbH
+ * Author: Daniel Schultz <d.schultz@phytec.de>
+ *
+ * Overlay for the PEB-X-005 expansion board with Lumissil CG5317 and TI MSPM0
+ * Visit: https://www.lumissil.com/applications/communication/electric-vehicles-charging/vehicle-charging/is32cg5317 for details
+ *
+ */
+
+#include <dt-bindings/gpio/gpio.h>
+#include "k3-pinctrl.h"
+
+/dts-v1/;
+/plugin/;
+
+&{/} {
+	aliases {
+		serial6 = "/bus@f0000/bus@b00000/target-module@2b300050/serial@0";
+	};
+};
+
+&main_pmx0 {
+	main_spi0_pins_default: main-spi0-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x01bc, PIN_INPUT, 0)	 /* (A14) SPI0_CLK */
+			AM62X_IOPAD(0x01b4, PIN_OUTPUT, 0)	 /* (A13) SPI0_CS0 */
+			AM62X_IOPAD(0x01c0, PIN_OUTPUT, 0)	 /* (B13) SPI0_D0 */
+			AM62X_IOPAD(0x01c4, PIN_INPUT, 0)	 /* (B14) SPI0_D1 */
+			AM62X_IOPAD(0x0194, PIN_INPUT, 7)	 /* (B19) MCASP0_AXR3.GPIO1_7 */
+			AM62X_IOPAD(0x0198, PIN_INPUT, 7)	 /* (A19) MCASP0_AXR2.GPIO1_8 */
+		>;
+	};
+
+	/* Tied to MSP_BSL and can switch the MSPM0 into BSL Mode during reset. */
+	main_gpio1_pins_default: main-gpio1-pins-default {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x1b0, PIN_OUTPUT, 7) /* (A20) MCASP0_ACLKR.GPIO1_14 */
+		>;
+	};
+};
+
+&mcu_pmx0 {
+	wkup_uart0_pins_default: wkup-uart0-pins-default {
+		pinctrl-single,pins = <
+			AM62X_MCU_IOPAD(0x0024, PIN_INPUT, 0) /* (B4) WKUP_UART0_RXD */
+			AM62X_MCU_IOPAD(0x0028, PIN_OUTPUT, 0) /* (C5) WKUP_UART0_TXD */
+		>;
+	};
+
+	/* Tied to MSPM0 NRST and can reset the chip. */
+	mcu_gpio0_pins_default: mcu-gpio0-pins-default {
+		pinctrl-single,pins = <
+			AM62X_MCU_IOPAD(0x0020, PIN_OUTPUT, 7) /* (A20) MCU_UART_RTSn.MCU_GPIO0_8 */
+		>;
+	};
+};
+
+&main_spi0{
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_spi0_pins_default>;
+	ti,pindir-d0-out-d1-in = <1>;
+	status = "okay";
+
+	cg5317: cg5317@0 {
+		compatible = "cg,cg5317";
+		reg = <0x0>;
+		interrupts-extended = <&main_gpio1 8 0x1>,
+				      <&main_gpio1 7 0x1>;
+		interrupt-names = "gp_irq", "rx_irq";
+		spi-cpha;
+		spi-max-frequency = <1000000>;
+	};
+};
+
+/* main_uart1 uses balls A19/B19 */
+&main_uart1 {
+	status = "disable";
+};
+
+&wkup_uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&wkup_uart0_pins_default>,
+		    <&mcu_gpio0_pins_default>,
+		    <&main_gpio1_pins_default>;
+	status = "okay";
+};
