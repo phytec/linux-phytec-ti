@@ -507,6 +507,10 @@
 	};
 };
 
+&torrent_phy_dp {
+	status = "disabled";
+};
+
 &tscadc0 {
 	status = "okay";
 
