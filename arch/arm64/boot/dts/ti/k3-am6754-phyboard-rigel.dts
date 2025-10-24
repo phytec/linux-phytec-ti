@@ -540,6 +540,10 @@
 	};
 };
 
+&serdes_wiz0 {
+	status = "okay";
+};
+
 &serdes1 {
 	status = "okay";
 
@@ -554,6 +558,7 @@
 
 &serdes_wiz1 {
 	clocks = <&k3_clks 280 0>, <&k3_clks 280 1>, <&pcie_refclk0>;
+	status = "okay";
 };
 
 &usbss0 {
