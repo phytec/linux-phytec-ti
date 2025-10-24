@@ -5277,6 +5277,35 @@ static const struct panel_desc_dsi lg_lh500wx1_sd03 = {
 	.lanes = 4,
 };
 
+static const struct drm_display_mode lincolntech_lcd282_mode = {
+	.clock = 154000,
+	.hdisplay = 1200,
+	.hsync_start = 1259,
+	.hsync_end = 1271,
+	.htotal = 1295,
+	.vdisplay = 1920,
+	.vsync_start = 1923,
+	.vsync_end = 1933,
+	.vtotal = 1989,
+	.flags = DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_PVSYNC,
+};
+
+static const struct panel_desc_dsi lincolntech_lcd282 = {
+	.desc = {
+		.modes = &lincolntech_lcd282_mode,
+		.num_modes = 1,
+		.bpc = 8,
+		.size = {
+			.width = 151,
+			.height = 94,
+		},
+		.connector_type = DRM_MODE_CONNECTOR_DSI,
+	},
+	.flags = MIPI_DSI_MODE_VIDEO,
+	.format = MIPI_DSI_FMT_RGB888,
+	.lanes = 4,
+};
+
 static const struct drm_display_mode panasonic_vvx10f004b00_mode = {
 	.clock = 157200,
 	.hdisplay = 1920,
@@ -5378,6 +5407,9 @@ static const struct of_device_id dsi_of_match[] = {
 	}, {
 		.compatible = "lg,lh500wx1-sd03",
 		.data = &lg_lh500wx1_sd03
+	}, {
+		.compatible = "lincolntech,lcd282",
+		.data = &lincolntech_lcd282,
 	}, {
 		.compatible = "panasonic,vvx10f004b00",
 		.data = &panasonic_vvx10f004b00
