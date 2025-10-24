@@ -51,6 +51,16 @@ config VIDEO_ALVIUM_CSI2
 	  To compile this driver as a module, choose M here: the
 	  module will be called alvium-csi2.
 
+config VIDEO_AR0144
+	tristate "ON Semiconductor AR0144 sensor support"
+	help
+	  This driver supports AR0144 cameras from Onsemiconductor, monochrome
+	  and colour models are supported as well as MIPI and parallel
+	  interface.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called ar0144.
+
 config VIDEO_AR0521
 	tristate "ON Semiconductor AR0521 sensor support"
 	help
@@ -1260,17 +1270,6 @@ config VIDEO_SAA711X
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called saa7115.
-
-config VIDEO_AR0144
-	tristate "Onsemi AR0144 camera sensor support"
-	depends on I2C && VIDEO_DEV
-	select MEDIA_CONTROLLER
-	select VIDEO_V4L2_SUBDEV_API
-	select V4L2_FWNODE
-	help
-	  This driver supports AR0144 cameras from Onsemiconductor, monochrome
-	  and colour models are supported as well as MIPI and parallel
-	  interface.
 
 config VIDEO_TC358743
 	tristate "Toshiba TC358743 decoder"
