@@ -19,7 +19,7 @@
 		default-brightness-level = <6>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&bl_pwm_pins_default>;
-		pwms = <&epwm1 0 50000 1>;
+		pwms = <&epwm1 0 50000 0>;
 	};
 };
 
