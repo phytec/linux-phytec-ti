@@ -417,6 +417,13 @@
 				   "DE485_F232", "UART1_LB";
 
 		bootph-all;
+
+		p5-hog {
+			/* P5 - USB_HUB_GLOBAL_RSTz */
+			gpio-hog;
+			gpios = <5 GPIO_ACTIVE_HIGH>;
+			output-high;
+		};
 	};
 
 	gpio_exp1: gpio@21 {
