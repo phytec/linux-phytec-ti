@@ -1725,8 +1725,9 @@ out:
 	return ret;
 }
 
-static int ar0144_g_frame_interval(struct v4l2_subdev *sd,
-				   struct v4l2_subdev_frame_interval *interval)
+static int ar0144_get_frame_interval(struct v4l2_subdev *sd,
+				     struct v4l2_subdev_state *sd_state,
+				     struct v4l2_subdev_frame_interval *interval)
 {
 	struct ar0144 *sensor = to_ar0144(sd);
 	unsigned long pix_freq;
@@ -1752,7 +1753,7 @@ static struct v4l2_rect *ar0144_get_pad_crop(struct ar0144 *sensor,
 {
 	switch (which) {
 	case V4L2_SUBDEV_FORMAT_TRY:
-		return v4l2_subdev_get_try_crop(&sensor->subdev, state, pad);
+		return v4l2_subdev_state_get_crop(state, pad);
 	case V4L2_SUBDEV_FORMAT_ACTIVE:
 		return &sensor->crop;
 	default:
@@ -1766,7 +1767,7 @@ static struct v4l2_mbus_framefmt *ar0144_get_pad_fmt(struct ar0144 *sensor,
 {
 	switch (which) {
 	case V4L2_SUBDEV_FORMAT_TRY:
-		return v4l2_subdev_get_try_format(&sensor->subdev, state, pad);
+		return v4l2_subdev_state_get_format(state, pad);
 	case V4L2_SUBDEV_FORMAT_ACTIVE:
 		return &sensor->fmt;
 	default:
@@ -2066,7 +2067,6 @@ static const struct v4l2_subdev_core_ops ar0144_subdev_core_ops = {
 
 static const struct v4l2_subdev_video_ops ar0144_subdev_video_ops = {
 	.s_stream		= ar0144_s_stream,
-	.g_frame_interval	= ar0144_g_frame_interval,
 };
 
 static const struct v4l2_subdev_pad_ops ar0144_subdev_pad_ops = {
@@ -2077,6 +2077,7 @@ static const struct v4l2_subdev_pad_ops ar0144_subdev_pad_ops = {
 	.set_selection		= ar0144_set_selection,
 	.get_selection		= ar0144_get_selection,
 	.get_mbus_config	= ar0144_get_mbus_config,
+	.get_frame_interval	= ar0144_get_frame_interval,
 };
 
 static const struct v4l2_subdev_ops ar0144_subdev_ops = {
@@ -2106,7 +2107,7 @@ static int ar0144_set_analogue_gain(struct ar0144 *sensor, unsigned int val)
 	return 1000 * (1u << coarse) * 32 / (32 - fine);
 }
 
-unsigned int ar0144_get_min_color_gain(struct ar0144 *sensor)
+static unsigned int ar0144_get_min_color_gain(struct ar0144 *sensor)
 {
 	unsigned int gains[4];
 	int min_idx = 0;
