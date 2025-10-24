@@ -1,0 +1,57 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/*
+ * Copyright (C) 2025 PHYTEC America LLC
+ * Author: Nathan Morrisson <nmorrisson@phytec.com>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include "k3-pinctrl.h"
+
+&{/} {
+	can_tc1: can-phy1 {
+		compatible = "ti,tcan1042";
+		#phy-cells = <0>;
+		max-bitrate = <8000000>;
+		standby-gpios = <&gpio_exp1 3 GPIO_ACTIVE_HIGH>;
+	};
+
+	can_tc2: can-phy2 {
+		compatible = "ti,tcan1042";
+		#phy-cells = <0>;
+		max-bitrate = <8000000>;
+		standby-gpios = <&gpio_exp1 5 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&mcu_pmx0 {
+	mcu_mcan0_pins_default: mcu-mcan0-pins-default {
+		pinctrl-single,pins = <
+			J722S_MCU_IOPAD(0x038, PIN_INPUT, 0)	/* (D8) MCU_MCAN0_RX */
+			J722S_MCU_IOPAD(0x034, PIN_OUTPUT, 0)	/* (B2) MCU_MCAN0_TX */
+		>;
+	};
+
+	mcu_mcan1_pins_default: mcu-mcan1-pins-default {
+		pinctrl-single,pins = <
+			J722S_MCU_IOPAD(0x040, PIN_INPUT, 0)	/* (B1) MCU_MCAN1_RX */
+			J722S_MCU_IOPAD(0x03c, PIN_OUTPUT, 0)	/* (C1) MCU_MCAN1_TX */
+		>;
+	};
+};
+
+&mcu_mcan0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&mcu_mcan0_pins_default>;
+	phys = <&can_tc1>;
+	status = "okay";
+};
+
+&mcu_mcan1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&mcu_mcan1_pins_default>;
+	phys = <&can_tc2>;
+	status = "okay";
+};
