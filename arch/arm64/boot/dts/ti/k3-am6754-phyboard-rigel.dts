@@ -194,6 +194,7 @@
 			J722S_IOPAD(0x01e8, PIN_INPUT_PULLUP, 0)	/* (C24) I2C1_SCL */
 			J722S_IOPAD(0x01ec, PIN_INPUT_PULLUP, 0)	/* (A22) I2C1_SDA */
 		>;
+		bootph-all;
 	};
 
 	main_mcan0_pins_default: main-mcan0-default-pins {
