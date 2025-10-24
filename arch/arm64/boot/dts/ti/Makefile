@@ -40,6 +40,7 @@ dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-m2-lwb5p.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-oldi-ac209a.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-oldi-ac200.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-lpm.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am62-phyboard-lyra-m2-cc3351.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-lp-sk.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am62-lp-sk-lincolntech-lcd185-panel.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62-lp-sk-microtips-mf101hie-panel.dtbo
@@ -281,6 +282,8 @@ k3-am625-phyboard-lyra-oldi-ac200-dtbs := k3-am625-phyboard-lyra-rdk.dtb \
 	k3-am62-phyboard-lyra-oldi-ac200.dtbo
 k3-am625-phyboard-lyra-lpm-dtbs := k3-am625-phyboard-lyra-rdk.dtb \
 	k3-am62-phyboard-lyra-lpm.dtbo
+k3-am625-phyboard-lyra-m2-cc3351-dtbs := k3-am625-phyboard-lyra-rdk.dtb \
+	k3-am62-phyboard-lyra-m2-cc3351.dtbo
 k3-am625-sk-csi2-imx219-dtbs := k3-am625-sk.dtb \
 	k3-am62x-sk-csi2-imx219.dtbo
 k3-am625-sk-csi2-ov5640-dtbs := k3-am625-sk.dtb \
