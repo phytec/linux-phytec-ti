@@ -305,6 +305,12 @@
 			AM62PX_IOPAD(0x0258, PIN_OUTPUT, 0) /* (G21) USB1_DRVVBUS */
 		>;
 	};
+
+	usb_pd_int_pins_default: usb-pd-int-default-pins {
+		pinctrl-single,pins = <
+			AM62PX_IOPAD(0x0088, PIN_INPUT, 7) /* (R24) GPMC0_OEn_REn.GPIO0_33 */
+		>;
+	};
 };
 
 &cpsw3g {
@@ -440,6 +446,10 @@
 	usb-pd@22 {
 		compatible = "ti,tps6598x";
 		reg = <0x22>;
+		interrupt-parent = <&main_gpio0>;
+		interrupts = <33 IRQ_TYPE_EDGE_FALLING>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&usb_pd_int_pins_default>;
 
 		connector {
 			compatible = "usb-c-connector";
