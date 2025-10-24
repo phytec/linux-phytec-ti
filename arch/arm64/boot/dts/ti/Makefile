@@ -77,6 +77,10 @@ dtb-$(CONFIG_ARCH_K3) += k3-am62l3-evm-mcan.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62l3-evm-nand.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62l3-evm-pwm.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62l3-phyflex-libra-rdk.dtb
+dtb-$(CONFIG_ARCH_K3) += k3-am62l3-phyflex-libra-lvds-ac209.dtb
+
+k3-am62l3-phyflex-libra-lvds-ac209-dtbs := k3-am62l3-phyflex-libra-rdk.dtb \
+					k3-am62l3-phyflex-libra-lvds-ac209.dtbo
 
 # Boards with AM62Px SoC
 dtb-$(CONFIG_ARCH_K3) += k3-am62p5-sk.dtb
