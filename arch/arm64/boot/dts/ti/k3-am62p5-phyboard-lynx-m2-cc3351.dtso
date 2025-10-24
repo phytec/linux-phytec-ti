@@ -1,0 +1,100 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/*
+ * Copyright (C) 2025 PHYTEC America LLC
+ * Author: John Ma <jma@phytec.com>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include "k3-pinctrl.h"
+
+&{/} {
+	aliases {
+		serial4 = "/bus@f0000/serial@2820000";
+	};
+
+	reg_wifi_en: fixed-regulator-wifi-en {
+		compatible = "regulator-fixed";
+		regulator-name = "wifi_en";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&wifi_en_pins_default>;
+		gpio = <&main_gpio0 22 GPIO_ACTIVE_HIGH>;
+		regulator-always-on;
+		enable-active-high;
+	};
+};
+
+&main_pmx0 {
+	bt_en_pins_default: bt-en-pins-default{
+		pinctrl-single,pins = <
+			AM62PX_IOPAD(0x0054, PIN_INPUT, 7) /* (V24) GPMC0_AD6.GPIO0_21 */
+		>;
+	};
+
+	bt_uart2_pins_default: bt-uart2-pins-default {
+		pinctrl-single,pins = <
+			AM62PX_IOPAD(0x0074, PIN_INPUT, 8) /* (AB24) GPMC0_AD14.UART2_CTSn */
+			AM62PX_IOPAD(0x0078, PIN_OUTPUT, 8) /* (AC24) GPMC0_AD15.UART2_RTSn */
+			AM62PX_IOPAD(0x005c, PIN_INPUT, 2) /* (AC25) GPMC0_AD8.UART2_RXD */
+			AM62PX_IOPAD(0x0060, PIN_OUTPUT, 2) /* (AB25) GPMC0_AD9.UART2_TXD */
+		>;
+	};
+
+	main_mmc2_wifi_pins_default: main-mmc2-wifi-pins-default {
+		pinctrl-single,pins = <
+			AM62PX_IOPAD(0x0120, PIN_INPUT, 0) /* (K24) MMC2_CMD */
+			AM62PX_IOPAD(0x0118, PIN_INPUT, 0) /* (K21) MMC2_CLK */
+			AM62PX_IOPAD(0x011C, PIN_INPUT, 0) /* () MMC2_CLKLB */
+			AM62PX_IOPAD(0x0114, PIN_INPUT, 0) /* (K23) MMC2_DAT0 */
+			AM62PX_IOPAD(0x0110, PIN_INPUT, 0) /* (K22) MMC2_DAT1 */
+			AM62PX_IOPAD(0x010c, PIN_INPUT, 0) /* (L20) MMC2_DAT2 */
+			AM62PX_IOPAD(0x0108, PIN_INPUT, 0) /* (L21) MMC2_DAT3 */
+		>;
+	};
+
+	wifi_en_pins_default: wifi-en-pins-default {
+		pinctrl-single,pins = <
+			AM62PX_IOPAD(0x0058, PIN_INPUT, 7) /* (W25) GPMC0_AD7.GPIO0_22 */
+		>;
+	};
+};
+
+&main_uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&bt_uart2_pins_default>;
+	uart-has-rtscts;
+	status = "okay";
+
+	bluetooth {
+		compatible = "ti,cc33xx-bt";
+		pinctrl-names = "default";
+		pinctrl-0 = <&bt_en_pins_default>;
+		cc33xx-supply = <&reg_wifi_en>;
+		max-speed = <115200>;
+	};
+};
+
+&sdhci2 {
+	vmmc-supply = <&reg_wifi_en>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_mmc2_wifi_pins_default>;
+	bus-width = <4>;
+	non-removable;
+	ti,fails-without-test-cd;
+	cap-power-off-card;
+	keep-power-in-suspend;
+	ti,driver-strength-ohm = <50>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+
+	wifi: cc3300@2 {
+		compatible = "ti,cc3300";
+		reg = <2>;
+	};
+};
