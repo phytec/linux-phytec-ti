@@ -144,10 +144,12 @@
 };
 
 &oldi0_dss0 {
+	ti,companion-oldi = <&oldi1_dss0>;
 	status = "okay";
 };
 
 &oldi1_dss0 {
+	ti,secondary-oldi;
 	status = "okay";
 };
 
