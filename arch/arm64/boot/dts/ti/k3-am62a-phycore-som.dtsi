@@ -204,6 +204,7 @@
 	mboxes = <&mailbox0_cluster1>, <&mbox_c7x_0>;
 	memory-region = <&c7x_0_dma_memory_region>,
 			<&c7x_0_memory_region>;
+	status = "okay";
 };
 
 &cpsw3g {
@@ -260,7 +261,7 @@
 	};
 };
 
-&mailbox0_cluster2 {
+&mailbox0_cluster3 {
 	status = "disabled";
 };
 
@@ -363,6 +364,10 @@
 	};
 };
 
+&mcu_r5fss0 {
+	status = "okay";
+};
+
 &mcu_r5fss0_core0 {
 	mboxes = <&mailbox0_cluster2>, <&mbox_mcu_r5_0>;
 	memory-region = <&mcu_r5fss0_core0_dma_memory_region>,
@@ -410,6 +415,10 @@
 	pinctrl-0 = <&main_mmc0_pins_default>;
 	non-removable;
 	bootph-all;
+	status = "okay";
+};
+
+&wkup_r5fss0 {
 	status = "okay";
 };
 
