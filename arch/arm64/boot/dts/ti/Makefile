@@ -216,6 +216,7 @@ dtb-$(CONFIG_ARCH_K3) += k3-am67-phyboard-rigel-vm016-mipi-csi0.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am67-phyboard-rigel-vm016-mipi-csi1.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am67-phyboard-rigel-vm016-mipi-csi2.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am67-phyboard-rigel-vm016-mipi-csi3.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am67-phyboard-rigel-m2-cc3351.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-j722s-evm.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-j722s-evm-csi2-quad-rpi-cam-imx219.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-j722s-evm-csi2-quad-tevi-ov5640.dtbo
