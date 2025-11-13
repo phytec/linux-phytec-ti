@@ -48,6 +48,30 @@
 		standby-gpios = <&gpio_expander 9 GPIO_ACTIVE_HIGH>;
 	};
 
+	curr_sens_som_in: current-sense-som-in {
+		compatible = "current-sense-amplifier";
+		#io-channel-cells = <0>;
+		io-channels = <&tscadc0_adc 0>;
+		sense-gain-div = <3>;
+		sense-gain-mult = <100>;
+		sense-resistor-micro-ohms = <4000>;
+	};
+
+	curr_sens_vdd_5v0: current-sense-vdd-5v0 {
+		compatible = "current-sense-amplifier";
+		#io-channel-cells = <0>;
+		io-channels = <&tscadc0_adc 2>;
+		sense-gain-div = <3>;
+		sense-gain-mult = <100>;
+		sense-resistor-micro-ohms = <4000>;
+	};
+
+	iio-hwmon {
+		compatible = "iio-hwmon";
+		io-channels = <&curr_sens_som_in>, <&volt_sens_som_in>,
+			      <&curr_sens_vdd_5v0>, <&volt_sens_vdd_5v0>;
+	};
+
 	reg_vdd_1v8: regulator-vdd-1v8 {
 		compatible = "regulator-fixed";
 		regulator-always-on;
@@ -82,6 +106,22 @@
 		regulator-max-microvolt = <12000000>;
 		regulator-min-microvolt = <12000000>;
 		regulator-name = "VDD_12V0";
+	};
+
+	volt_sens_som_in: voltage-sense-som-in {
+		compatible = "voltage-divider";
+		#io-channel-cells = <0>;
+		io-channels = <&tscadc0_adc 1>;
+		output-ohms = <100>;
+		full-ohms = <346>;
+	};
+
+	volt_sens_vdd_5v0: voltage-sense-vdd-5v0 {
+		compatible = "voltage-divider";
+		#io-channel-cells = <0>;
+		io-channels = <&tscadc0_adc 3>;
+		output-ohms = <100>;
+		full-ohms = <346>;
 	};
 };
 
@@ -363,7 +403,7 @@
 &tscadc0 {
 	status = "okay";
 
-	adc {
+	tscadc0_adc: adc {
 		ti,adc-channels = <0 1 2 3>;
 	};
 };
