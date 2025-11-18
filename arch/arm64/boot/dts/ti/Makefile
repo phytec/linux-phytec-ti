@@ -152,6 +152,7 @@ dtb-$(CONFIG_ARCH_K3) += k3-am64-tqma64xxl-mbax4xxl-wlan.dtbo
 # Common overlays for the phyCORE-AM6* family of boards
 dtb-$(CONFIG_ARCH_K3) += k3-am6xx-phycore-disable-eth-phy.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am6xx-phycore-disable-rtc.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am6xx-phycore-disable-som-eeprom-opt.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am6xx-phycore-disable-spi-nor.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am6xx-phycore-qspi-nor.dtbo
 
@@ -386,6 +387,8 @@ k3-am642-tqma64xxl-mbax4xxl-sdcard-dtbs := \
 	k3-am642-tqma64xxl-mbax4xxl.dtb k3-am64-tqma64xxl-mbax4xxl-sdcard.dtbo
 k3-am642-tqma64xxl-mbax4xxl-wlan-dtbs := \
 	k3-am642-tqma64xxl-mbax4xxl.dtb k3-am64-tqma64xxl-mbax4xxl-wlan.dtbo
+k3-am6754-phyboard-rigel-disable-som-eeprom-opt := k3-am6754-phyboard-rigel.dtb \
+	k3-am6xx-phycore-disable-som-eeprom-opt.dtbo
 k3-am6754-phyboard-rigel-dsi-lcd282-dtbs := k3-am6754-phyboard-rigel.dtb \
 	k3-am6754-phyboard-rigel-dsi-lcd282.dtbo
 k3-am6754-phyboard-rigel-gpio-fan-dtbs := k3-am6754-phyboard-rigel.dtb \
