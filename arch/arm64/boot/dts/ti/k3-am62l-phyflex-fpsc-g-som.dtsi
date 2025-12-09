@@ -265,6 +265,8 @@
 	non-removable;
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_mmc0_pins_default>;
+	/delete-property/ mmc-hs200-1_8v;
+	/delete-property/ ti,otap-del-sel-hs200;
 	bootph-all;
 	status = "okay";
 };
