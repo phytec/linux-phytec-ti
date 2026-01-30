@@ -33,6 +33,23 @@
 		standby-gpios = <&gpio_exp1 1 GPIO_ACTIVE_HIGH>;
 	};
 
+	usb0_connector: connector {
+		compatible ="gpio-usb-b-connector", "usb-c-connector";
+		label = "USB-C";
+		data-role = "dual";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&main_usbc_power_pins_default>;
+
+		id-gpios = <&main_gpio1 15 GPIO_ACTIVE_HIGH>;
+
+		port {
+			usb0_con: endpoint {
+				remote-endpoint = <&usb0_ep>;
+			};
+		};
+	};
+
 	hdmi0: connector-hdmi {
 		compatible = "hdmi-connector";
 		label = "hdmi";
@@ -282,7 +299,7 @@
 
 	main_usbc_power_pins_default: main-usbc-power-pins-default {
 		pinctrl-single,pins = <
-			J722S_IOPAD(0x254, PIN_INPUT, 7)	/* (E25) USB0_DRVVBUS.GPIO1_50 */
+			J722S_IOPAD(0x1b4, PIN_INPUT, 7)	/* (B20) SPI0_CS0.GPIO1_15 */
 		>;
 	};
 };
@@ -329,19 +346,6 @@
 		assigned-clock-parents = <&k3_clks 157 34>;
 		assigned-clock-rates = <25000000>;
 		#clock-cells = <0>;
-	};
-};
-
-&main_gpio1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&main_usbc_power_pins_default>;
-
-	status = "okay";
-
-	p50-hog {
-		gpio-hog;
-		gpios = <50 GPIO_ACTIVE_HIGH>;
-		output-high;
 	};
 };
 
@@ -602,8 +606,15 @@
 };
 
 &usb0 {
-	dr_mode = "host";
+	dr_mode = "otg";
+	usb-role-switch;
 	maximum-speed = "high-speed";
+
+	port {
+		usb0_ep: endpoint {
+			remote-endpoint = <&usb0_con>;
+		};
+	};
 };
 
 &usb1 {
