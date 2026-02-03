@@ -69,6 +69,12 @@ properties:
           - const: phytec,am62-phycore-som
           - const: ti,am625
 
+      - description: K3 AM625 SoC PHYTEC phyVERSO-EVCS
+        items:
+          - const: phytec,am625-phyverso-evcs
+          - const: phytec,am62-phycore-som
+          - const: ti,am625
+
       - description: K3 AM625 SoC
         items:
           - enum:
