@@ -1,0 +1,97 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/*
+ * Copyright (C) 2026 PHYTEC Messtechnik GmbH
+ * Author: Alexander Bauer <a.bauer@phytec.de>
+ */
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include "k3-pinctrl.h"
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	aliases {
+		serial3 = "/bus@f0000/serial@2810000";
+	};
+
+	reg_wifi: regulator-wifi {
+		compatible = "regulator-fixed";
+		regulator-name = "WIFI_EN";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+		regulator-boot-on;
+	};
+};
+
+&main_pmx0 {
+	main_mmc2_wifi_pins_default: main-mmc2-wifi-default-pins {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x0120, PIN_INPUT, 0) /* (C24) MMC2_CMD */
+			AM62X_IOPAD(0x0118, PIN_OUTPUT, 0) /* (D25) MMC2_CLK */
+			AM62X_IOPAD(0x011C, PIN_INPUT, 0) /* () MMC2_CLKLB */
+			AM62X_IOPAD(0x0114, PIN_INPUT, 0) /* (B24) MMC2_DAT0 */
+			AM62X_IOPAD(0x0110, PIN_INPUT_PULLUP, 0) /* (C25) MMC2_DAT1 */
+			AM62X_IOPAD(0x010c, PIN_INPUT_PULLUP, 0) /* (E23) MMC2_DAT2 */
+			AM62X_IOPAD(0x0108, PIN_INPUT_PULLUP, 0) /* (D24) MMC2_DAT3 */
+		>;
+	};
+
+	main_uart1_pins_default: main-uart1-default-pins {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x194, PIN_INPUT, 2) /* (B19) MCASP0_AXR3.UART1_CTSn */
+			AM62X_IOPAD(0x198, PIN_OUTPUT, 2) /* (A19) MCASP0_AXR2.UART1_RTSn */
+			AM62X_IOPAD(0x1ac, PIN_INPUT, 2) /* (E19) MCASP0_AFSR.UART1_RXD */
+			AM62X_IOPAD(0x1b0, PIN_OUTPUT, 2) /* (A20) MCASP0_ACLKR.UART1_TXD */
+		>;
+	};
+
+	wifi_wlirq_pins_default: wifi-wlirq-default-pins {
+		pinctrl-single,pins = <
+			AM62X_IOPAD(0x128, PIN_INPUT_PULLDOWN, 7) /* (B23) MMC2_SDWP.GPIO0_72 */
+		>;
+	};
+};
+
+&main_uart1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_uart1_pins_default>;
+	status = "okay";
+
+	bluetooth {
+		compatible = "ti,cc33xx-bt";
+		cc33xx-supply = <&reg_wifi>;
+		max-speed = <115200>;
+	};
+};
+
+&sdhci2 {
+	vmmc-supply = <&reg_wifi>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&main_mmc2_wifi_pins_default>;
+	bus-width = <4>;
+	cap-power-off-card;
+	keep-power-in-suspend;
+	non-removable;
+	pm-ignore-notify;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	assigned-clocks = <&k3_clks 157 158>;
+	assigned-clock-parents = <&k3_clks 157 160>;
+	ti,fails-without-test-cd;
+	ti,driver-strength-ohm = <50>;
+	status = "okay";
+
+	cc33xx: wifi@2 {
+		compatible = "ti,cc3301";
+		reg = <2>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&wifi_wlirq_pins_default>;
+
+		interrupt-parent = <&main_gpio0>;
+		interrupts = <72 IRQ_TYPE_EDGE_RISING>;
+		irq-gpio = <&main_gpio0 72 GPIO_ACTIVE_HIGH>;
+	};
+};
