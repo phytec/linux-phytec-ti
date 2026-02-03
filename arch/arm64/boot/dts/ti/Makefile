@@ -16,6 +16,9 @@ dtb-$(CONFIG_ARCH_K3) += k3-am625-beagleplay-lincolntech-lcd185-panel.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am625-minimal.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am625-phyboard-lyra-rdk.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am625-phyverso-evcs.dtb
+dtb-$(CONFIG_ARCH_K3) += k3-am625-phyverso-evcs-cc3351.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am625-phyverso-evcs-oldi-dd0700mc01-dpi.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am625-phyverso-evcs-oldi-dd0700mc01-lvds.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am625-sk.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am625-sk-lincolntech-lcd185-panel.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am625-sk-microtips-mf101hie-panel.dtbo
@@ -302,6 +305,12 @@ k3-am625-phyboard-lyra-lpm-dtbs := k3-am625-phyboard-lyra-rdk.dtb \
 	k3-am62-phyboard-lyra-lpm.dtbo
 k3-am625-phyboard-lyra-m2-cc3351-dtbs := k3-am625-phyboard-lyra-rdk.dtb \
 	k3-am62-phyboard-lyra-m2-cc3351.dtbo
+k3-am625-phyverso-evcs-cc3351-dtbs := k3-am625-phyverso-evcs.dtb \
+	k3-am625-phyverso-evcs-cc3351.dtbo
+k3-am625-phyverso-evcs-oldi-dd0700mc01-dpi-dtbs := k3-am625-phyverso-evcs.dtb \
+	k3-am625-phyverso-evcs-oldi-dd0700mc01-dpi.dtbo
+k3-am625-phyverso-evcs-oldi-dd0700mc01-lvds-dtbs := k3-am625-phyverso-evcs.dtb \
+	k3-am625-phyverso-evcs-oldi-dd0700mc01-lvds.dtbo
 k3-am625-sk-csi2-imx219-dtbs := k3-am625-sk.dtb \
 	k3-am62x-sk-csi2-imx219.dtbo
 k3-am625-sk-csi2-ov5640-dtbs := k3-am625-sk.dtb \
@@ -505,6 +514,9 @@ k3-am62l3-evm-nand-dtbs := k3-am62l3-evm.dtb \
 dtb- += k3-am625-beagleplay-csi2-ov5640.dtb \
 	k3-am625-beagleplay-csi2-tevi-ov5640.dtb \
 	k3-am625-beagleplay-lincolntech-lcd185-panel.dtb \
+	k3-am625-phyverso-evcs-cc3351.dtb \
+	k3-am625-phyverso-evcs-oldi-dd0700mc01-dpi.dtbo \
+	k3-am625-phyverso-evcs-oldi-dd0700mc01-lvds.dtbo \
 	k3-am625-sk-csi2-imx219.dtb \
 	k3-am625-sk-csi2-ov5640.dtb \
 	k3-am625-sk-csi2-tevi-ov5640.dtb \
