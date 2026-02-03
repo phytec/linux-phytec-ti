@@ -34,6 +34,23 @@
 		standby-gpios = <&gpio_exp0 7 GPIO_ACTIVE_HIGH>;
 	};
 
+	usb0_connector: connector {
+		compatible ="gpio-usb-b-connector", "usb-c-connector";
+		label = "USB-C";
+		data-role = "dual";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&main_usbc_power_pins_default>;
+
+		id-gpios = <&main_gpio1 50 GPIO_ACTIVE_HIGH>;
+
+		port {
+			usb0_con: endpoint {
+				remote-endpoint = <&usb0_ep>;
+			};
+		};
+	};
+
 	hdmi0: connector-hdmi {
 		compatible = "hdmi-connector";
 		label = "hdmi";
@@ -306,9 +323,9 @@
 		>;
 	};
 
-	usb_pd_int_pins_default: usb-pd-int-default-pins {
+	main_usbc_power_pins_default: main-usbc-power-default-pins {
 		pinctrl-single,pins = <
-			AM62PX_IOPAD(0x0088, PIN_INPUT, 7) /* (R24) GPMC0_OEn_REn.GPIO0_33 */
+			AM62PX_IOPAD(0x0254, PIN_INPUT, 7) /* (G22) USB0_DRVVBUS.GPIO1_50 */
 		>;
 	};
 };
@@ -450,28 +467,6 @@
 		bootph-all;
 	};
 
-	usb-pd@22 {
-		compatible = "ti,tps6598x";
-		reg = <0x22>;
-		interrupt-parent = <&main_gpio0>;
-		interrupts = <33 IRQ_TYPE_EDGE_FALLING>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&usb_pd_int_pins_default>;
-
-		connector {
-			compatible = "usb-c-connector";
-			label = "USB-C";
-			self-powered;
-			data-role = "dual";
-			power-role = "sink";
-			port {
-				usb_con_hs: endpoint {
-					remote-endpoint = <&typec_hs>;
-				};
-			};
-		};
-	};
-
 	sii9022a: bridge-hdmi@3b {
 		compatible = "sil,sii9022";
 		reg = <0x3b>;
@@ -601,11 +596,13 @@
 };
 
 &usb0 {
+	dr_mode = "otg";
 	usb-role-switch;
+	maximum-speed = "high-speed";
 
 	port {
-		typec_hs: endpoint {
-			remote-endpoint = <&usb_con_hs>;
+		usb0_ep: endpoint {
+			remote-endpoint = <&usb0_con>;
 		};
 	};
 };
