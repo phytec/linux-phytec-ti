@@ -450,6 +450,13 @@
 
 		bootph-all;
 
+		p0-hog {
+			/* P0 - HDMI_RESETn */
+			gpio-hog;
+			gpios = <0 GPIO_ACTIVE_HIGH>;
+			output-high;
+		};
+
 		p5-hog {
 			/* P5 - USB_HUB_GLOBAL_RSTz */
 			gpio-hog;
