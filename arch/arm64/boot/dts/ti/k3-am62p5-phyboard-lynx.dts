@@ -353,18 +353,33 @@
 };
 
 &dss0 {
-	bootph-all;
+	status = "disabled";
+};
+
+&dss1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&main_dpi_pins_default>;
+	clocks = <&k3_clks 232 8>,
+		 <&k3_clks 232 0>,
+		 <&k3_clks 232 4>;
+
+	assigned-clocks = <&k3_clks 241 0>,	/* DSS1-VP0 */
+			  <&k3_clks 240 0>,	/* DSS1-VP1 */
+			  <&k3_clks 245 0>;	/* DPI Output */
+
+	assigned-clock-parents = <&k3_clks 241 2>,	/* PLL 17 HDMI */
+				 <&k3_clks 240 1>,	/* PLL 18 DSI */
+				 <&k3_clks 245 2>;	/* DSS1-DPI0 */
+
 	status = "okay";
 };
 
-&dss0_ports {
-	/* DSS0-VP2: DPI/HDMI Output */
-	hdmi0_dss: port@1 {
-		reg = <1>;
+&dss1_ports {
+	/* DSS1-VP0: DPI/HDMI Output */
+	port@0 {
+		reg = <0>;
 
-		dss0_dpi1_out: endpoint {
+		dss1_dpi0_out: endpoint {
 			remote-endpoint = <&sii9022a_in>;
 		};
 	};
@@ -475,7 +490,7 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&hdmi_int_pins_default>;
 		#sound-dai-cells = <0>;
-		sil,i2s-data-lanes = < 0 >;
+		sil,i2s-data-lanes = <0>;
 
 		ports {
 			#address-cells = <1>;
@@ -484,13 +499,13 @@
 			/*
 			 * HDMI can be serviced with 3 potential VPs -
 			 * (DSS0 VP1 / DSS1 VP0 / DSS1 VP1).
-			 * For now, we will service it with DSS0 VP1.
+			 * For now, we will service it with DSS1 VP0.
 			 */
 			port@0 {
 				reg = <0>;
 
 				sii9022a_in: endpoint {
-					remote-endpoint = <&dss0_dpi1_out>;
+					remote-endpoint = <&dss1_dpi0_out>;
 					bus-width = <16>;
 				};
 			};
