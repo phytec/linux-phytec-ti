@@ -434,6 +434,6 @@
 	status = "okay";
 };
 
-&wkup_uart_conf {
+&wkup_uart0_interconnect {
 	status = "okay";
 };
