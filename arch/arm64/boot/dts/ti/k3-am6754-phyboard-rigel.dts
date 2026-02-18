@@ -14,7 +14,7 @@
 #include "k3-am67-phycore-som.dtsi"
 
 / {
-	compatible = "phytec,am67-phyboard-rigel",
+	compatible = "phytec,am6754-phyboard-rigel",
 		     "phytec,am67-phycore-som", "ti,j722s";
 	model = "PHYTEC phyBOARD-Rigel AM67";
 
