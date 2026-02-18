@@ -277,13 +277,13 @@
 		bootph-all;
 	};
 
-	main_pcie_pins_default: main-pcie-pins-default {
+	main_pcie_pins_default: main-pcie-default-pins {
 		pinctrl-single,pins = <
 			J722S_IOPAD(0x07c, PIN_INPUT, 7)	/* (T23) GPMC0_CLK.GPIO0_31 */
 		>;
 	};
 
-	main_pcie_usb_sel_pins_default: main-pcie-usb-sel-pins-default {
+	main_pcie_usb_sel_pins_default: main-pcie-usb-sel-default-pins {
 		pinctrl-single,pins = <
 			J722S_IOPAD(0x058, PIN_INPUT, 7)	/* (T22) GPMC0_AD7.GPIO0_22 */
 		>;
@@ -297,7 +297,7 @@
 		bootph-all;
 	};
 
-	main_usbc_power_pins_default: main-usbc-power-pins-default {
+	main_usbc_power_pins_default: main-usbc-power-default-pins {
 		pinctrl-single,pins = <
 			J722S_IOPAD(0x1b4, PIN_INPUT, 7)	/* (B20) SPI0_CS0.GPIO1_15 */
 		>;
