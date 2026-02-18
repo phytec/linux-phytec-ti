@@ -358,6 +358,7 @@
 	veml6030: light-sensor@10 {
 		compatible = "vishay,veml6030";
 		reg = <0x10>;
+		vdd-supply = <&vcc_3v3_sw>;
 	};
 };
 
