@@ -108,6 +108,7 @@ dtb-$(CONFIG_ARCH_K3) += k3-am62p5-sk-microtips-mf070zima-lcd3.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62p5-sk-rpi-hdr-ehrpwm.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62p5-phyboard-lynx.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am62p5-phyboard-lynx-oldi-lcd185.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am62p5-phyboard-lynx-oldi-ac209a.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62p5-phyboard-lynx-vm016-mipi.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62p5-phyboard-lynx-m2-cc3351.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62p5-phyboard-lynx-dsi-lcd282.dtbo
@@ -354,6 +355,8 @@ k3-am62a7-sk-fastboot-disable-hdmi-dtbs := k3-am62a7-sk.dtb \
 k3-am62a7-sk-hdmi-audio-dtbs := k3-am62a7-sk.dtb k3-am62x-sk-hdmi-audio.dtbo
 k3-am62p5-phyboard-lynx-oldi-lcd185-dtbs := k3-am62p5-phyboard-lynx.dtb \
 	k3-am62p5-phyboard-lynx-oldi-lcd185.dtbo
+k3-am62p5-phyboard-lynx-oldi-ac209a-dtbs := k3-am62p5-phyboard-lynx.dtb \
+	k3-am62p5-phyboard-lynx-oldi-ac209a.dtbo
 k3-am62p5-sk-csi2-imx219-dtbs := k3-am62p5-sk.dtb \
 	k3-am62x-sk-csi2-imx219.dtbo
 k3-am62p5-sk-csi2-ov5640-dtbs := k3-am62p5-sk.dtb \
