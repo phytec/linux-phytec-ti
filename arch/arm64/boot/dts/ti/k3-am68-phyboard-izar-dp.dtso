@@ -1,0 +1,118 @@
+// SPDX-License-Identifier: GPL-2.0-only or MIT
+/*
+ * Copyright (C) 2026 PHYTEC Messtechnik GmbH
+ * Author: Dominik Haller <d.haller@phytec.de>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include "k3-pinctrl.h"
+
+&{/} {
+
+	dp0: dp0-connector {
+		compatible = "dp-connector";
+		label = "DP0";
+		type = "full-size";
+		dp-pwr-supply = <&dp0_pwr_3v3>;
+
+		port {
+			dp0_connector_in: endpoint {
+				remote-endpoint = <&dp0_out>;
+			};
+		};
+	};
+
+	dp0_pwr_3v3: fixedregulator-dp0-prw {
+		compatible = "regulator-fixed";
+		regulator-name = "dp0-pwr";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		enable-active-high;
+	};
+};
+
+&dp0_ports {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	port@0 {
+		reg = <0>;
+		dp0_in: endpoint {
+			remote-endpoint = <&dpi0_out>;
+		};
+	};
+
+	port@4 {
+		reg = <4>;
+		dp0_out: endpoint {
+			remote-endpoint = <&dp0_connector_in>;
+		};
+	};
+};
+
+&dss {
+	status = "okay";
+};
+
+&dss_ports {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	port@0 {
+		reg = <0>;
+		dpi0_out: endpoint {
+			remote-endpoint = <&dp0_in>;
+		};
+	};
+};
+
+&edp_serdes_mux {
+	idle-states = <1>; /* EDP0 to SERDES lane 2/3 */
+};
+
+&main_cpsw {
+	status = "disabled";
+};
+
+&main_cpsw_mdio {
+	status = "disabled";
+};
+
+&mhdp {
+	pinctrl-names = "default";
+	pinctrl-0 = <&dp0_default_pins>;
+	cdns,no-hpd;
+	status = "okay";
+};
+
+&serdes0_usb_link {
+	status = "disabled";
+};
+
+&torrent_phy_dp {
+	status = "okay";
+};
+
+&usbss0 {
+	ti,usb2-only;
+};
+
+&usb0 {
+        dr_mode = "host";
+        maximum-speed = "high-speed";
+	/delete-node/ phys;
+	/delete-node/ phy-names;
+};
+
+&main_pmx0 {
+	/delete-node/ rgmii1-pins-default;
+
+        dp0_default_pins: dp0-default-pins {
+                pinctrl-single,pins = <
+                        J721S2_IOPAD(0x0b8, PIN_INPUT, 3) /* (AA24) MCASP1_ACLKX.DP0_HPD */
+                >;
+        };
+};
