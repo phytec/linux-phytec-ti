@@ -20,7 +20,7 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&backlight_pins_default>;
 		power-supply = <&bl_12v>;
-		pwms = <&main_ehrpwm0 1 6666666 0>;
+		pwms = <&main_ehrpwm0 1 44000 0>;
 	};
 
 	bl_12v: regulator-backlight {
