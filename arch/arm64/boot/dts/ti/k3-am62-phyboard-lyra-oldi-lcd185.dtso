@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: GPL-2.0
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
 /*
- * Copyright (C) 2022 PHYTEC Messtechnik GmbH
+ * Copyright (C) 2022-2026 PHYTEC Messtechnik GmbH
  * Author: Wadim Egorov <w.egorov@phytec.de>
  */
 
@@ -16,12 +16,14 @@
 	display {
 		compatible = "lincolntech,lcd185-101ct";
 		backlight = <&backlight>;
+		power-supply = <&vdd_usb_5v0>;
 
 		ports {
 			#address-cells = <1>;
 			#size-cells = <0>;
 
 			port@0 {
+				reg = <0>;
 				dual-lvds-odd-pixels;
 				lcd_in0: endpoint {
 					remote-endpoint = <&oldi_0_out>;
@@ -29,6 +31,7 @@
 			};
 
 			port@1 {
+				reg = <1>;
 				dual-lvds-even-pixels;
 				lcd_in1: endpoint {
 					remote-endpoint = <&oldi_1_out>;
@@ -38,16 +41,22 @@
 	};
 
 	backlight: backlight {
-		pinctrl-names = "default";
-		pinctrl-0 = <&bl_pwm_pins_default>;
-
 		compatible = "pwm-backlight";
-
 		brightness-levels = <0 4 8 16 32 64 128 255>;
 		default-brightness-level = <6>;
-
 		enable-gpios = <&gpio_exp 5 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&bl_pwm_pins_default>;
 		pwms = <&epwm0 1 50000 0>;
+	};
+
+	vdd_usb_5v0: regulator-vdd-usb5v0 {
+		compatible = "regulator-fixed";
+		regulator-name = "vdd-usb5v0";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+		regulator-boot-on;
 	};
 };
 
@@ -102,20 +111,20 @@
 };
 
 &main_pmx0 {
-	bl_pwm_pins_default: bl-pwm-pins-default {
+	bl_pwm_pins_default: bl-pwm-default-pins {
 		pinctrl-single,pins = <
 			AM62X_IOPAD(0x01b8, PIN_INPUT, 2) /* (C13) SPI0_CS1.EHRPWM0_B */
 		>;
 	};
 
-	touch_screen_pins_default: touch-screen-pins-default {
+	touch_screen_pins_default: touch-screen-default-pins {
 		pinctrl-single,pins = <
 			AM62X_IOPAD(0x048, PIN_OUTPUT, 7) /* (N25) GPMC0_AD3.GPIO0_18 - RST */
 			AM62X_IOPAD(0x04c, PIN_INPUT, 7) /* (P24) GPMC0_AD4.GPIO0_19 - INT */
 		>;
 	};
 
-	main_oldi0_pins_default: main-oldi0-pins-default {
+	main_oldi0_pins_default: main-oldi0-default-pins {
 		pinctrl-single,pins = <
 			AM62X_IOPAD(0x0260, PIN_OUTPUT, 0) /* (AA5) OLDI0_A0N */
 			AM62X_IOPAD(0x025c, PIN_OUTPUT, 0) /* (Y6) OLDI0_A0P */
@@ -142,47 +151,35 @@
 };
 
 &oldi0 {
+	ti,companion-oldi = <&oldi1>;
 	status = "okay";
+};
+
+&oldi0_port0 {
+	oldi_0_in: endpoint {
+		remote-endpoint = <&dpi0_out0>;
+	};
+};
+
+&oldi0_port1 {
+	oldi_0_out: endpoint {
+		remote-endpoint = <&lcd_in0>;
+	};
 };
 
 &oldi1 {
+	ti,secondary-oldi;
 	status = "okay";
 };
 
-&oldi0_ports {
-	#address-cells = <1>;
-	#size-cells = <0>;
-
-	port@0 {
-		reg = <0>;
-		oldi_0_in: endpoint {
-			remote-endpoint = <&dpi0_out0>;
-		};
-	};
-
-	port@1 {
-		reg = <1>;
-		oldi_0_out: endpoint {
-			remote-endpoint = <&lcd_in0>;
-		};
+&oldi1_port0 {
+	oldi_1_in: endpoint {
+		remote-endpoint = <&dpi0_out1>;
 	};
 };
 
-&oldi1_ports {
-	#address-cells = <1>;
-	#size-cells = <0>;
-
-	port@0 {
-		reg = <0>;
-		oldi_1_in: endpoint {
-			remote-endpoint = <&dpi0_out1>;
-		};
-	};
-
-	port@1 {
-		reg = <1>;
-		oldi_1_out: endpoint {
-			remote-endpoint = <&lcd_in1>;
-		};
+&oldi1_port1 {
+	oldi_1_out: endpoint {
+		remote-endpoint = <&lcd_in1>;
 	};
 };
