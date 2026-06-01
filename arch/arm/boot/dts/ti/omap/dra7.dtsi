@@ -986,7 +986,7 @@
 			ranges = <0x0 0x59000000 0x1000>;
 
 			bb2d: gpu@0 {
-				compatible = "vivante,gc";
+				compatible = "vivante,gc", "ti,dra7-bb2d";
 				reg = <0x0 0x700>;
 				interrupts = <GIC_SPI 120 IRQ_TYPE_LEVEL_HIGH>;
 				clocks = <&dss_clkctrl DRA7_DSS_BB2D_CLKCTRL 0>;
