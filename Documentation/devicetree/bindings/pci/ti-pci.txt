@@ -59,6 +59,8 @@ DEVICE MODE
 
 Optional Property:
  - gpios : Should be added if a GPIO line is required to drive PERST# line
+ - pcie-clk-oe-gpio : GPIO line which controls PCIe clock output enable (OE)
+ - pcie-reset-active-low : Specify if PCIe reset line is active-low
 
 NOTE: Two DT nodes may be added for each PCI controller; one for host
 mode and another for device mode. So in order for PCI to
