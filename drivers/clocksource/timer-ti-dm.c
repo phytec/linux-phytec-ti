@@ -1439,6 +1439,16 @@ static int omap_dm_timer_probe(struct platform_device *pdev)
 
 	dev_pm_qos_expose_latency_limit(dev, PM_QOS_RESUME_LATENCY_NO_CONSTRAINT);
 
+	if (dev->of_node
+		&& of_find_property(dev->of_node, "ti,timer-auto-run", NULL)) {
+
+		ret = omap_dm_timer_start(&timer->cookie);
+		if (ret < 0) {
+			dev_err(dev, "%s: omap_dm_timer_start failed!\n", __func__);
+			return ret;
+		}
+	}
+
 	dev_dbg(dev, "Device Probed.\n");
 
 	return 0;
