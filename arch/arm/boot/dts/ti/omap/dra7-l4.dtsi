@@ -1411,7 +1411,7 @@
 			};
 		};
 
-		target-module@59000 {			/* 0x48059000, ap 17 16.0 */
+		gpio4_target: target-module@59000 {			/* 0x48059000, ap 17 16.0 */
 			compatible = "ti,sysc-omap2", "ti,sysc";
 			reg = <0x59000 0x4>,
 			      <0x59010 0x4>,
