@@ -1,0 +1,525 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2018 PHYTEC America, LLC. - https://www.phytec.com
+ * Author: Russell Robinson <rrobinson@phytec.com>
+ *
+ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
+ * Author: Primoz Fiser <primoz.fiser@norik.com>
+ *
+ * Product homepage:
+ * https://www.phytec.com/product/phycore-am57x
+ */
+
+#include <dt-bindings/gpio/gpio.h>
+#include "am57xx-industrial-grade.dtsi"
+
+/ {
+	aliases {
+		mmc1 = &mmc2;
+		rtc0 = &i2c_som_rtc;
+		rtc1 = &rtc;
+		rtc2 = &i2c_pmic_rtc;
+	};
+
+	/*
+	 * Set the minimum memory size here and
+	 * let the bootloader set the real size.
+	 */
+	memory {
+		device_type = "memory";
+		reg = <0x0 0x80000000 0x0 0x20000000>;
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		dsp1_memory_region: dsp1-memory@99000000 {
+			compatible = "shared-dma-pool";
+			reg = <0x0 0x99000000 0x0 0x4000000>;
+			reusable;
+		};
+
+		ipu1_memory_region: ipu1-memory@9d000000 {
+			compatible = "shared-dma-pool";
+			reg = <0x0 0x9d000000 0x0 0x2000000>;
+			reusable;
+		};
+
+		ipu2_memory_region: ipu2-memory@95800000 {
+			compatible = "shared-dma-pool";
+			reg = <0x0 0x95800000 0x0 0x3800000>;
+			reusable;
+		};
+	};
+
+	vdd_3v3: regulator-vdd-3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "VDD_3V3";
+		vin-supply = <&regen1>;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+
+	regulator-vtt {
+		/* TPS51200 */
+		compatible = "regulator-fixed";
+		regulator-name = "VTT";
+		vin-supply = <&vdd_3v3>;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+		regulator-boot-on;
+		enable-active-high;
+		gpio = <&gpio4 8 GPIO_ACTIVE_HIGH>;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&leds_som_pins_default>;
+		pinctrl-1 = <&leds_som_pins_sleep>;
+
+		led-3 {
+			label = "phycore:red";
+			gpios = <&gpio4 9 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "heartbeat";
+		};
+
+		led-4 {
+			label = "phycore:green";
+			gpios = <&gpio4 10 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "cpu0";
+		};
+	};
+};
+
+&dra7_pmx_core {
+	davinci_mdio_pins_default: davinci_mdio_pins_default {
+		pinctrl-single,pins = <
+			/* MDIO */
+			DRA7XX_CORE_IOPAD(0x363c, PIN_OUTPUT_PULLUP | MUX_MODE0)	/* (V1) mdio_mclk */
+			DRA7XX_CORE_IOPAD(0x3640, PIN_INPUT_PULLUP | MUX_MODE0)		/* (U4) mdio_d */
+		>;
+	};
+
+	davinci_mdio_pins_sleep: davinci_mdio_pins_sleep {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x363c, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3640, PIN_INPUT | MUX_MODE15)
+		>;
+	};
+
+	eeprom_wp_pin: eeprom_wp_pin {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x3724, PIN_OUTPUT | MUX_MODE14)	/* mcasp3_aclkx.gpio5_13 */
+		>;
+	};
+
+	emac0_pins_default: emac0_pins_default {
+		pinctrl-single,pins = <
+			/* Slave 1 */
+			DRA7XX_CORE_IOPAD(0x3650, PIN_OUTPUT | MUX_MODE0)	/* (W9) rgmii0_txc */
+			DRA7XX_CORE_IOPAD(0x3654, PIN_OUTPUT | MUX_MODE0)	/* (V9) rgmii0_txctl */
+			DRA7XX_CORE_IOPAD(0x3658, PIN_OUTPUT | MUX_MODE0)	/* (V7) rgmii0_txd3 */
+			DRA7XX_CORE_IOPAD(0x365c, PIN_OUTPUT | MUX_MODE0)	/* (U7) rgmii0_txd2 */
+			DRA7XX_CORE_IOPAD(0x3660, PIN_OUTPUT | MUX_MODE0)	/* (V6) rgmii0_txd1 */
+			DRA7XX_CORE_IOPAD(0x3664, PIN_OUTPUT | MUX_MODE0)	/* (U6) rgmii0_txd0 */
+			DRA7XX_CORE_IOPAD(0x3668, PIN_INPUT | MUX_MODE0)	/* (U5) rgmii0_rxc */
+			DRA7XX_CORE_IOPAD(0x366c, PIN_INPUT | MUX_MODE0)	/* (V5) rgmii0_rxctl */
+			DRA7XX_CORE_IOPAD(0x3670, PIN_INPUT | MUX_MODE0)	/* (V4) rgmii0_rxd3 */
+			DRA7XX_CORE_IOPAD(0x3674, PIN_INPUT | MUX_MODE0)	/* (V3) rgmii0_rxd2 */
+			DRA7XX_CORE_IOPAD(0x3678, PIN_INPUT | MUX_MODE0)	/* (Y2) rgmii0_rxd1 */
+			DRA7XX_CORE_IOPAD(0x367c, PIN_INPUT | MUX_MODE0)	/* (W2) rgmii0_rxd0 */
+		>;
+
+	};
+
+	emac0_pins_sleep: emac0_pins_sleep {
+		pinctrl-single,pins = <
+			/* Slave 1 */
+			DRA7XX_CORE_IOPAD(0x3650, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3654, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3658, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x365c, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3660, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3664, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3668, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x366c, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3670, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3674, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3678, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x367c, PIN_INPUT | MUX_MODE15)
+		>;
+	};
+
+	i2c1_pins_default: i2c1_pins_default {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x3800, PIN_INPUT_PULLUP | MUX_MODE0)	/* (C21) i2c1_sda */
+			DRA7XX_CORE_IOPAD(0x3804, PIN_INPUT_PULLUP | MUX_MODE0)	/* (C20) i2c1_scl */
+		>;
+	};
+
+	i2c1_pins_sleep: i2c1_pins_sleep {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x3800, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3804, PIN_INPUT | MUX_MODE15)
+		>;
+	};
+
+	leds_som_pins_default: leds_som_pins_default {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x3588, PIN_OUTPUT | MUX_MODE14)	/* (F5) vin2a_d8.gpio4_9 */
+			DRA7XX_CORE_IOPAD(0x358c, PIN_OUTPUT | MUX_MODE14)	/* (E6) vin2a_d9.gpio4_10 */
+		>;
+	};
+
+	leds_som_pins_sleep: leds_som_pins_sleep {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x3588, PIN_INPUT_PULLDOWN | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x358c, PIN_INPUT_PULLDOWN | MUX_MODE15)
+		>;
+	};
+
+	mcspi1_pins_default: mcspi1_pins_default {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x37a4, PIN_INPUT | MUX_MODE0)         /* spi1_sclk */
+			DRA7XX_CORE_IOPAD(0x37a8, PIN_INPUT | MUX_MODE0)         /* spi1_d1 */
+			DRA7XX_CORE_IOPAD(0x37ac, PIN_INPUT | MUX_MODE0)         /* spi1_d0 */
+			DRA7XX_CORE_IOPAD(0x37b0, PIN_OUTPUT_PULLUP | MUX_MODE0) /* spi1_cs0 */
+			DRA7XX_CORE_IOPAD(0x37b4, PIN_OUTPUT_PULLUP | MUX_MODE0) /* spi1_cs1 */
+		>;
+	};
+
+	mmc2_pins_sleep: mmc2_pins_sleep {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x349c, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x34b0, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x34a0, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x34a4, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x34a8, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x34ac, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x348c, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3490, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3494, PIN_INPUT | MUX_MODE15)
+			DRA7XX_CORE_IOPAD(0x3498, PIN_INPUT | MUX_MODE15)
+		>;
+	};
+
+	tps659038_pins_default: tps659038_pins_default {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x3818, PIN_INPUT_PULLUP | MUX_MODE14)	/* (AD17) Wakeup0.gpio1_0 */
+		>;
+	};
+};
+
+&cpu0 {
+	vdd-supply = <&smps12_reg>;
+	voltage-tolerance = <1>;
+};
+
+&cpsw_port1 {
+	phy-handle = <&phy0>;
+	phy-mode = "rgmii-rxid";
+	ti,dual-emac-pvid = <1>;
+};
+
+&davinci_mdio_sw {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&davinci_mdio_pins_default>;
+	pinctrl-1 = <&davinci_mdio_pins_sleep>;
+
+	phy0: ethernet-phy@1 {
+		reg = <1>;
+	};
+};
+
+&dsp1 {
+	status = "okay";
+	memory-region = <&dsp1_memory_region>;
+};
+
+&gpio4_target {
+	ti,no-reset-on-init;
+	ti,no-idle-on-init;
+};
+
+&i2c1 {
+	status = "okay";
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&i2c1_pins_default>;
+	pinctrl-1 = <&i2c1_pins_sleep>;
+	clock-frequency = <400000>;
+
+	eeprom@50 {
+		compatible = "atmel,24c32";
+		pinctrl-names = "default";
+		pinctrl-0 = <&eeprom_wp_pin>;
+		wp-gpios = <&gpio5 13 GPIO_ACTIVE_HIGH>;
+		reg = <0x50>;
+		pagesize = <32>;
+	};
+
+	tps659038: pmic@58 {
+		compatible = "ti,tps659038";
+		reg = <0x58>;
+		interrupt-parent = <&gpio1>;
+		interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
+
+		#interrupt-cells = <2>;
+		interrupt-controller;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&tps659038_pins_default>;
+
+		ti,system-power-controller;
+		ti,palmas-override-powerhold;
+
+		pmic {
+			compatible = "ti,tps659038-pmic";
+
+			regulators {
+				ldo1_reg: ldo1 {
+					regulator-name = "VDD_SD";
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <3300000>;
+					regulator-always-on;
+					regulator-boot-on;
+				};
+
+				ldo2_reg: ldo2 {
+					regulator-name = "VDD_SHV5";
+					regulator-min-microvolt = <3300000>;
+					regulator-max-microvolt = <3300000>;
+					regulator-always-on;
+					regulator-boot-on;
+				};
+
+				ldo3_reg: ldo3 {
+					regulator-name = "VDDA_1V8_PHYA";
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <1800000>;
+					regulator-always-on;
+					regulator-boot-on;
+				};
+
+				ldo4_reg: ldo4 {
+					regulator-name = "VDDA_1V8_PHYB";
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <1800000>;
+					regulator-always-on;
+					regulator-boot-on;
+				};
+
+				ldo9_reg: ldo9 {
+					regulator-name = "VDD_RTC";
+					regulator-min-microvolt = <1050000>;
+					regulator-max-microvolt = <1050000>;
+					regulator-always-on;
+					regulator-boot-on;
+				};
+
+				ldoln_reg: ldoln {
+					regulator-name = "VDDA_1V8_PLL";
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <1800000>;
+					regulator-always-on;
+					regulator-boot-on;
+				};
+
+				ldousb_reg: ldousb {
+					regulator-name = "VUSB_3V3";
+					regulator-min-microvolt = <3300000>;
+					regulator-max-microvolt = <3300000>;
+					regulator-boot-on;
+				};
+
+				regen1: regen1 {
+					regulator-name = "VDD_3V3_ON";
+					regulator-boot-on;
+					regulator-always-on;
+				};
+
+				smps12_reg: smps12 {
+					regulator-name = "VDD_MPU";
+					regulator-min-microvolt = <850000>;
+					regulator-max-microvolt = <1250000>;
+					regulator-always-on;
+					regulator-boot-on;
+				};
+
+				smps3_reg: smps3 {
+					regulator-name = "VDD_DDR";
+					regulator-min-microvolt = <1350000>;
+					regulator-max-microvolt = <1350000>;
+					regulator-always-on;
+					regulator-boot-on;
+				};
+
+				smps45_reg: smps45 {
+					regulator-name = "VDD_DSP";
+					regulator-min-microvolt = <850000>;
+					regulator-max-microvolt = <1150000>;
+					regulator-always-on;
+					regulator-boot-on;
+				};
+
+				smps6_reg: smps6 {
+					regulator-name = "VDD_CORE";
+					regulator-min-microvolt = <850000>;
+					regulator-max-microvolt = <1030000>;
+					regulator-always-on;
+					regulator-boot-on;
+				};
+
+				/* SMPS7 unused */
+
+				smps8_reg: smps8 {
+					regulator-name = "VDD_1V8";
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <1800000>;
+					regulator-always-on;
+					regulator-boot-on;
+				};
+
+				smps9_reg: smps9 {
+					regulator-name = "ETH0_VDD_1V2";
+					regulator-min-microvolt = <1200000>;
+					regulator-max-microvolt = <1200000>;
+					regulator-always-on;
+					regulator-boot-on;
+				};
+			};
+		};
+
+		power-button {
+			compatible = "ti,palmas-pwrbutton";
+			interrupt-parent = <&tps659038>;
+			interrupts = <1 IRQ_TYPE_EDGE_FALLING>;
+			wakeup-source;
+			ti,palmas-long-press-seconds = <12>;
+		};
+
+		i2c_pmic_rtc: rtc {
+			compatible = "ti,palmas-rtc";
+			interrupt-parent = <&tps659038>;
+			interrupts = <8 IRQ_TYPE_EDGE_FALLING>;
+			wakeup-source;
+		};
+
+		extcon_usb2: extcon {
+			compatible = "ti,palmas-usb-vid";
+			ti,enable-vbus-detection;
+			ti,enable-id-detection;
+		};
+	};
+
+	i2c_som_rtc: rtc@68 {
+		compatible = "microcrystal,rv4162";
+		reg = <0x68>;
+		wakeup-source;
+	};
+};
+
+&ipu1 {
+	status = "okay";
+	memory-region = <&ipu1_memory_region>;
+};
+
+&ipu2 {
+	status = "okay";
+	memory-region = <&ipu2_memory_region>;
+};
+
+&mac_sw {
+	status = "okay";
+	slaves = <1>;
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&emac0_pins_default>;
+	pinctrl-1 = <&emac0_pins_sleep>;
+};
+
+&mailbox3 {
+	status = "okay";
+	mbox_pru1_0: mbox-pru1-0 {
+		ti,mbox-tx = <0 0 0>;
+		ti,mbox-rx = <1 0 0>;
+		status = "okay";
+	};
+	mbox_pru1_1: mbox-pru1-1 {
+		ti,mbox-tx = <2 0 0>;
+		ti,mbox-rx = <3 0 0>;
+		status = "okay";
+	};
+};
+
+&mailbox4 {
+	status = "okay";
+	mbox_pru2_0: mbox-pru2-0 {
+		ti,mbox-tx = <0 0 0>;
+		ti,mbox-rx = <1 0 0>;
+		status = "okay";
+	};
+	mbox_pru2_1: mbox-pru2-1 {
+		ti,mbox-tx = <2 0 0>;
+		ti,mbox-rx = <3 0 0>;
+		status = "okay";
+	};
+};
+
+&mcspi1 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&mcspi1_pins_default>;
+	ti,pindir-d0-out-d1-in;
+};
+
+&mmc2 {
+	status = "okay";
+	vmmc-supply = <&vdd_3v3>;
+	bus-width = <8>;
+	non-removable;
+	max-frequency = <96000000>;
+	no-1-8-v;
+};
+
+&pruss1 {
+	status = "okay";
+};
+
+&pruss1_mdio {
+	status = "disabled";
+};
+
+&pru1_0 {
+	mboxes = <&mailbox3 &mbox_pru1_0>;
+	status = "okay";
+};
+
+&pru1_1 {
+	mboxes = <&mailbox3 &mbox_pru1_1>;
+	status = "okay";
+};
+
+&pruss2 {
+	status = "okay";
+};
+
+&pruss2_mdio {
+	status = "disabled";
+};
+
+&pru2_0 {
+	mboxes = <&mailbox4 &mbox_pru2_0>;
+	status = "okay";
+};
+
+&pru2_1 {
+	mboxes = <&mailbox4 &mbox_pru2_1>;
+	status = "okay";
+};
+
+&rtc {
+	status = "okay";
+};

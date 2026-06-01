@@ -1,0 +1,47 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
+ * Author: Primoz Fiser <primoz.fiser@norik.com>
+ */
+
+#include "am5718.dtsi"
+#include "dra72x-mmc-iodelay.dtsi"
+#include "dra7-ipu-dsp-common.dtsi"
+#include "am57xx-phycore-common.dtsi"
+
+/ {
+	model = "PHYTEC phyCORE-AM5716";
+	compatible = "phytec,am57xx-phycore-som", "ti,am5716", "ti,dra722", "ti,dra72", "ti,dra7";
+};
+
+/* TI AM5716 SoC doesn't have BB2D, DSS, IVA & GPU */
+&bb2d {
+	status = "disabled";
+};
+
+&dss {
+	status = "disabled";
+};
+
+&gpu {
+	status = "disabled";
+};
+
+&mmc2 {
+	pinctrl-names = "default", "sleep", "hs", "ddr_3_3v";
+	pinctrl-0 = <&mmc2_pins_default>;
+	pinctrl-1 = <&mmc2_pins_sleep>;
+	pinctrl-2 = <&mmc2_pins_hs>;
+	pinctrl-3 = <&mmc2_pins_ddr_rev20 &mmc2_iodelay_ddr_conf>;
+};
+
+/* Limit PCIe to one lane on phyCORE-AM5716 */
+&pcie2_phy {
+	status = "disabled";
+};
+
+&pcie1_rc {
+	num-lanes = <1>;
+	phys = <&pcie1_phy>;
+	phy-names = "pcie-phy0";
+};

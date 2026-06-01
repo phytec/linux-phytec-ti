@@ -170,7 +170,15 @@ dtb-$(CONFIG_SOC_DRA7XX) += \
 	dra72-evm.dtb \
 	dra72-evm-revc.dtb \
 	dra71-evm.dtb \
-	dra76-evm.dtb
+	dra76-evm.dtb \
+	am57xx-phytec-pcm-948.dtb \
+	am5716-phytec-pcm-948-10203111I.dtb \
+	am5726-phytec-pcm-948-40201111I.dtb \
+	am5728-phytec-pcm-948-40300111I.dtb \
+	am5728-phytec-pcm-948-40A00111I.dtb \
+	am5728-phytec-pcm-948-50500111I.dtb \
+	am5729-phytec-pcm-948-10306111I.dtb \
+	am5749-phytec-pcm-948-32302111I.dtb
 dtb-$(CONFIG_SOC_OMAP5) += \
 	omap5-cm-t54.dtb \
 	omap5-igep0050.dtb \
