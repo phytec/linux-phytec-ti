@@ -84,6 +84,11 @@ properties:
       Timer access has been limited to secure mode only.
     type: boolean
 
+  ti,timer-auto-run:
+    description:
+      Automatically run time on timer probe.
+    type: boolean
+
   ti,hwmods:
     description:
       Name of the HWMOD associated with timer. This is for legacy
