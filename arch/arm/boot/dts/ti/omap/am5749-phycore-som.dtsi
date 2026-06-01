@@ -1,0 +1,52 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
+ * Author: Primoz Fiser <primoz.fiser@norik.com>
+ */
+
+#include "am5748.dtsi"
+#include "dra76x-mmc-iodelay.dtsi"
+#include "dra74-ipu-dsp-common.dtsi"
+#include "am57xx-phycore-common.dtsi"
+
+/ {
+	model = "PHYTEC phyCORE-AM5749";
+	compatible = "phytec,am57xx-phycore-som", "ti,am5748", "ti,dra762", "ti,dra7";
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		dsp2_memory_region: dsp2-memory@9f000000 {
+			compatible = "shared-dma-pool";
+			reg = <0x0 0x9f000000 0x0 0x800000>;
+			reusable;
+		};
+	};
+};
+
+&bb2d {
+	status = "okay";
+};
+
+&dsp2 {
+	status = "okay";
+	memory-region = <&dsp2_memory_region>;
+};
+
+&emif1 {
+	status = "okay";
+};
+
+&gpu {
+	status = "okay";
+};
+
+&mmc2 {
+	pinctrl-names = "default", "sleep", "hs", "ddr_3_3v";
+	pinctrl-0 = <&mmc2_pins_default>;
+	pinctrl-1 = <&mmc2_pins_sleep>;
+	pinctrl-2 = <&mmc2_pins_default>;
+	pinctrl-3 = <&mmc2_pins_default>;
+};

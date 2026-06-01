@@ -1,0 +1,14 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
+ * Author: Primoz Fiser <primoz.fiser@norik.com>
+ */
+
+#include "am5728-phycore-som.dtsi"
+
+/ {
+	model = "PHYTEC phyCORE-AM5729";
+	compatible = "phytec,am57xx-phycore-som", "ti,am5728", "ti,dra742", "ti,dra74", "ti,dra7";
+};
+
+/* TI AM5729 SoC has EVE */
