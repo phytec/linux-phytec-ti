@@ -111,6 +111,8 @@
 #define MT9M111_OUTFMT_FLIP_BAYER_COL	(1 << 9)
 #define MT9M111_OUTFMT_FLIP_BAYER_ROW	(1 << 8)
 #define MT9M111_OUTFMT_PROCESSED_BAYER	(1 << 14)
+/* TODO: undocumented and only mentioned in TN09163_A appnote */
+#define MT9M111_OUTFMT_SOC_AS_SENSOR	(1 << 12)
 #define MT9M111_OUTFMT_BYPASS_IFP	(1 << 10)
 #define MT9M111_OUTFMT_INV_PIX_CLOCK	(1 << 9)
 #define MT9M111_OUTFMT_RGB		(1 << 8)
@@ -209,6 +211,13 @@ static const struct mt9m111_datafmt mt9m111_colour_fmts[] = {
 	{MEDIA_BUS_FMT_SBGGR10_2X8_PADHI_LE, V4L2_COLORSPACE_SRGB, true, true},
 };
 
+static const struct mt9m111_datafmt mt9m111_10bit_fmts[] = {
+	{MEDIA_BUS_FMT_SBGGR10_1X10, V4L2_COLORSPACE_SRGB, true, true},
+	{MEDIA_BUS_FMT_SGBRG10_1X10, V4L2_COLORSPACE_SRGB, true, true},
+	{MEDIA_BUS_FMT_SGRBG10_1X10, V4L2_COLORSPACE_SRGB, true, true},
+	{MEDIA_BUS_FMT_SRGGB10_1X10, V4L2_COLORSPACE_SRGB, true, true},
+};
+
 enum mt9m111_mode_id {
 	MT9M111_MODE_SXGA_8FPS,
 	MT9M111_MODE_SXGA_15FPS,
@@ -247,6 +256,7 @@ struct mt9m111 {
 	/* user point of view - 0: falling 1: rising edge */
 	unsigned int pclk_sample:1;
 	struct media_pad pad;
+	bool allow_10bit:1;
 };
 
 static const struct mt9m111_mode_info mt9m111_mode_data[MT9M111_NUM_MODES] = {
@@ -288,6 +298,13 @@ static const struct mt9m111_datafmt *mt9m111_find_datafmt(struct mt9m111 *mt9m11
 	for (i = 0; i < ARRAY_SIZE(mt9m111_colour_fmts); i++)
 		if (mt9m111_colour_fmts[i].code == code)
 			return mt9m111_colour_fmts + i;
+
+	if (mt9m111->allow_10bit) {
+		for (i = 0; i < ARRAY_SIZE(mt9m111_10bit_fmts); i++)
+			if (mt9m111_10bit_fmts[i].code == code)
+				return mt9m111_10bit_fmts + i;
+	}
+
 
 	return mt9m111->fmt;
 }
@@ -550,6 +567,7 @@ static int mt9m111_set_pixfmt(struct mt9m111 *mt9m111,
 	struct i2c_client *client = v4l2_get_subdevdata(&mt9m111->subdev);
 	u16 data_outfmt2, mask_outfmt2 = MT9M111_OUTFMT_PROCESSED_BAYER |
 		MT9M111_OUTFMT_BYPASS_IFP | MT9M111_OUTFMT_RGB |
+		MT9M111_OUTFMT_SOC_AS_SENSOR |
 		MT9M111_OUTFMT_RGB565 | MT9M111_OUTFMT_RGB555 |
 		MT9M111_OUTFMT_RGB444x | MT9M111_OUTFMT_RGBx444 |
 		MT9M111_OUTFMT_SWAP_YCbCr_C_Y_RGB_EVEN |
@@ -560,6 +578,12 @@ static int mt9m111_set_pixfmt(struct mt9m111 *mt9m111,
 	case MEDIA_BUS_FMT_SBGGR8_1X8:
 		data_outfmt2 = MT9M111_OUTFMT_PROCESSED_BAYER |
 			MT9M111_OUTFMT_RGB;
+		break;
+	case MEDIA_BUS_FMT_SBGGR10_1X10:
+	case MEDIA_BUS_FMT_SGBRG10_1X10:
+	case MEDIA_BUS_FMT_SGRBG10_1X10:
+	case MEDIA_BUS_FMT_SRGGB10_1X10:
+		data_outfmt2 = MT9M111_OUTFMT_SOC_AS_SENSOR;
 		break;
 	case MEDIA_BUS_FMT_SBGGR10_2X8_PADHI_LE:
 		data_outfmt2 = MT9M111_OUTFMT_BYPASS_IFP | MT9M111_OUTFMT_RGB;
@@ -1075,6 +1099,13 @@ static const struct mt9m111_datafmt *mt9m111_fmt_by_idx(
 		return &mt9m111_colour_fmts[idx];
 	idx -= cnt;
 
+	if (mt9m111->allow_10bit) {
+		cnt = ARRAY_SIZE(mt9m111_10bit_fmts);
+		if (idx < cnt)
+			return &mt9m111_10bit_fmts[idx];
+		idx -= cnt;
+	}
+
 	return NULL;
 }
 
@@ -1373,6 +1404,9 @@ static int mt9m111_probe(struct i2c_client *client)
 
 	/* Default HIGHPOWER context */
 	mt9m111->ctx = &context_b;
+
+	mt9m111->allow_10bit = of_property_read_bool(client->dev.of_node,
+						    "mt9m111,allow-10bit");
 
 	v4l2_i2c_subdev_init(&mt9m111->subdev, client, &mt9m111_subdev_ops);
 	mt9m111->subdev.internal_ops = &mt9m111_internal_ops;
