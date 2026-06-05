@@ -133,6 +133,7 @@
 #define MT9M111_RM_PWR_MASK		BIT(10)
 #define MT9M111_RM_SKIP2_MASK		GENMASK(3, 2)
 
+#define V4L2_CID_X_PIXEL_RATE	(V4L2_CID_USER_BASE | 0x1002)
 /*
  * Camera control register addresses (0x200..0x2ff not implemented)
  */
@@ -943,6 +944,13 @@ static int mt9m111_s_ctrl(struct v4l2_ctrl *ctrl)
 		return mt9m111_set_test_pattern(mt9m111, ctrl->val);
 	case V4L2_CID_COLORFX:
 		return mt9m111_set_colorfx(mt9m111, ctrl->val);
+	case V4L2_CID_X_PIXEL_RATE:
+		if (mt9m111->clk) {
+			clk_set_rate(mt9m111->clk, ctrl->val);
+			ctrl->val = clk_get_rate(mt9m111->clk);
+		}
+
+		return 0;
 	}
 
 	return -EINVAL;
@@ -1416,11 +1424,24 @@ out_put_fw:
 	return ret;
 }
 
+static const struct v4l2_ctrl_config mt9m111_ctrls[] = {
+	{
+		.ops    = &mt9m111_ctrl_ops,
+		.id     = V4L2_CID_X_PIXEL_RATE,
+		.type   = V4L2_CTRL_TYPE_INTEGER,
+		.name   = "X Pixel Rate",
+		.min    =  2000000,
+		.max    = 54000000,
+		.def    = 27000000,
+		.step   = 1,
+	},
+};
+
 static int mt9m111_probe(struct i2c_client *client)
 {
 	struct mt9m111 *mt9m111;
 	struct i2c_adapter *adapter = client->adapter;
-	int ret;
+	int ret, i;
 	u32 fixed_rate;
 
 	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_WORD_DATA)) {
@@ -1481,7 +1502,7 @@ static int mt9m111_probe(struct i2c_client *client)
 	mt9m111->subdev.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE |
 				 V4L2_SUBDEV_FL_HAS_EVENTS;
 
-	v4l2_ctrl_handler_init(&mt9m111->hdl, 7);
+	v4l2_ctrl_handler_init(&mt9m111->hdl, ARRAY_SIZE(mt9m111_ctrls) + 7);
 	v4l2_ctrl_new_std(&mt9m111->hdl, &mt9m111_ctrl_ops,
 			V4L2_CID_VFLIP, 0, 1, 1, 0);
 	v4l2_ctrl_new_std(&mt9m111->hdl, &mt9m111_ctrl_ops,
@@ -1505,6 +1526,10 @@ static int mt9m111_probe(struct i2c_client *client)
 				BIT(V4L2_COLORFX_NEGATIVE) |
 				BIT(V4L2_COLORFX_SOLARIZATION)),
 			V4L2_COLORFX_NONE);
+
+	for (i = 0; i < ARRAY_SIZE(mt9m111_ctrls); ++i)
+		v4l2_ctrl_new_custom(&mt9m111->hdl, &mt9m111_ctrls[i], NULL);
+
 	mt9m111->subdev.ctrl_handler = &mt9m111->hdl;
 	if (mt9m111->hdl.error) {
 		ret = mt9m111->hdl.error;
