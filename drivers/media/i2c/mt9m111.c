@@ -211,6 +211,13 @@ static const struct mt9m111_datafmt mt9m111_colour_fmts[] = {
 	{MEDIA_BUS_FMT_SBGGR10_2X8_PADHI_LE, V4L2_COLORSPACE_SRGB, true, true},
 };
 
+static const struct mt9m111_datafmt mt9m111_processed_fmts[] = {
+	{MEDIA_BUS_FMT_SBGGR8_1X8, V4L2_COLORSPACE_SRGB, false, true},
+	{MEDIA_BUS_FMT_SGBRG8_1X8, V4L2_COLORSPACE_SRGB, false, true},
+	{MEDIA_BUS_FMT_SGRBG8_1X8, V4L2_COLORSPACE_SRGB, false, true},
+	{MEDIA_BUS_FMT_SRGGB8_1X8, V4L2_COLORSPACE_SRGB, false, true},
+};
+
 static const struct mt9m111_datafmt mt9m111_10bit_fmts[] = {
 	{MEDIA_BUS_FMT_SBGGR10_1X10, V4L2_COLORSPACE_SRGB, true, true},
 	{MEDIA_BUS_FMT_SGBRG10_1X10, V4L2_COLORSPACE_SRGB, true, true},
@@ -257,6 +264,7 @@ struct mt9m111 {
 	unsigned int pclk_sample:1;
 	struct media_pad pad;
 	bool allow_10bit:1;
+	bool allow_burst:1;
 };
 
 static const struct mt9m111_mode_info mt9m111_mode_data[MT9M111_NUM_MODES] = {
@@ -305,6 +313,11 @@ static const struct mt9m111_datafmt *mt9m111_find_datafmt(struct mt9m111 *mt9m11
 				return mt9m111_10bit_fmts + i;
 	}
 
+	if (mt9m111->allow_burst) {
+		for (i = 0; i < ARRAY_SIZE(mt9m111_processed_fmts); i++)
+			if (mt9m111_processed_fmts[i].code == code)
+				return mt9m111_processed_fmts + i;
+	}
 
 	return mt9m111->fmt;
 }
@@ -427,7 +440,7 @@ static int mt9m111_setup_geometry(struct mt9m111 *mt9m111, struct v4l2_rect *rec
 	if (!ret)
 		ret = reg_write(WINDOW_HEIGHT, rect->height);
 
-	if (!fmt->bypass_ifp) {
+	if (!fmt->bypass_ifp && mt9m111->allow_burst) {
 		/* IFP in use, down-scaling possible */
 		if (!ret)
 			ret = mt9m111_setup_rect_ctx(mt9m111, &context_b,
@@ -576,6 +589,9 @@ static int mt9m111_set_pixfmt(struct mt9m111 *mt9m111,
 
 	switch (code) {
 	case MEDIA_BUS_FMT_SBGGR8_1X8:
+	case MEDIA_BUS_FMT_SGBRG8_1X8:
+	case MEDIA_BUS_FMT_SGRBG8_1X8:
+	case MEDIA_BUS_FMT_SRGGB8_1X8:
 		data_outfmt2 = MT9M111_OUTFMT_PROCESSED_BAYER |
 			MT9M111_OUTFMT_RGB;
 		break;
@@ -673,7 +689,7 @@ static int mt9m111_set_fmt(struct v4l2_subdev *sd,
 		rect->height = ALIGN(rect->height, 2);
 	}
 
-	if (fmt->bypass_ifp) {
+	if (fmt->bypass_ifp || !mt9m111->allow_burst) {
 		/* IFP bypass mode, no scaling */
 		mf->width = rect->width;
 		mf->height = rect->height;
@@ -1106,6 +1122,13 @@ static const struct mt9m111_datafmt *mt9m111_fmt_by_idx(
 		idx -= cnt;
 	}
 
+	if (mt9m111->allow_burst) {
+		cnt = ARRAY_SIZE(mt9m111_processed_fmts);
+		if (idx < cnt)
+			return &mt9m111_processed_fmts[idx];
+		idx -= cnt;
+	}
+
 	return NULL;
 }
 
@@ -1407,6 +1430,8 @@ static int mt9m111_probe(struct i2c_client *client)
 
 	mt9m111->allow_10bit = of_property_read_bool(client->dev.of_node,
 						    "mt9m111,allow-10bit");
+	mt9m111->allow_burst = of_property_read_bool(client->dev.of_node,
+						    "mt9m111,allow-burst");
 
 	v4l2_i2c_subdev_init(&mt9m111->subdev, client, &mt9m111_subdev_ops);
 	mt9m111->subdev.internal_ops = &mt9m111_internal_ops;
