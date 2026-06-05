@@ -1090,12 +1090,35 @@ static int mt9m111_s_power(struct v4l2_subdev *sd, int on)
 	return ret;
 }
 
+static int mt9m111_querycap(struct mt9m111 *mt9m111,
+	struct v4l2_capability *cap)
+{
+	strcpy(cap->driver, "mt9m111");
+
+	return 0;
+}
+
+static long mt9m111_core_ioctl(struct v4l2_subdev *sd,
+			      unsigned int cmd, void *arg)
+{
+	struct mt9m111 *mt9m111 = container_of(sd, struct mt9m111, subdev);
+
+	switch (cmd) {
+	case VIDIOC_QUERYCAP:
+		return mt9m111_querycap(mt9m111, arg);
+
+	default:
+		return -ENOTTY;
+	}
+}
+
 static const struct v4l2_ctrl_ops mt9m111_ctrl_ops = {
 	.s_ctrl = mt9m111_s_ctrl,
 };
 
 static const struct v4l2_subdev_core_ops mt9m111_subdev_core_ops = {
 	.s_power	= mt9m111_s_power,
+	.ioctl		= mt9m111_core_ioctl,
 	.log_status = v4l2_ctrl_subdev_log_status,
 	.subscribe_event = v4l2_ctrl_subdev_subscribe_event,
 	.unsubscribe_event = v4l2_event_subdev_unsubscribe,
