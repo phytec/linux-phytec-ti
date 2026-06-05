@@ -975,7 +975,7 @@
 			};
 		};
 
-		target-module@59000000 {
+		bb2d_target: target-module@59000000 {
 			compatible = "ti,sysc-omap4", "ti,sysc";
 			reg = <0x59000020 0x4>;
 			reg-names = "rev";
