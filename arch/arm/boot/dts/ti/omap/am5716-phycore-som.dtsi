@@ -15,6 +15,10 @@
 };
 
 /* TI AM5716 SoC doesn't have BB2D, DSS, IVA & GPU */
+&bb2d_target {
+	status = "disabled";
+};
+
 &bb2d {
 	status = "disabled";
 };
