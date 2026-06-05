@@ -3414,38 +3414,6 @@ static void ar0144_set_defaults(struct ar0144 *sensor)
 	sensor->gains.min_ref = 1000;
 }
 
-static int ar0144_subdev_registered(struct v4l2_subdev *sd)
-{
-	struct ar0144 *sensor = to_ar0144(sd);
-	int ret;
-
-	ar0144_set_defaults(sensor);
-
-	ret = ar0144_setup_pll(sensor);
-	if (ret)
-		return ret;
-
-	if (sensor->info.bus_type == V4L2_MBUS_CSI2_DPHY)
-		ret = ar0144_init_mipi_sensor(sensor);
-	else
-		ret = ar0144_init_parallel_sensor(sensor);
-
-	if (ret)
-		return ret;
-
-	ret = ar0144_create_ctrls(sensor);
-	if (ret)
-		return ret;
-
-	v4l2_ctrl_handler_setup(&sensor->ctrls);
-
-	return 0;
-}
-
-static const struct v4l2_subdev_internal_ops ar0144_subdev_internal_ops = {
-	.registered		= ar0144_subdev_registered,
-};
-
 static int ar0144_check_chip_id(struct ar0144 *sensor)
 {
 	struct device *dev = sensor->dev;
@@ -3702,7 +3670,6 @@ static int ar0144_probe(struct i2c_client *i2c)
 	}
 
 	sd->flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
-	sd->internal_ops = &ar0144_subdev_internal_ops;
 	sd->entity.function = MEDIA_ENT_F_CAM_SENSOR;
 
 	sensor->pad.flags = MEDIA_PAD_FL_SOURCE;
@@ -3714,6 +3681,26 @@ static int ar0144_probe(struct i2c_client *i2c)
 	ret = ar0144_check_chip_id(sensor);
 	if (ret)
 		goto out_media;
+
+	ar0144_set_defaults(sensor);
+
+	ret = ar0144_setup_pll(sensor);
+	if (ret)
+		goto out_media;
+
+	if (sensor->info.bus_type == V4L2_MBUS_CSI2_DPHY)
+		ret = ar0144_init_mipi_sensor(sensor);
+	else
+		ret = ar0144_init_parallel_sensor(sensor);
+
+	if (ret)
+		goto out_media;
+
+	ret = ar0144_create_ctrls(sensor);
+	if (ret)
+		goto out_media;
+
+	v4l2_ctrl_handler_setup(&sensor->ctrls);
 
 	ret = v4l2_async_register_subdev_sensor(&sensor->subdev);
 	if (ret)
