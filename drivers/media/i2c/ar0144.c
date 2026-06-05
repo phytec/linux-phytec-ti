@@ -298,6 +298,8 @@ struct ar0144_businfo {
 	unsigned long target_link_frequency;
 	const s64 *link_freqs;
 
+	unsigned int bus_width;
+	unsigned int data_shift;
 	unsigned int slew_rate_dat;
 	unsigned int slew_rate_clk;
 
@@ -1577,10 +1579,10 @@ static int ar0144_config_frame(struct ar0144 *sensor)
 static int ar0144_config_parallel(struct ar0144 *sensor)
 {
 	int ret;
+	unsigned int bpp = sensor->bpp + sensor->info.data_shift;
 
 	ret = ar0144_write(sensor, AR0144_DATA_FORMAT_BITS,
-			   BIT_DATA_FMT_IN(sensor->bpp) |
-			   BIT_DATA_FMT_OUT(sensor->bpp));
+			   BIT_DATA_FMT_IN(bpp) | BIT_DATA_FMT_OUT(bpp));
 	if (ret)
 		return ret;
 
@@ -3400,6 +3402,10 @@ static void ar0144_set_defaults(struct ar0144 *sensor)
 		break;
 	}
 
+	/* In case of parallel bus data-shifting re-calculate num_fmts */
+	if (sensor->info.bus_type == V4L2_MBUS_PARALLEL)
+		sensor->num_fmts = bpp_to_index(sensor, sensor->info.bus_width) + 1;
+
 	sensor->fmt.code = sensor->formats[sensor->num_fmts - 1].code;
 	sensor->bpp = sensor->formats[sensor->num_fmts - 1].bpp;
 
@@ -3467,8 +3473,35 @@ static int ar0144_parse_parallel_props(struct ar0144 *sensor,
 	unsigned int tmp;
 
 	sensor->info.flags = bus_cfg->bus.parallel.flags;
+	sensor->info.bus_width = bus_cfg->bus.parallel.bus_width;
+	sensor->info.data_shift = bus_cfg->bus.parallel.data_shift;
 	/* Required for PLL calculation */
 	sensor->info.num_lanes = 1;
+
+	if (sensor->info.bus_width != 8 &&
+	    sensor->info.bus_width != 10 &&
+	    sensor->info.bus_width != 12) {
+		dev_err(sensor->dev, "Wrong bus width configured");
+		return -EINVAL;
+	}
+
+	if (sensor->info.data_shift != 0 &&
+	    sensor->info.data_shift != 2 &&
+	    sensor->info.data_shift != 4) {
+		dev_err(sensor->dev, "Wrong data shift configured");
+		return -EINVAL;
+	}
+
+	if ((sensor->model->chip == AR0144 &&
+	    sensor->info.bus_width + sensor->info.data_shift > 12) ||
+	    (sensor->model->chip == AR0234 &&
+	    sensor->info.bus_width + sensor->info.data_shift > 10) ||
+	    (sensor->info.bus_width + sensor->info.data_shift < 8)) {
+		dev_err(sensor->dev,
+		    "Wrong combined bus width configured for %s",
+		    sensor->model->chip == AR0234 ? "AR0234" : "AR0144");
+		return -EINVAL;
+	}
 
 	tmp = AR0144_NO_SLEW_RATE;
 	fwnode_property_read_u32(ep, "onsemi,slew-rate-dat", &tmp);
