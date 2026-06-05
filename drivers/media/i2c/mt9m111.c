@@ -1262,6 +1262,7 @@ static int mt9m111_probe(struct i2c_client *client)
 	struct mt9m111 *mt9m111;
 	struct i2c_adapter *adapter = client->adapter;
 	int ret;
+	u32 fixed_rate;
 
 	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_WORD_DATA)) {
 		dev_warn(&adapter->dev,
@@ -1282,6 +1283,21 @@ static int mt9m111_probe(struct i2c_client *client)
 	mt9m111->clk = devm_clk_get(&client->dev, "mclk");
 	if (IS_ERR(mt9m111->clk))
 		return PTR_ERR(mt9m111->clk);
+
+	if (mt9m111->clk) {
+		if (!of_property_read_u32(client->dev.of_node,
+					  "mt9m111,fixed-clock",
+					  &fixed_rate)) {
+			if (fixed_rate < 27000000 || fixed_rate > 54000000) {
+				dev_warn(&client->dev,
+					"fixed-clock rate (%d) is invalid, defaulting to 27MHz\n",
+					fixed_rate);
+				clk_set_rate(mt9m111->clk, 27000000);
+			} else {
+				clk_set_rate(mt9m111->clk, fixed_rate);
+			}
+		}
+	}
 
 	mt9m111->regulator = devm_regulator_get(&client->dev, "vdd");
 	if (IS_ERR(mt9m111->regulator)) {
