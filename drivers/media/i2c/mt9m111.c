@@ -191,21 +191,22 @@ static struct mt9m111_context context_b = {
 struct mt9m111_datafmt {
 	u32	code;
 	enum v4l2_colorspace		colorspace;
+	bool bypass_ifp:1;
+	bool is_bayer:1;
 };
 
 static const struct mt9m111_datafmt mt9m111_colour_fmts[] = {
-	{MEDIA_BUS_FMT_YUYV8_2X8, V4L2_COLORSPACE_SRGB},
-	{MEDIA_BUS_FMT_YVYU8_2X8, V4L2_COLORSPACE_SRGB},
-	{MEDIA_BUS_FMT_UYVY8_2X8, V4L2_COLORSPACE_SRGB},
-	{MEDIA_BUS_FMT_VYUY8_2X8, V4L2_COLORSPACE_SRGB},
-	{MEDIA_BUS_FMT_RGB555_2X8_PADHI_LE, V4L2_COLORSPACE_SRGB},
-	{MEDIA_BUS_FMT_RGB555_2X8_PADHI_BE, V4L2_COLORSPACE_SRGB},
-	{MEDIA_BUS_FMT_RGB565_2X8_LE, V4L2_COLORSPACE_SRGB},
-	{MEDIA_BUS_FMT_RGB565_2X8_BE, V4L2_COLORSPACE_SRGB},
-	{MEDIA_BUS_FMT_BGR565_2X8_LE, V4L2_COLORSPACE_SRGB},
-	{MEDIA_BUS_FMT_BGR565_2X8_BE, V4L2_COLORSPACE_SRGB},
-	{MEDIA_BUS_FMT_SBGGR8_1X8, V4L2_COLORSPACE_SRGB},
-	{MEDIA_BUS_FMT_SBGGR10_2X8_PADHI_LE, V4L2_COLORSPACE_SRGB},
+	{MEDIA_BUS_FMT_YUYV8_2X8, V4L2_COLORSPACE_SRGB, false, false},
+	{MEDIA_BUS_FMT_YVYU8_2X8, V4L2_COLORSPACE_SRGB, false, false},
+	{MEDIA_BUS_FMT_UYVY8_2X8, V4L2_COLORSPACE_SRGB, false, false},
+	{MEDIA_BUS_FMT_VYUY8_2X8, V4L2_COLORSPACE_SRGB, false, false},
+	{MEDIA_BUS_FMT_RGB555_2X8_PADHI_LE, V4L2_COLORSPACE_SRGB, false, false},
+	{MEDIA_BUS_FMT_RGB555_2X8_PADHI_BE, V4L2_COLORSPACE_SRGB, false, false},
+	{MEDIA_BUS_FMT_RGB565_2X8_LE, V4L2_COLORSPACE_SRGB, false, false},
+	{MEDIA_BUS_FMT_RGB565_2X8_BE, V4L2_COLORSPACE_SRGB, false, false},
+	{MEDIA_BUS_FMT_BGR565_2X8_LE, V4L2_COLORSPACE_SRGB, false, false},
+	{MEDIA_BUS_FMT_BGR565_2X8_BE, V4L2_COLORSPACE_SRGB, false, false},
+	{MEDIA_BUS_FMT_SBGGR10_2X8_PADHI_LE, V4L2_COLORSPACE_SRGB, true, true},
 };
 
 enum mt9m111_mode_id {
@@ -398,6 +399,7 @@ static int mt9m111_setup_geometry(struct mt9m111 *mt9m111, struct v4l2_rect *rec
 {
 	struct i2c_client *client = v4l2_get_subdevdata(&mt9m111->subdev);
 	int ret;
+	struct mt9m111_datafmt const *fmt = mt9m111_find_datafmt(mt9m111, code);
 
 	ret = reg_write(COLUMN_START, rect->left);
 	if (!ret)
@@ -408,7 +410,7 @@ static int mt9m111_setup_geometry(struct mt9m111 *mt9m111, struct v4l2_rect *rec
 	if (!ret)
 		ret = reg_write(WINDOW_HEIGHT, rect->height);
 
-	if (code != MEDIA_BUS_FMT_SBGGR10_2X8_PADHI_LE) {
+	if (!fmt->bypass_ifp) {
 		/* IFP in use, down-scaling possible */
 		if (!ret)
 			ret = mt9m111_setup_rect_ctx(mt9m111, &context_b,
@@ -460,8 +462,7 @@ static int mt9m111_set_selection(struct v4l2_subdev *sd,
 	    sel->target != V4L2_SEL_TGT_CROP)
 		return -EINVAL;
 
-	if (mt9m111->fmt->code == MEDIA_BUS_FMT_SBGGR8_1X8 ||
-	    mt9m111->fmt->code == MEDIA_BUS_FMT_SBGGR10_2X8_PADHI_LE) {
+	if (mt9m111->fmt->is_bayer) {
 		/* Bayer format - even size lengths */
 		align = 1;
 		/* Let the user play with the starting pixel */
@@ -637,8 +638,7 @@ static int mt9m111_set_fmt(struct v4l2_subdev *sd,
 
 	fmt = mt9m111_find_datafmt(mt9m111, mf->code);
 
-	bayer = fmt->code == MEDIA_BUS_FMT_SBGGR8_1X8 ||
-		fmt->code == MEDIA_BUS_FMT_SBGGR10_2X8_PADHI_LE;
+	bayer = fmt->is_bayer;
 
 	/*
 	 * With Bayer format enforce even side lengths, but let the user play
@@ -649,7 +649,7 @@ static int mt9m111_set_fmt(struct v4l2_subdev *sd,
 		rect->height = ALIGN(rect->height, 2);
 	}
 
-	if (fmt->code == MEDIA_BUS_FMT_SBGGR10_2X8_PADHI_LE) {
+	if (fmt->bypass_ifp) {
 		/* IFP bypass mode, no scaling */
 		mf->width = rect->width;
 		mf->height = rect->height;
@@ -1065,6 +1065,19 @@ static const struct v4l2_subdev_core_ops mt9m111_subdev_core_ops = {
 #endif
 };
 
+static const struct mt9m111_datafmt *mt9m111_fmt_by_idx(
+	struct mt9m111 const *mt9m111, size_t idx)
+{
+	size_t  cnt;
+
+	cnt = ARRAY_SIZE(mt9m111_colour_fmts);
+	if (idx < cnt)
+		return &mt9m111_colour_fmts[idx];
+	idx -= cnt;
+
+	return NULL;
+}
+
 static int mt9m111_get_frame_interval(struct v4l2_subdev *sd,
 				      struct v4l2_subdev_state *sd_state,
 				      struct v4l2_subdev_frame_interval *fi)
@@ -1132,10 +1145,14 @@ static int mt9m111_enum_mbus_code(struct v4l2_subdev *sd,
 		struct v4l2_subdev_state *sd_state,
 		struct v4l2_subdev_mbus_code_enum *code)
 {
-	if (code->pad || code->index >= ARRAY_SIZE(mt9m111_colour_fmts))
+	struct mt9m111 *mt9m111 = container_of(sd, struct mt9m111, subdev);
+	struct mt9m111_datafmt const *fmt = mt9m111_fmt_by_idx(mt9m111, code->index);
+
+	if (!fmt)
 		return -EINVAL;
 
-	code->code = mt9m111_colour_fmts[code->index].code;
+	code->code = fmt->code;
+
 	return 0;
 }
 
