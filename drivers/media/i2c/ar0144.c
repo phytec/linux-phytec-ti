@@ -364,6 +364,7 @@ struct ar0144 {
 
 	struct clk *extclk;
 	struct gpio_desc *reset_gpio;
+	unsigned int reset_extra_wait;
 
 	struct mutex lock;
 
@@ -1387,7 +1388,7 @@ static void ar0144_reset(struct ar0144 *sensor)
 		ar0144_set_bits(sensor, AR0144_RESET_REGISTER, BIT_RESET);
 	}
 
-	wait_usecs = 160000 / ext_freq_mhz;
+	wait_usecs = 160000 / ext_freq_mhz + sensor->reset_extra_wait;
 	usleep_range(wait_usecs, wait_usecs + 1000);
 }
 
@@ -3576,6 +3577,8 @@ static int ar0144_of_probe(struct ar0144 *sensor)
 	struct v4l2_fwnode_endpoint bus_cfg = {
 		.bus_type = V4L2_MBUS_UNKNOWN,
 	};
+	struct device_node *np = dev->of_node;
+	unsigned int tmp = 0;
 	int ret;
 
 	clk = devm_clk_get(dev, "ext");
@@ -3597,6 +3600,9 @@ static int ar0144_of_probe(struct ar0144 *sensor)
 	}
 
 	sensor->reset_gpio = gpio;
+
+	of_property_read_u32(np, "onsemi,extra-wait-after-reset", &tmp);
+	sensor->reset_extra_wait = clamp_t(unsigned int, tmp, 0, 200000);
 
 	ep = fwnode_graph_get_next_endpoint(dev_fwnode(dev), NULL);
 	if (!ep)
