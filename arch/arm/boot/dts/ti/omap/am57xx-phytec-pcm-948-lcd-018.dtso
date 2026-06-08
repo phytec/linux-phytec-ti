@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
+ * Author: Primoz Fiser <primoz.fiser@norik.com>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/interrupt-controller/irq.h>
+#include "am57xx-phytec-pcm-948-lcd.dtsi"
+
+&lcd {
+	compatible = "edt,etm0700g0dh6", "panel-dpi";
+};
+
+&dra7_pmx_core {
+	edt_ts_irq_pin: edt_ts_irq_pin {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x3634, PIN_INPUT_PULLUP | MUX_MODE14)	/* (B9) vout1_d22.gpio8_22 */
+		>;
+	};
+};
+
+&i2c4 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	touchscreen@38 {
+		compatible = "edt,edt-ft5406";
+		reg = <0x38>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&edt_ts_irq_pin>;
+		interrupt-parent = <&gpio8>;
+		interrupts = <22 0>;
+	};
+};
