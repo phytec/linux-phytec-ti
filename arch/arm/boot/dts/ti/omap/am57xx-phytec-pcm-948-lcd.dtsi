@@ -1,0 +1,142 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
+ * Author: Primoz Fiser <primoz.fiser@norik.com>
+ */
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/dra.h>
+
+&{/} {
+	aliases {
+		display0 = "/display";
+		display1 = "/connector";
+	};
+
+	backlight: backlight {
+		compatible = "pwm-backlight";
+		pwms = <&ehrpwm0 0 50000 0>;
+		brightness-levels = <0 4 8 16 32 64 128 255>;
+		default-brightness-level = <6>;
+	};
+
+	lcd: display {
+		pinctrl-names = "default";
+		pinctrl-0 = <&lcd_pins &lcd_pins_iodelay_conf>;
+		backlight = <&backlight>;
+		enable-gpios = <&gpio8 23 GPIO_ACTIVE_LOW>;
+
+		port {
+			lcd_in: endpoint@0 {
+				remote-endpoint = <&dpi_out>;
+			};
+		};
+	};
+};
+
+&dra7_iodelay_core {
+	lcd_pins_iodelay_conf: lcd_pins_iodelay_conf {
+		pinctrl-pin-array = <
+			0xb6c A_DELAY_PS(2000) G_DELAY_PS(229)	/* CFG_VIN2A_DE0_OUT */
+			0xb78 A_DELAY_PS(0) G_DELAY_PS(697)	/* CFG_VIN2A_FLD0_OUT */
+			0xb84 A_DELAY_PS(2516) G_DELAY_PS(0)	/* CFG_VIN2A_HSYNC0_OUT */
+			0xb90 A_DELAY_PS(1937) G_DELAY_PS(406)	/* CFG_VIN2A_VSYNC0_OUT */
+			0x3b0 A_DELAY_PS(3116) G_DELAY_PS(360)	/* CFG_MCASP1_ACLKR_OUT */
+			0x488 A_DELAY_PS(1170) G_DELAY_PS(1000)	/* CFG_MCASP1_FSR_OUT */
+			0x428 A_DELAY_PS(1321) G_DELAY_PS(1250)	/* CFG_MCASP1_AXR2_OUT */
+			0x434 A_DELAY_PS(1275) G_DELAY_PS(1020)	/* CFG_MCASP1_AXR3_OUT */
+			0x440 A_DELAY_PS(1392) G_DELAY_PS(1360)	/* CFG_MCASP1_AXR4_OUT */
+			0x44c A_DELAY_PS(2364) G_DELAY_PS(240)	/* CFG_MCASP1_AXR5_OUT */
+			0x458 A_DELAY_PS(1480) G_DELAY_PS(1090)	/* CFG_MCASP1_AXR6_OUT */
+			0x464 A_DELAY_PS(1307) G_DELAY_PS(1180)	/* CFG_MCASP1_AXR7_OUT */
+
+			0x4a0 A_DELAY_PS(2983) G_DELAY_PS(240)	/* CFG_MCASP2_ACLKR_OUT */
+			0x4b8 A_DELAY_PS(1721) G_DELAY_PS(120)	/* CFG_MCASP2_AXR0_OUT */
+			0x4c4 A_DELAY_PS(1067) G_DELAY_PS(840)	/* CFG_MCASP2_AXR1_OUT */
+			0x4e8 A_DELAY_PS(1093) G_DELAY_PS(1040)	/* CFG_MCASP2_AXR4_OUT */
+			0x4f4 A_DELAY_PS(1810) G_DELAY_PS(240)	/* CFG_MCASP2_AXR5_OUT */
+			0x500 A_DELAY_PS(2844) G_DELAY_PS(240)	/* CFG_MCASP2_AXR6_OUT */
+			0x50c A_DELAY_PS(1608) G_DELAY_PS(120)	/* CFG_MCASP2_AXR7_OUT */
+			0x518 A_DELAY_PS(980) G_DELAY_PS(536)	/* CFG_MCASP2_FSR_OUT */
+
+			0x560 A_DELAY_PS(1635) G_DELAY_PS(1240)	/* CFG_MCASP4_ACLKX_OUT */
+			0x56c A_DELAY_PS(1569) G_DELAY_PS(120)	/* CFG_MCASP4_AXR0_OUT */
+			0x578 A_DELAY_PS(798) G_DELAY_PS(600)	/* CFG_MCASP4_AXR1_OUT */
+			0x584 A_DELAY_PS(893) G_DELAY_PS(540)	/* CFG_MCASP4_FSX_OUT */
+
+			0x590 A_DELAY_PS(4400) G_DELAY_PS(1820)	/* CFG_MCASP5_ACLKX_OUT */
+			0x59c A_DELAY_PS(4640) G_DELAY_PS(980)	/* CFG_MCASP5_AXR0_OUT */
+			0x5a8 A_DELAY_PS(4200) G_DELAY_PS(1120)	/* CFG_MCASP5_AXR1_OUT */
+			0x5b4 A_DELAY_PS(4330) G_DELAY_PS(1160)	/* CFG_MCASP5_FSX_OUT */
+		>;
+	};
+};
+
+&dra7_pmx_core {
+	ehrpwm1a_pin: ehrpwm1a_pin {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x34f4, PIN_OUTPUT_PULLDOWN | MUX_MODE10)	/* (AE8) vin1a_d0.ehrpwm1A */
+		>;
+	};
+
+	lcd_pins: pinmux_lcd {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x3558, PIN_OUTPUT | MUX_MODE4 | SLEWCONTROL | MODE_SELECT)   /* (G2) vin2a_de0.vout2_de */
+			DRA7XX_CORE_IOPAD(0x355c, PIN_OUTPUT | MUX_MODE4 | SLEWCONTROL | MODE_SELECT)   /* (H7) vin2a_fld0.vout2_clk */
+			DRA7XX_CORE_IOPAD(0x3560, PIN_OUTPUT | MUX_MODE4 | SLEWCONTROL | MODE_SELECT)   /* (G1) vin2a_hsync0.vout2_hsync */
+			DRA7XX_CORE_IOPAD(0x3564, PIN_OUTPUT | MUX_MODE4 | SLEWCONTROL | MODE_SELECT)   /* (G6) vin2a_vsync0.vout2_vsync */
+			DRA7XX_CORE_IOPAD(0x3638, PIN_OUTPUT_PULLDOWN | MUX_MODE14)			/* (A10) vout1_d23.gpio8_23 */
+			DRA7XX_CORE_IOPAD(0x36ac, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (B14) mcasp1_aclkr.vout2_d0 */
+			DRA7XX_CORE_IOPAD(0x36b0, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (J14) mcasp1_fsr.vout2_d1 */
+			DRA7XX_CORE_IOPAD(0x36bc, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (G13) mcasp1_axr2.vout2_d2 */
+			DRA7XX_CORE_IOPAD(0x36c0, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (J11) mcasp1_axr3.vout2_d3 */
+			DRA7XX_CORE_IOPAD(0x36c4, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (E12) mcasp1_axr4.vout2_d4 */
+			DRA7XX_CORE_IOPAD(0x36c8, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (F13) mcasp1_axr5.vout2_d5 */
+			DRA7XX_CORE_IOPAD(0x36cc, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (C12) mcasp1_axr6.vout2_d6 */
+			DRA7XX_CORE_IOPAD(0x36d0, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (D12) mcasp1_axr7.vout2_d7 */
+			DRA7XX_CORE_IOPAD(0x36fc, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (E15) mcasp2_aclkr.vout2_d8 */
+			DRA7XX_CORE_IOPAD(0x3700, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (A20) mcasp2_fsr.vout2_d9 */
+			DRA7XX_CORE_IOPAD(0x3704, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (B15) mcasp2_axr0.vout2_d10 */
+			DRA7XX_CORE_IOPAD(0x3708, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (A15) mcasp2_axr1.vout2_d11 */
+			DRA7XX_CORE_IOPAD(0x3714, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (D15) mcasp2_axr4.vout2_d12 */
+			DRA7XX_CORE_IOPAD(0x3718, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (B16) mcasp2_axr5.vout2_d13 */
+			DRA7XX_CORE_IOPAD(0x371c, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (B17) mcasp2_axr6.vout2_d14 */
+			DRA7XX_CORE_IOPAD(0x3720, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (A17) mcasp2_axr7.vout2_d15 */
+			DRA7XX_CORE_IOPAD(0x3734, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (C18) mcasp4_aclkx.vout2_d16 */
+			DRA7XX_CORE_IOPAD(0x3738, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (A21) mcasp4_fsx.vout2_d17 */
+			DRA7XX_CORE_IOPAD(0x373c, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (G16) mcasp4_axr0.vout2_d18 */
+			DRA7XX_CORE_IOPAD(0x3740, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (D17) mcasp4_axr1.vout2_d19 */
+			DRA7XX_CORE_IOPAD(0x3744, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (AA3) mcasp5_aclkx.vout2_d20 */
+			DRA7XX_CORE_IOPAD(0x3748, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (AB9) mcasp5_fsx.vout2_d21 */
+			DRA7XX_CORE_IOPAD(0x374c, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (AB3) mcasp5_axr0.vout2_d22 */
+			DRA7XX_CORE_IOPAD(0x3750, PIN_OUTPUT | MUX_MODE6 | SLEWCONTROL | MODE_SELECT)   /* (AA4) mcasp5_axr1.vout2_d23 */
+		>;
+	};
+};
+
+&dss {
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		dss_port: port@1 {
+			reg = <1>;
+
+			dpi_out: endpoint {
+				data-lines = <24>;
+				remote-endpoint = <&lcd_in>;
+			};
+		};
+	};
+};
+
+/* ehrpwm0 maps to EHRPWM1 signal name */
+&ehrpwm0 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&ehrpwm1a_pin>;
+};
+
+&epwmss0 {
+	status = "okay";
+};

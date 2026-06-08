@@ -1,0 +1,47 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
+ * Author: Primoz Fiser <primoz.fiser@norik.com>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include "am57xx-phytec-pcm-948-cam.dtsi"
+
+&cam_ext_mclk {
+	status = "okay";
+};
+
+&vdd_vcam {
+	status = "okay";
+};
+
+&i2c3 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	camera@48 {
+		compatible = "aptina,mt9p031";
+		reg = <0x48>;
+
+		port {
+			mt9p031_ep: endpoint {
+				remote-endpoint = <&vin3a_vm011_ep>;
+				pclk-sample = <0>;
+				bus-width = <8>;
+				input-clock-frequency = <26000000>;
+				pixel-clock-frequency = <78000000>;
+			};
+		};
+	};
+};
+
+&vin3a {
+	vin3a_vm011_ep: endpoint {
+		remote-endpoint = <&mt9p031_ep>;
+		hsync-active = <1>;
+		vsync-active = <1>;
+		slave-mode;
+	};
+};

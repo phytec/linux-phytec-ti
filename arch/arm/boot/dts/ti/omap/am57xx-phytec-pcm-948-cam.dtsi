@@ -1,0 +1,85 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
+ * Author: Primoz Fiser <primoz.fiser@norik.com>
+ */
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/dra.h>
+#include <dt-bindings/clock/dra7.h>
+
+&{/} {
+	cam_ext_mclk: cam_ext_mclk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <27000000>;
+		status = "disabled";
+	};
+
+	vdd_vcam: regulator-vdd-vcam {
+		compatible = "regulator-fixed";
+		regulator-name = "VDD_VCAM";
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+		status = "disabled";
+	};
+};
+
+&dra7_iodelay_core {
+	cam_pins_iodelay_conf: cam_pins_iodelay_conf {
+		pinctrl-pin-array = <
+			0xbf4 A_DELAY_PS(1996) G_DELAY_PS(632)	/* CFG_VOUT1_D16_IN */
+			0xc00 A_DELAY_PS(2190) G_DELAY_PS(790)	/* CFG_VOUT1_D17_IN */
+			0xc0c A_DELAY_PS(2100) G_DELAY_PS(604)	/* CFG_VOUT1_D18_IN */
+			0xc18 A_DELAY_PS(2108) G_DELAY_PS(286)	/* CFG_VOUT1_D19_IN */
+			0x96c A_DELAY_PS(1854) G_DELAY_PS(1624)	/* CFG_VIN1A_D20_IN */
+			0x978 A_DELAY_PS(1906) G_DELAY_PS(1520)	/* CFG_VIN1A_D21_IN */
+			0x984 A_DELAY_PS(1807) G_DELAY_PS(1437)	/* CFG_VIN1A_D22_IN */
+			0x990 A_DELAY_PS(1996) G_DELAY_PS(997)	/* CFG_VIN1A_D23_IN */
+			0xa2c A_DELAY_PS(0) G_DELAY_PS(0)	/* CFG_VIN1B_CLK1_IN */
+			0x24c A_DELAY_PS(2154) G_DELAY_PS(978)	/* CFG_GPMC_A8_IN */
+			0x258 A_DELAY_PS(2185) G_DELAY_PS(1152)	/* CFG_GPMC_A9_IN */
+			0x120 A_DELAY_PS(2108) G_DELAY_PS(823)	/* CFG_GPMC_A10_IN */
+			0x12c A_DELAY_PS(2068) G_DELAY_PS(977)	/* CFG_GPMC_A11_IN */
+		>;
+	};
+};
+
+&dra7_pmx_core {
+	cam_pins_default: cam_pins_default {
+		pinctrl-single,pins = <
+			DRA7XX_CORE_IOPAD(0x3460, PIN_INPUT_PULLDOWN | MUX_MODE2 | MODE_SELECT)	/* (N7) gpmc_a8.vin3a_hsync0 */
+			DRA7XX_CORE_IOPAD(0x3464, PIN_INPUT_PULLDOWN | MUX_MODE2 | MODE_SELECT)	/* (R4) gpmc_a9.vin3a_vsync0 */
+			DRA7XX_CORE_IOPAD(0x3468, PIN_INPUT_PULLDOWN | MUX_MODE2 | MODE_SELECT)	/* (N9) gpmc_a10.vin3a_de0 */
+			DRA7XX_CORE_IOPAD(0x346c, PIN_INPUT_PULLDOWN | MUX_MODE2 | MODE_SELECT)	/* (P9) gpmc_a11.vin3a_fld0 */
+			DRA7XX_CORE_IOPAD(0x34e0, PIN_INPUT | MUX_MODE6 | MODE_SELECT)		/* (AH7) vin1b_clk1.vin3a_clk0 */
+			DRA7XX_CORE_IOPAD(0x3544, PIN_INPUT_PULLDOWN | MUX_MODE6 | MODE_SELECT)	/* (AE2) vin1a_d20.vin3a_d4 */
+			DRA7XX_CORE_IOPAD(0x3548, PIN_INPUT_PULLDOWN | MUX_MODE6 | MODE_SELECT)	/* (AE6) vin1a_d21.vin3a_d5 */
+			DRA7XX_CORE_IOPAD(0x354c, PIN_INPUT_PULLDOWN | MUX_MODE6 | MODE_SELECT)	/* (AD2) vin1a_d22.vin3a_d6 */
+			DRA7XX_CORE_IOPAD(0x3550, PIN_INPUT_PULLDOWN | MUX_MODE6 | MODE_SELECT)	/* (AD3) vin1a_d23.vin3a_d7 */
+			DRA7XX_CORE_IOPAD(0x35e4, PIN_OUTPUT | MUX_MODE14)			/* (F10) vout1_d2.gpio8_2 */
+			DRA7XX_CORE_IOPAD(0x361c, PIN_INPUT_PULLDOWN | MUX_MODE4 | MODE_SELECT)	/* (B7) vout1_d16.vin3a_d0 */
+			DRA7XX_CORE_IOPAD(0x3620, PIN_INPUT_PULLDOWN | MUX_MODE4 | MODE_SELECT)	/* (B8) vout1_d17.vin3a_d1 */
+			DRA7XX_CORE_IOPAD(0x3624, PIN_INPUT_PULLDOWN | MUX_MODE4 | MODE_SELECT)	/* (A7) vout1_d18.vin3a_d2 */
+			DRA7XX_CORE_IOPAD(0x3628, PIN_INPUT_PULLDOWN | MUX_MODE4 | MODE_SELECT)	/* (A8) vout1_d19.vin3a_d3 */
+			DRA7XX_CORE_IOPAD(0x36a0, PIN_INPUT | MUX_MODE9)			/* (C23) xref_clk3.clkout3 */
+		>;
+	};
+};
+
+/* move dsp1 to timer14 to free up timer5 */
+&dsp1 {
+	ti,timers = <&timer14>;
+};
+
+/* timer5 required to enable camera clk */
+&timer5 {
+	status = "okay";
+	assigned-clocks = <&ipu_clkctrl DRA7_IPU_TIMER5_CLKCTRL 24>, <&clkoutmux0_clk_mux>;
+	assigned-clock-parents = <&clkoutmux0_clk_mux>;
+	ti,timer-auto-run;
+};
+
+&vip2 {
+	status = "okay";
+};

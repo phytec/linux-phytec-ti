@@ -1,0 +1,18 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2023 PHYTEC Messtechnik GmbH
+ * Author: Primoz Fiser <primoz.fiser@norik.com>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include "am57xx-phytec-pcm-948-lcd.dtsi"
+
+&lcd {
+	compatible = "primeview,pm070wl4", "panel-dpi";
+};
+
+&stmpe811 {
+	status = "okay";
+};
