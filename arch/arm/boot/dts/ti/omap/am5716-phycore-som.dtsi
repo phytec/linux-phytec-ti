@@ -27,6 +27,10 @@
 	status = "disabled";
 };
 
+&gpu_target {
+	status = "disabled";
+};
+
 &gpu {
 	status = "disabled";
 };
