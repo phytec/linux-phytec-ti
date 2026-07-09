@@ -242,6 +242,9 @@ k3-am68-phyboard-izar-vm020-mipi-csi0-dtbs := k3-am68-phyboard-izar.dtb \
 dtb-$(CONFIG_ARCH_K3) += k3-am68-phyboard-izar-vm020-mipi-csi1.dtb
 k3-am68-phyboard-izar-vm020-mipi-csi1-dtbs := k3-am68-phyboard-izar.dtb \
         k3-am68-phyboard-izar-vm020-mipi-csi1.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am68-phyboard-izar-pwm-fan.dtb
+k3-am68-phyboard-izar-pwm-fan-dtbs := k3-am68-phyboard-izar.dtb \
+        k3-am68-phyboard-izar-pwm-fan.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am68-sk-base-board.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am68-sk-base-board-pcie1-ep.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am68-sk-v3link-fusion.dtbo
@@ -542,6 +545,7 @@ dtb- += k3-am625-beagleplay-csi2-ov5640.dtb \
 	k3-am68-phyboard-izar-vm017-mipi-csi1.dtb \
 	k3-am68-phyboard-izar-vm020-mipi-csi0.dtb \
 	k3-am68-phyboard-izar-vm020-mipi-csi1.dtb \
+	k3-am68-phyboard-izar-pwm-fan.dtb \
 	k3-am68-sk-base-board-csi2-dual-imx219.dtb \
 	k3-am68-sk-base-board-pcie1-ep.dtb \
 	k3-am68-sk-fpdlink-fusion.dtb \
