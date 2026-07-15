@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/*
+ * Copyright (C) 2025 PHYTEC America LLC
+ * Author: Nathan Morrisson <nmorrisson@phytec.com>
+ */
+
+#include "k3-am62p-am67-phyboard-common-oldi-lcd185.dtsi"
