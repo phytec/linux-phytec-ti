@@ -337,6 +337,14 @@
 		reg = <0x51>;
 		pagesize = <16>;
 	};
+
+	i2c_mux: i2c-mux@77 {
+		compatible = "nxp,pca9547";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0x77>;
+		vdd-supply = <&vcc_3v3_sw>;
+	};
 };
 
 &main_mcan0 {
