@@ -266,6 +266,7 @@ dtb-$(CONFIG_ARCH_K3) += k3-am6754-phyboard-rigel.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am6754-phyboard-rigel-dsi-lcd282.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am6754-phyboard-rigel-gpio-fan.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am6754-phyboard-rigel-mcu-mcans.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am6754-phyboard-rigel-oldi-lcd185.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am67a-beagley-ai.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-j722s-evm.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-j722s-evm-csi2-quad-rpi-cam-imx219.dtbo
@@ -410,6 +411,8 @@ k3-am6754-phyboard-rigel-gpio-fan-dtbs := \
 	k3-am6754-phyboard-rigel.dtb k3-am6754-phyboard-rigel-gpio-fan.dtbo
 k3-am6754-phyboard-rigel-mcu-mcans-dtbs := \
 	k3-am6754-phyboard-rigel.dtb k3-am6754-phyboard-rigel-mcu-mcans.dtbo
+k3-am6754-phyboard-rigel-oldi-lcd185-dtbs := \
+	k3-am6754-phyboard-rigel.dtb k3-am6754-phyboard-rigel-oldi-lcd185.dtbo
 k3-am68-sk-base-board-csi2-dual-imx219-dtbs := k3-am68-sk-base-board.dtb \
 	k3-j721e-sk-csi2-dual-imx219.dtbo
 k3-am68-sk-base-board-pcie1-ep-dtbs := k3-am68-sk-base-board.dtb \
