@@ -265,6 +265,7 @@ dtb-$(CONFIG_ARCH_K3) += k3-j721s2-evm-audio.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am6754-phyboard-rigel.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am6754-phyboard-rigel-dsi-lcd282.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am6754-phyboard-rigel-gpio-fan.dtbo
+dtb-$(CONFIG_ARCH_K3) += k3-am6754-phyboard-rigel-m2-cc3351.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am6754-phyboard-rigel-mcu-mcans.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am6754-phyboard-rigel-oldi-lcd185.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am6754-phyboard-rigel-vm016-mipi-csi0.dtbo
@@ -414,6 +415,8 @@ k3-am6754-phyboard-rigel-dsi-lcd282-dtbs := \
 	k3-am6754-phyboard-rigel.dtb k3-am6754-phyboard-rigel-dsi-lcd282.dtbo
 k3-am6754-phyboard-rigel-gpio-fan-dtbs := \
 	k3-am6754-phyboard-rigel.dtb k3-am6754-phyboard-rigel-gpio-fan.dtbo
+k3-am6754-phyboard-rigel-m2-cc3351-dtbs := \
+	k3-am6754-phyboard-rigel.dtb k3-am6754-phyboard-rigel-m2-cc3351.dtbo
 k3-am6754-phyboard-rigel-mcu-mcans-dtbs := \
 	k3-am6754-phyboard-rigel.dtb k3-am6754-phyboard-rigel-mcu-mcans.dtbo
 k3-am6754-phyboard-rigel-oldi-lcd185-dtbs := \
