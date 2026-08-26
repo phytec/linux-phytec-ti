@@ -65,6 +65,13 @@ properties:
           - const: phytec,am62p-phycore-som
           - const: ti,am62p5
 
+      - description: K3 AM62P5 SoC PHYTEC FPSC based boards
+        items:
+          - enum:
+              - phytec,am62p5-phyflex-libra-rdk
+          - const: phytec,am62p-phyflex-fpsc-g
+          - const: ti,am62p5
+
       - description: K3 AM625 SoC PHYTEC phyBOARD-Lyra
         items:
           - const: phytec,am625-phyboard-lyra-rdk
