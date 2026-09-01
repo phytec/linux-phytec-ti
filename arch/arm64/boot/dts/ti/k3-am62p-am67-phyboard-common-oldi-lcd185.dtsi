@@ -158,28 +158,24 @@
 };
 
 &oldi0_dss0_port0 {
-	reg = <0>;
 	oldi0_dss0_in: endpoint {
 		remote-endpoint = <&dss0_out0>;
 	};
 };
 
 &oldi0_dss0_port1 {
-	reg = <1>;
 	oldi0_dss0_out: endpoint {
 		remote-endpoint = <&lcd_in0>;
 	};
 };
 
 &oldi1_dss0_port0 {
-	reg = <0>;
 	oldi1_dss0_in: endpoint {
 		remote-endpoint = <&dss0_out1>;
 	};
 };
 
 &oldi1_dss0_port1 {
-	reg = <1>;
 	oldi1_dss0_out: endpoint {
 		remote-endpoint = <&lcd_in1>;
 	};
