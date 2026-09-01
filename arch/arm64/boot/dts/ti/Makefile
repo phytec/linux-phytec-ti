@@ -92,6 +92,7 @@ k3-am62l3-phyflex-libra-lvds-ac209-dtbs := k3-am62l3-phyflex-libra-rdk.dtb \
 
 # Boards with AM62Px SoC
 dtb-$(CONFIG_ARCH_K3) += k3-am62p5-phyboard-lynx.dtb
+dtb-$(CONFIG_ARCH_K3) += k3-am62p5-phyboard-lynx-oldi-lcd185.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62p5-phyflex-libra-rdk.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am62p5-sk.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am62p5-sk-ecap-capture.dtbo
@@ -351,6 +352,8 @@ k3-am62-lp-sk-microtips-mf101hie-panel-dtbs := k3-am62-lp-sk.dtb \
 	k3-am62-lp-sk-microtips-mf101hie-panel.dtbo
 k3-am62-lp-sk-microtips-mf103hie-lcd2-dtbs := k3-am62-lp-sk.dtb \
 	k3-am62x-sk-microtips-mf103hie-lcd2.dtbo
+k3-am62p5-phyboard-lynx-oldi-lcd185-dtbs := \
+	k3-am62p5-phyboard-lynx.dtb k3-am62p5-phyboard-lynx-oldi-lcd185.dtbo
 k3-am62p5-sk-dsi-rpi-7inch-panel-dtbs := k3-am62p5-sk.dtb \
 	k3-am62p5-sk-dsi-rpi-7inch-panel.dtbo
 k3-am62p5-sk-dss-shared-mode-dtbs := k3-am62p5-sk.dtb \
