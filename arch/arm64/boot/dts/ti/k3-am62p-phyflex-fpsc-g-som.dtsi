@@ -154,6 +154,10 @@
 	bootph-all;
 };
 
+&fsas0 {
+	status = "okay";
+};
+
 &sdhci0 {
 	non-removable;
 	bootph-all;
