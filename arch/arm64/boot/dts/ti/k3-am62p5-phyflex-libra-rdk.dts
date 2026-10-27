@@ -363,11 +363,10 @@
 	status = "okay";
 
 	adc@0 {
-		compatible = "microchip,mcp3002";
+		compatible = "microchip,mcp3208";
 		reg = <0>;
 		vref-supply = <&vdd_5v0_ref>;
-		spi-cpha;
-		spi-cpol;
+		spi-max-frequency = <2000000>;
 		#io-channel-cells = <1>;
 	};
 };
