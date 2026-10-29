@@ -86,8 +86,11 @@ dtb-$(CONFIG_ARCH_K3) += k3-am62l3-evm-tida-010939.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62l3-evm-idle-states.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62l3-minimal.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am62l3-phyflex-libra-rdk.dtb
+dtb-$(CONFIG_ARCH_K3) += k3-am62l3-phyflex-libra-1a-rdk.dtb
+dtb-$(CONFIG_ARCH_K3) += k3-am62l3-phyflex-libra-1a-lvds-ac209.dtb
+k3-am62l3-phyflex-libra-1a-lvds-ac209-dtbs := k3-am62l3-phyflex-libra-1a-rdk.dtb \
+					k3-am62l3-phyflex-libra-1a-lvds-ac209.dtbo
 dtb-$(CONFIG_ARCH_K3) += k3-am62l3-phyflex-libra-lvds-ac209.dtb
-
 k3-am62l3-phyflex-libra-lvds-ac209-dtbs := k3-am62l3-phyflex-libra-rdk.dtb \
 					k3-am62l3-phyflex-libra-lvds-ac209.dtbo
 
