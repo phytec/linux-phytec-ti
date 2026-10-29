@@ -9,7 +9,7 @@
 
 /dts-v1/;
 
-#include <dt-bindings/leds/leds-pca9532.h>
+#include <dt-bindings/leds/common.h>
 #include "k3-am62l3.dtsi"
 #include "k3-am62l-phyflex-fpsc-g-som.dtsi"
 
@@ -22,7 +22,6 @@
 		ethernet2 = &cpsw_port2;
 		i2c2 = &i2c0;
 		i2c3 = &i2c1;
-		i2c4 = &i2c2;
 		i2c5 = &i2c3;
 		mmc1 = &sdhci1;
 		serial1 = &uart4;
@@ -38,14 +37,21 @@
 		compatible = "ti,tcan1042";
 		#phy-cells = <0>;
 		max-bitrate = <8000000>;
-		standby-gpios = <&gpio_expander 10 GPIO_ACTIVE_HIGH>;
+		standby-gpios = <&gpio_expander2 0 GPIO_ACTIVE_HIGH>;
 	};
 
 	can_tc2: can-phy1 {
 		compatible = "ti,tcan1042";
 		#phy-cells = <0>;
 		max-bitrate = <8000000>;
-		standby-gpios = <&gpio_expander 9 GPIO_ACTIVE_HIGH>;
+		standby-gpios = <&gpio_expander2 1 GPIO_ACTIVE_HIGH>;
+	};
+
+	can_tc3: can-phy2 {
+		compatible = "ti,tcan1042";
+		#phy-cells = <0>;
+		max-bitrate = <8000000>;
+		standby-gpios = <&gpio_expander2 2 GPIO_ACTIVE_HIGH>;
 	};
 
 	curr_sens_som_in: current-sense-som-in {
@@ -99,6 +105,15 @@
 		regulator-name = "VDD_5V0";
 	};
 
+	reg_vdd_5v0_ref: regulator-vdd-5v0-ref {
+		compatible = "regulator-fixed";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-name = "VDD_5V0_REF";
+	};
+
 	reg_vdd_12v0: regulator-vdd-12v0 {
 		compatible = "regulator-fixed";
 		regulator-always-on;
@@ -126,9 +141,15 @@
 };
 
 &pmx0 {
-	gpio_expander_pins_default: gpio-expander-default-pins {
+	gpio_expander1_pins_default: gpio-expander1-default-pins {
 		pinctrl-single,pins = <
-			AM62LX_IOPAD(0x00c0, PIN_INPUT, 7) /* (N19) GPMC0_ADVn_ALE.GPIO0_32 */
+			AM62LX_IOPAD(0x008c, PIN_INPUT, 7) /* (H22) GPMC0_AD5.GPIO0_20 */
+		>;
+	};
+
+	gpio_expander2_pins_default: gpio-expander2-default-pins {
+		pinctrl-single,pins = <
+			AM62LX_IOPAD(0x0088, PIN_INPUT, 7) /* (K23) GPMC0_AD4.GPIO0_19 */
 		>;
 	};
 
@@ -143,13 +164,6 @@
 		pinctrl-single,pins = <
 			AM62LX_IOPAD(0x01d4, PIN_INPUT, 0) /* (D7) I2C1_SCL */
 			AM62LX_IOPAD(0x01d8, PIN_INPUT, 0) /* (A6) I2C1_SDA */
-		>;
-	};
-
-	i2c2_pins_default: i2c2-default-pins {
-		pinctrl-single,pins = <
-			AM62LX_IOPAD(0x01dc, PIN_INPUT, 0) /* (B8) I2C2_SCL */
-			AM62LX_IOPAD(0x01e0, PIN_INPUT, 0) /* (D8) I2C2_SDA */
 		>;
 	};
 
@@ -171,6 +185,13 @@
 		pinctrl-single,pins = <
 			AM62LX_IOPAD(0x0180, PIN_INPUT, 5) /* (A8) MCASP0_AXR3.MCAN1_RX */
 			AM62LX_IOPAD(0x0184, PIN_OUTPUT, 5) /* (B10) MCASP0_AXR2.MCAN1_TX */
+		>;
+	};
+
+	mcan2_pins_default: mcan2-default-pins {
+		pinctrl-single,pins = <
+			AM62LX_IOPAD(0x01bc, PIN_INPUT, 6) /* (B14) UART0_CTSn.MCAN2_RX */
+			AM62LX_IOPAD(0x01c0, PIN_OUTPUT, 6) /* (B13) UART0_RTSn.MCAN2_TX */
 		>;
 	};
 
@@ -217,10 +238,28 @@
 		>;
 	};
 
+	spi1_pins_default: spi1-default-pins {
+		pinctrl-single,pins = <
+			AM62LX_IOPAD(0x005c, PIN_INPUT, 1) /* (F19) OSPI0_D5.SPI1_CLK */
+			AM62LX_IOPAD(0x0058, PIN_INPUT, 1) /* (F21) OSPI0_D4.SPI1_CS0 */
+			AM62LX_IOPAD(0x0060, PIN_OUTPUT, 1) /* (G20) OSPI0_D6.SPI1_D0 */
+			AM62LX_IOPAD(0x0064, PIN_INPUT, 1) /* (F20) OSPI0_D7.SPI1_D1 */
+		>;
+	};
+
+	spi2_pins_default: spi2-default-pins {
+		pinctrl-single,pins = <
+			AM62LX_IOPAD(0x00dc, PIN_INPUT, 2) /* (N21) GPMC0_WPn.SPI2_CLK */
+			AM62LX_IOPAD(0x00e8, PIN_INPUT, 2) /* (L19) GPMC0_CSn1.SPI2_CS0 */
+			AM62LX_IOPAD(0x00e0, PIN_OUTPUT, 2) /* (M21) GPMC0_DIR.SPI2_D0 */
+			AM62LX_IOPAD(0x00e4, PIN_INPUT, 2) /* (L20) GPMC0_CSn0.SPI2_D1 */
+		>;
+	};
+
 	uart0_pins_default: uart0-default-pins {
 		pinctrl-single,pins = <
-			AM62LX_IOPAD(0x01b4, PIN_INPUT, 0)      /* (D13) UART0_RXD */
-			AM62LX_IOPAD(0x01b8, PIN_OUTPUT, 0)     /* (C13) UART0_TXD */
+			AM62LX_IOPAD(0x01b4, PIN_INPUT, 0) /* (D13) UART0_RXD */
+			AM62LX_IOPAD(0x01b8, PIN_OUTPUT, 0) /* (C13) UART0_TXD */
 		>;
 		bootph-all;
 	};
@@ -231,6 +270,18 @@
 			AM62LX_IOPAD(0x0090, PIN_OUTPUT, 2) /* (H23) GPMC0_AD6.UART4_RTSn */
 			AM62LX_IOPAD(0x00ec, PIN_INPUT, 3) /* (M23) GPMC0_CSn2.UART4_RXD */
 			AM62LX_IOPAD(0x00f0, PIN_OUTPUT, 3) /* (M22) GPMC0_CSn3.UART4_TXD */
+		>;
+	};
+
+	usb0_pins_default: usb0-default-pins {
+		pinctrl-single,pins = <
+			AM62LX_IOPAD(0x0244, PIN_OUTPUT, 0) /* (C6) USB0_DRVVBUS */
+		>;
+	};
+
+	usb1_pins_default: usb1-default-pins {
+		pinctrl-single,pins = <
+			AM62LX_IOPAD(0x0248, PIN_OUTPUT, 0) /* (A5) USB1_DRVVBUS */
 		>;
 	};
 
@@ -274,6 +325,28 @@
 	pinctrl-0 = <&i2c0_pins_default>;
 	status = "okay";
 
+	gpio_expander1: gpio@21 {
+		compatible = "ti,tcal6416";
+		reg = <0x21>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_expander1_pins_default>;
+		#gpio-cells = <2>;
+		gpio-controller;
+		gpio-line-names = "VCONN_nFAULT", "X_CSI1_CTRL1",
+				  "X_CSI1_CTRL3", "X_CSI1_CTRL4",
+				  "USB-C_nINT/AUDIO_AC", "X_CSI2_CTRL1",
+				  "X_CSI2_CTRL3", "X_CSI2_CTRL4",
+				  "CLK_EN_AV", "X_W_nDISABLE1",
+				  "X_W_nDISABLE2", "X_PCIE1_nWAKE",
+				  "X_PCIE2_nWAKE", "X_UART1_nWAKE",
+				  "UART1_BT_RS_SEL", "UART1_RS232_485_SEL";
+		interrupt-parent = <&gpio0>;
+		interrupts = <20 IRQ_TYPE_EDGE_FALLING>;
+		interrupt-controller;
+		#interrupt-cells = <2>;
+		vcc-supply = <&reg_vdd_3v3>;
+	};
+
 	eeprom@51 {
 		compatible = "atmel,24c02";
 		reg = <0x51>;
@@ -287,45 +360,70 @@
 	pinctrl-0 = <&i2c1_pins_default>;
 	status = "okay";
 
-	leds@62 {
-		compatible = "nxp,pca9533";
-		reg = <0x62>;
-
-		led-1 {
-			type = <PCA9532_TYPE_LED>;
-		};
-
-		led-2 {
-			type = <PCA9532_TYPE_LED>;
-		};
-
-		led-3 {
-			type = <PCA9532_TYPE_LED>;
-		};
-	};
-};
-
-&i2c2 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&i2c2_pins_default>;
-	status = "okay";
-
-	gpio_expander: gpio@20 {
-		compatible = "ti,tca6416";
-		reg = <0x20>;
+	gpio_expander2: gpio@21 {
+		compatible = "ti,tcal6416";
+		reg = <0x21>;
 		pinctrl-names = "default";
-		pinctrl-0 = <&gpio_expander_pins_default>;
+		pinctrl-0 = <&gpio_expander2_pins_default>;
 		#gpio-cells = <2>;
 		gpio-controller;
-		gpio-line-names = "CSI1_CTRL1", "CSI1_CTRL2", "CSI1_CTRL3",
-				  "CSI1_CTRL4", "CSI2_CTRL1", "CSI2_CTRL2",
-				  "CSI2_CTRL3", "CSI2_CTRL4", "CLK_EN_AV",
-				  "nCAN2_EN", "nCAN1_EN", "PCIE1_nWAKE",
-				  "PCIE2_nWAKE", "PCIE2_nALERT_3V3",
-				  "UART1_BT_RS_SEL", "UART1_RS232_485_SEL";
+		gpio-line-names = "CAN1_STBY", "CAN2_STBY",
+				  "CAN3_STBY", "X_KEY-E_nALERT",
+				  "X_KEY-M_nALERT", "X_SDIO_nWAKE",
+				  "X_SDIO_nRESET", "HDMI_EN",
+				  "X_RTC_nINT", "LVDS1_BL_EN",
+				  "SFP_TX_FAULT", "SFP_TX_DISABLE",
+				  "SFP_MOD_ABS", "SFP_RS0",
+				  "SFP_RX_LOSS", "SFP_RS1";
 		interrupt-parent = <&gpio0>;
-		interrupts = <32 IRQ_TYPE_EDGE_FALLING>;
+		interrupts = <19 IRQ_TYPE_EDGE_FALLING>;
+		interrupt-controller;
+		#interrupt-cells = <2>;
 		vcc-supply = <&reg_vdd_3v3>;
+	};
+
+	usb-typec@47 {
+		compatible = "ti,hd3ss3220";
+		reg = <0x47>;
+		interrupts-extended = <&gpio_expander1 4 IRQ_TYPE_LEVEL_LOW>;
+
+		connector {
+			compatible = "usb-c-connector";
+			label = "USB-C";
+			data-role = "dual";
+			power-role = "dual";
+			try-power-role = "source";
+			typec-power-opmode = "default";
+			pd-disable;
+
+			port {
+				usb0_con: endpoint {
+					remote-endpoint = <&usb0_ep>;
+				};
+			};
+		};
+	};
+
+	led-controller@62 {
+		compatible = "nxp,pca9633";
+		reg = <0x62>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		led@0 {
+			reg = <0>;
+			color = <LED_COLOR_ID_RED>;
+		};
+
+		led@1 {
+			reg = <1>;
+			color = <LED_COLOR_ID_GREEN>;
+		};
+
+		led@2 {
+			reg = <2>;
+			color = <LED_COLOR_ID_BLUE>;
+		};
 	};
 };
 
@@ -355,6 +453,13 @@
 	status = "okay";
 };
 
+&mcan2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&mcan2_pins_default>;
+	phys = <&can_tc3>;
+	status = "okay";
+};
+
 &ospi0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&ospi_pins_default>;
@@ -381,6 +486,40 @@
 	bootph-all;
 	no-1-8-v;
 	status = "okay";
+};
+
+&spi1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi1_pins_default>;
+
+	ti,pindir-d0-out-d1-in;
+	status = "okay";
+
+	adc@0 {
+		compatible = "microchip,mcp3208";
+		reg = <0>;
+		spi-max-frequency = <2000000>;
+		vref-supply = <&reg_vdd_5v0_ref>;
+		#io-channel-cells = <1>;
+	};
+};
+
+&spi2 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi2_pins_default>;
+
+	ti,pindir-d0-out-d1-in;
+	status = "okay";
+
+	tpm@0 {
+		compatible = "infineon,slb9670", "tcg,tpm_tis-spi";
+		reg = <0>;
+		spi-max-frequency = <10000000>;
+	};
 };
 
 &tscadc0 {
@@ -413,7 +552,16 @@
 };
 
 &usb0 {
-	dr_mode = "host";
+	pinctrl-names = "default";
+	pinctrl-0 = <&usb0_pins_default>;
+	usb-role-switch;
+	bootph-all;
+
+	port {
+		usb0_ep: endpoint {
+			remote-endpoint = <&usb0_con>;
+		};
+	};
 };
 
 /* 4-port Type-A HUB */
@@ -424,6 +572,8 @@
 
 &usb1 {
 	dr_mode = "host";
+	pinctrl-names = "default";
+	pinctrl-0 = <&usb1_pins_default>;
 };
 
 &wkup_uart0 {

@@ -17,7 +17,7 @@
 		compatible = "pwm-backlight";
 		brightness-levels = <0 8 16 32 64 128 255>;
 		default-brightness-level = <10>;
-		enable-gpios = <&gpio0 37 GPIO_ACTIVE_LOW>;
+		enable-gpios = <&gpio_expander2 9 GPIO_ACTIVE_HIGH>;
 		num-interpolated-steps = <2>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&backlight_pins_default>;
@@ -89,9 +89,8 @@
 
 &pmx0 {
 	backlight_pins_default: backlight-default-pins {
-                pinctrl-single,pins = <
+		pinctrl-single,pins = <
 			AM62LX_IOPAD(0x01a8, PIN_OUTPUT, 2) /* (E13) SPI0_CLK.EHRPWM1_A */
-			AM62LX_IOPAD(0x00d4, PIN_OUTPUT, 7) /* (N23) GPMC0_WAIT0.GPIO0_37 */
 		>;
 	};
 };
@@ -108,8 +107,8 @@
 			panel_bridge_in: endpoint {
 				remote-endpoint = <&dsi0_out>;
 				data-lanes = <1 2 3 4>;
-				};
 			};
+		};
 
 		port@2 {
 			reg = <2>;
