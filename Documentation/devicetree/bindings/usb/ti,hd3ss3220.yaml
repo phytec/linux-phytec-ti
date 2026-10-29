@@ -25,6 +25,9 @@ properties:
   interrupts:
     maxItems: 1
 
+  connector:
+    $ref: /schemas/connector/usb-connector.yaml#
+
   ports:
     $ref: /schemas/graph.yaml#/properties/ports
     description: OF graph bindings (specified in bindings/graph.txt) that model
