@@ -291,7 +291,3 @@
 		reg = <0x52>;
 	};
 };
-
-&wkup_gpio0 {
-	status = "okay";
-};
