@@ -1,0 +1,55 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/*
+ * Copyright (C) 2026 PHYTEC Messtechnik GmbH
+ * Author: Dominik Haller <d.haller@phytec.de>
+ *
+ * The SLG7WD47666V is custom programmed with a 5s hardware timeout.
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include "k3-pinctrl.h"
+
+&{/} {
+	watchdog {
+		compatible = "linux,wdt-gpio";
+		pinctrl-names = "default";
+		pinctrl-0 = <&watchdog_wdi_pins_default>;
+		gpios = <&wkup_gpio0 6 GPIO_ACTIVE_HIGH>;
+		hw_algo = "toggle";
+		hw_margin_ms = <5000>;
+		always-running;
+	};
+};
+
+&pmx0 {
+	watchdog_enable_pins_default: watchdog-enable-default-pins {
+		pinctrl-single,pins = <
+			AM62LX_IOPAD(0x01e4, PIN_OUTPUT, 7) /* (D16) EXT_REFCLK1.GPIO0_104 */
+		>;
+	};
+
+	watchdog_wdi_pins_default: watchdog-wdi-default-pins {
+		pinctrl-single,pins = <
+			AM62LX_IOPAD(0x0018, PIN_OUTPUT, 7) /* (Y23) WKUP_CLKOUT0.WKUP_GPIO0_6 */
+		>;
+	};
+};
+
+&gpio0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&watchdog_enable_pins_default>;
+
+	wd-en-hog {
+		gpio-hog;
+		gpios = <104 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "WD_EN";
+	};
+};
+
+&wkup_gpio0 {
+	status = "okay";
+};

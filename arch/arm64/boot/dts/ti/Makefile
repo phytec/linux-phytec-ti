@@ -93,7 +93,9 @@ k3-am62l3-phyflex-libra-1a-lvds-ac209-dtbs := k3-am62l3-phyflex-libra-1a-rdk.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am62l3-phyflex-libra-lvds-ac209.dtb
 k3-am62l3-phyflex-libra-lvds-ac209-dtbs := k3-am62l3-phyflex-libra-rdk.dtb \
 					k3-am62l3-phyflex-libra-lvds-ac209.dtbo
-
+dtb-$(CONFIG_ARCH_K3) += k3-am62l3-phyflex-libra-watchdog.dtb
+k3-am62l3-phyflex-libra-watchdog-dtbs := k3-am62l3-phyflex-libra-rdk.dtb \
+					k3-am62l-phyflex-fpsc-g-som-watchdog.dtbo
 # Boards with AM62Px SoC
 dtb-$(CONFIG_ARCH_K3) += k3-am62p5-phyboard-lynx.dtb
 dtb-$(CONFIG_ARCH_K3) += k3-am62p5-phyboard-lynx-dsi-lcd282.dtbo
