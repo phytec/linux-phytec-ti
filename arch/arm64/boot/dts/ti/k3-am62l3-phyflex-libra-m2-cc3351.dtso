@@ -1,0 +1,85 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/*
+ * Copyright (C) 2026 PHYTEC Messtechnik GmbH
+ * Author: Dominik Haller <d.haller@phytec.de>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include "k3-pinctrl.h"
+
+&{/} {
+	reg_wifi_en: regulator-wifi-en {
+		compatible = "regulator-fixed";
+		enable-active-high;
+		gpio = <&gpio_expander1 10 GPIO_ACTIVE_HIGH>;
+		regulator-always-on;
+		regulator-max-microvolt = <3300000>;
+		regulator-min-microvolt = <3300000>;
+		regulator-name = "wifi_en";
+	};
+};
+
+&gpio_expander1 {
+	bt-en-hog {
+		/* X_W_nDISABLE1 */
+		gpio-hog;
+		gpios = <9 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "BT_EN";
+	};
+
+	uart1-bt-rs-sel-hog {
+		/* FPSC UART1 set to Bluetooth */
+		gpio-hog;
+		gpios = <14 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "UART1_BT_RS_SEL";
+	};
+};
+
+&pmx0 {
+	mmc2_wifi_pins_default: mmc2-wifi-default-pins {
+		pinctrl-single,pins = <
+			AM62LX_IOPAD(0x010c, PIN_INPUT, 0) /* (U23) MMC2_CMD */
+			AM62LX_IOPAD(0x0104, PIN_OUTPUT, 0) /* (R23) MMC2_CLK */
+			AM62LX_IOPAD(0x0108, PIN_INPUT, 0) /* () MMC2_CLKLB */
+			AM62LX_IOPAD(0x0100, PIN_INPUT, 0) /* (U22) MMC2_DAT0 */
+			AM62LX_IOPAD(0x00fc, PIN_INPUT, 0) /* (T22) MMC2_DAT1 */
+			AM62LX_IOPAD(0x00f8, PIN_INPUT, 0) /* (T23) MMC2_DAT2 */
+			AM62LX_IOPAD(0x00f4, PIN_INPUT, 0) /* (R22) MMC2_DAT3 */
+		>;
+	};
+};
+
+&sdhci2 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	bus-width = <4>;
+	cap-power-off-card;
+	keep-power-in-suspend;
+	non-removable;
+	pinctrl-0 = <&mmc2_wifi_pins_default>;
+	pinctrl-names = "default";
+	sd-uhs-sdr50;
+	sd-uhs-sdr104;
+	vmmc-supply = <&reg_wifi_en>;
+	vqmmc-supply = <&buck2_reg>;
+	ti,fails-without-test-cd;
+	status = "okay";
+
+	wifi: wifi@2 {
+		compatible = "ti,cc3300";
+		reg = <2>;
+	};
+};
+
+&uart4 {
+	bluetooth {
+		compatible = "ti,cc33xx-bt";
+		max-speed = <115200>;
+		cc33xx-supply = <&reg_wifi_en>;
+	};
+};
