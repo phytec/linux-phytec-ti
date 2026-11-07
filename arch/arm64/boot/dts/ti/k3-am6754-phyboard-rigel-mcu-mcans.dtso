@@ -46,6 +46,8 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&mcu_mcan0_pins_default>;
 	phys = <&can_tc1>;
+	assigned-clocks = <&k3_clks 188 1>;
+	assigned-clock-rates = <80000000>;
 	status = "okay";
 };
 
@@ -53,5 +55,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&mcu_mcan1_pins_default>;
 	phys = <&can_tc2>;
+	assigned-clocks = <&k3_clks 189 1>;
+	assigned-clock-rates = <80000000>;
 	status = "okay";
 };
