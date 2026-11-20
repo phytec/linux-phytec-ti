@@ -3738,10 +3738,22 @@ static int ub960_parse_dt_rxports(struct ub960_data *priv)
 	}
 
 	if (strobe_min < UB960_MIN_AEQ_STROBE_POS ||
+	    strobe_min > UB960_MAX_AEQ_STROBE_POS) {
+		dev_err(dev, "illegal aeq-strobe-min value: %d ([%d, %d])\n",
+			strobe_min, UB960_MIN_AEQ_STROBE_POS, UB960_MAX_AEQ_STROBE_POS);
+		return -EINVAL;
+	}
+
+	if (strobe_max < UB960_MIN_AEQ_STROBE_POS ||
 	    strobe_max > UB960_MAX_AEQ_STROBE_POS) {
-		dev_err(dev, "illegal aeq-strobe range: [%d, %d] ([%d, %d])\n",
-			strobe_min, strobe_max,
-			UB960_MIN_AEQ_STROBE_POS, UB960_MAX_AEQ_STROBE_POS);
+		dev_err(dev, "illegal aeq-strobe-max value: %d ([%d, %d])\n",
+			strobe_max, UB960_MIN_AEQ_STROBE_POS, UB960_MAX_AEQ_STROBE_POS);
+		return -EINVAL;
+	}
+
+	if (strobe_min > strobe_max) {
+		dev_err(dev, "aeq-strobe-min (%d) must be less or equal to aeq-strobe-max (%d)",
+			strobe_min, strobe_max);
 		return -EINVAL;
 	}
 
