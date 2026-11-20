@@ -69,14 +69,16 @@ properties:
       ti,aeq-strobe-min:
         $ref: /schemas/types.yaml#/definitions/int32
         minimum: -7
-        maximum: 0
-        description: AEQ Strobe minimum available setting
+        maximum: 7
+        description: Minimum value for the strobe range used by AEQ.
 
       ti,aeq-strobe-max:
         $ref: /schemas/types.yaml#/definitions/int32
-        minimum: 0
+        minimum: -7
         maximum: 7
-        description: AEQ Strobe maximum available setting
+        description:
+          Maximum value for the strobe range used by AEQ. Must be larger than or
+          equal to aeq-strobe-min.
 
     patternProperties:
       '^link@[0-3]$':
