@@ -428,7 +428,7 @@
 				   "AUDIO_RESETn", "USB_HUB_EN",
 				   "DSI0_TP_RST", "USB_HUB_GLOBAL_RSTz",
 				   "LVDS_BKLT_EN", "CAN0_nEN",
-				   "WL_HOST_WAKE", "BT_HOST_WAKE",
+				   "USB-C_VCONN_FAULTz", "",
 				   "USER_LED2", "USER_BUT2",
 				   "UART1_nSHDN", "UART1_MODE_SEL",
 				   "DE485_F232", "UART1_LB";
@@ -474,7 +474,7 @@
 				   "DSI_LED_COMM", "MCU_LIGHT_INTn",
 				   "MCU_TEMP_INTn", "M2_BT_DEV_WAKE",
 				   "AUDIO_GPIO", "nFAN_OUT",
-				   "", "",
+				   "USB-C_nFAULT", "",
 				   "", "",
 				   "", "";
 
