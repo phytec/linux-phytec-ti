@@ -85,6 +85,26 @@
 		};
 	};
 
+	leds {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&leds_pins_default>, <&user_leds_pins_default>;
+
+		led-1 {
+			color = <LED_COLOR_ID_RED>;
+			function = LED_FUNCTION_INDICATOR;
+			function-enumerator = <1>;
+			gpios = <&main_gpio1 51 GPIO_ACTIVE_HIGH>;
+		};
+
+		led-2 {
+			color = <LED_COLOR_ID_GREEN>;
+			function = LED_FUNCTION_INDICATOR;
+			function-enumerator = <2>;
+			gpios = <&gpio_exp0 10 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
 	sound {
 		compatible = "simple-audio-card";
 		simple-audio-card,name = "phyBOARD-Lynx";
@@ -312,15 +332,15 @@
 		bootph-all;
 	};
 
-	main_usb1_pins_default: main-usb1-default-pins {
-		pinctrl-single,pins = <
-			AM62PX_IOPAD(0x0258, PIN_OUTPUT, 0) /* (G21) USB1_DRVVBUS */
-		>;
-	};
-
 	main_usbc_power_pins_default: main-usbc-power-default-pins {
 		pinctrl-single,pins = <
 			AM62PX_IOPAD(0x0254, PIN_INPUT, 7) /* (G22) USB0_DRVVBUS.GPIO1_50 */
+		>;
+	};
+
+	user_leds_pins_default: user-leds-default-pins {
+		pinctrl-single,pins = <
+			AM62PX_IOPAD(0x0258, PIN_OUTPUT, 7) /* (G21) USB1_DRVVBUS.GPIO1_51 */
 		>;
 	};
 };
@@ -629,6 +649,4 @@
 
 &usb1 {
 	dr_mode = "host";
-	pinctrl-names = "default";
-	pinctrl-0 = <&main_usb1_pins_default>;
 };
