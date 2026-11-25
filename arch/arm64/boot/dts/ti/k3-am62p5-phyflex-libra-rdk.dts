@@ -293,7 +293,7 @@
 		pinctrl-0 = <&gpio_exp2_int_pins_default>;
 		compatible = "ti,tca6416";
 		reg = <0x21>;
-		vcc-supply = <&vdd_3v3>;
+		vcc-supply = <&vdd_1v8>;
 		interrupt-parent = <&main_gpio0>;
 		interrupts = <20 IRQ_TYPE_EDGE_FALLING>;
 		#gpio-cells = <2>;
