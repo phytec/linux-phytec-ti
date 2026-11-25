@@ -37,23 +37,6 @@
 		standby-gpios = <&gpio_exp2 0 GPIO_ACTIVE_HIGH>;
 	};
 
-	usb0_connector: connector {
-		compatible = "gpio-usb-b-connector", "usb-b-connector";
-		label = "USB-C";
-		data-role = "dual";
-
-		pinctrl-names = "default";
-		pinctrl-0 = <&main_usbc_power_pins_default>;
-
-		id-gpios = <&main_gpio0 42 GPIO_ACTIVE_HIGH>;
-
-		port {
-			usb0_con: endpoint {
-				remote-endpoint = <&usb0_ep>;
-			};
-		};
-	};
-
 	vdd_1v8: regulator-vdd-1v8 {
 		compatible = "regulator-fixed";
 		regulator-name = "VDD_1V8";
@@ -199,12 +182,6 @@
 		>;
 	};
 
-	main_usbc_power_pins_default: main-usbc-power-default-pins {
-		pinctrl-single,pins = <
-			AM62PX_IOPAD(0x00ac, PIN_INPUT, 7) /* (U23) GPMC0_CSn1.GPIO0_42 */
-		>;
-	};
-
 	ospi0_pins_default: ospi0-default-pins {
 		pinctrl-single,pins = <
 			AM62PX_IOPAD(0x0000, PIN_OUTPUT, 0) /* (P23) OSPI0_CLK */
@@ -309,6 +286,28 @@
 				   "SFP_MOD_ABS", "SFP_RS0",
 				   "SFP_RX_LOSS", "SFP_RS1";
 		bootph-all;
+	};
+
+	usb-typec@47 {
+		compatible = "ti,hd3ss3220";
+		reg = <0x47>;
+		interrupts-extended = <&gpio_exp1 4 IRQ_TYPE_LEVEL_LOW>;
+
+		connector {
+			compatible = "usb-c-connector";
+			label = "USB-C";
+			data-role = "dual";
+			power-role = "dual";
+			try-power-role = "source";
+			typec-power-opmode = "default";
+			pd-disable;
+
+			port {
+				usb0_con: endpoint {
+					remote-endpoint = <&usb0_ep>;
+				};
+			};
+		};
 	};
 
 	led_controller: led-controller@62 {
