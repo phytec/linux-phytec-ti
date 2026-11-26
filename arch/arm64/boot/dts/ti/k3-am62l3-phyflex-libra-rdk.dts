@@ -249,8 +249,9 @@
 
 	spi2_pins_default: spi2-default-pins {
 		pinctrl-single,pins = <
+
 			AM62LX_IOPAD(0x00dc, PIN_INPUT, 2) /* (N21) GPMC0_WPn.SPI2_CLK */
-			AM62LX_IOPAD(0x00e8, PIN_INPUT, 2) /* (L19) GPMC0_CSn1.SPI2_CS0 */
+			AM62LX_IOPAD(0x00e8, PIN_INPUT_PULLUP, 2) /* (L19) GPMC0_CSn1.SPI2_CS0 */
 			AM62LX_IOPAD(0x00e0, PIN_OUTPUT, 2) /* (M21) GPMC0_DIR.SPI2_D0 */
 			AM62LX_IOPAD(0x00e4, PIN_INPUT, 2) /* (L20) GPMC0_CSn0.SPI2_D1 */
 		>;
