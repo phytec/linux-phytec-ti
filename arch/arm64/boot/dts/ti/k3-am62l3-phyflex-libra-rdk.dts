@@ -434,7 +434,7 @@
 	status = "okay";
 
 	temperature-sensor@4f {
-		compatible = "nxp,p3t1755";
+		compatible = "nxp,p3t1750";
 		reg = <0x4f>;
 		vs-supply = <&reg_vdd_1v8>;
 	};
